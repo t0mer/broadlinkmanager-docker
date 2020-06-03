@@ -325,4 +325,4 @@ def send_webfonts(path):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=2244)
+    app.run(debug=True, host='0.0.0.0', port=7020)

@@ -1,5 +1,5 @@
 # broadlinkmanager-docker
-Broadlink manageר is python based projecy that allows you to contorol you broadlink devices. Discover, Leran and send command in a very easy way.
+Broadlink manager is python based projecy that allows you to contorol you broadlink devices. Discover, Leran and send command in a very easy way.
 
 ## Base Image
 `From ubuntu:18.04` described [here](https://hub.docker.com/_/ubuntu).

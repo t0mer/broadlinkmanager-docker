@@ -16,7 +16,7 @@ docker run --name broadlinkmanager -p "7020:7020" techblog/broadlinkmanager:late
 ```yaml
 version: "3.6"
 services:
-  broadlinksvc:
+  broadlinkmanager:
     image: techblog/broadlinkmanager
     network_mode: host
     container_name: broadlinkmanager

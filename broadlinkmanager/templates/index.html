@@ -1,0 +1,353 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Broadlink Manager | Control Your broadlink Devices</title>
+    <link rel="icon" type="image/png" href="./img/broadlink.png">
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="./css/all.min.css">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="./css/adminlte.min.css">
+    <!-- Google Font: Source Sans Pro -->
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131664523-2"></script>
+    <script src="./js/hex.js"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'UA-131664523-2');
+    </script>
+
+    <style>
+        #scaning {
+            display: none;
+        }
+
+        .spinner {
+            margin: 0px auto;
+            width: 50px;
+            height: 30px;
+            text-align: center;
+            font-size: 10px;
+        }
+
+        .spinner>div {
+            background-color: #2980b9;
+            height: 100%;
+            width: 6px;
+            display: inline-block;
+            -webkit-animation: sk-stretchdelay 1.2s infinite ease-in-out;
+            animation: sk-stretchdelay 1.2s infinite ease-in-out;
+        }
+
+        .spinner .rect2 {
+            -webkit-animation-delay: -1.1s;
+            animation-delay: -1.1s;
+        }
+
+        .spinner .rect3 {
+            -webkit-animation-delay: -1.0s;
+            animation-delay: -1.0s;
+        }
+
+        .spinner .rect4 {
+            -webkit-animation-delay: -0.9s;
+            animation-delay: -0.9s;
+        }
+
+        .spinner .rect5 {
+            -webkit-animation-delay: -0.8s;
+            animation-delay: -0.8s;
+        }
+
+        @-webkit-keyframes sk-stretchdelay {
+
+            0%,
+            40%,
+            100% {
+                -webkit-transform: scaleY(0.4)
+            }
+
+            20% {
+                -webkit-transform: scaleY(1.0)
+            }
+        }
+
+        @keyframes sk-stretchdelay {
+
+            0%,
+            40%,
+            100% {
+                transform: scaleY(0.4);
+                -webkit-transform: scaleY(0.4);
+            }
+
+            20% {
+                transform: scaleY(1.0);
+                -webkit-transform: scaleY(1.0);
+            }
+        }
+    </style>
+
+
+
+</head>
+
+<body class="hold-transition sidebar-mini layout-boxed">
+    <!-- Site wrapper -->
+    <div class="wrapper">
+
+        <!-- Main Sidebar Container -->
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+            <!-- Brand Logo -->
+            <a href="/" class="brand-link">
+                <img src="./img/broadlink.png" alt="Broadlink Manager" class="brand-image img-circle elevation-3"
+                    style="opacity: .8">
+                <span class="brand-text font-weight-light">Broadlink Manager</span>
+            </a>
+            <!-- Sidebar -->
+            <div class="sidebar">
+
+                <nav class="mt-2">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+                        data-accordion="false">
+
+                        <li class="nav-item" title="List Exising Devices, send and learn codes etc.">
+                            <a href="/" class="nav-link active">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Devices</p>
+                            </a>
+                        </li>
+                        <li class="nav-item" title="Generate Random RF Codes (433/315)">
+                            <a href="/generator" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Code Generator</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/livolo" class="nav-link" title="Generate Random Livolo Code">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Livolo Code Generator</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/energenie" class="nav-link" title="Generate Random Energenie Socket Set">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Energenie Code Generator</p>
+                            </a>
+                        </li>
+                        <li class="nav-item"
+                            title="Change number of repeats in existing code (also works for IR codes)">
+                            <a href="/repeats" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Change Repeats</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="/convert" class="nav-link" title="Hex and Base64 Conversation">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Convert Hex-Base64</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/about" class="nav-link" title="About Broadlink Manager">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>About Broadlink Manager</p>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <!-- /.sidebar-menu -->
+            </div>
+            <!-- /.sidebar -->
+        </aside>
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <!-- Content Header (Page header) -->
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <h1>Devices List</h1>
+                        </div>
+
+                    </div>
+                </div><!-- /.container-fluid -->
+            </section>
+            <!-- Main content -->
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-12">
+                            <!-- Default box -->
+                            <div class="card">
+
+                                <div class="card-body">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+
+                                                <th>Device Name</th>
+                                                <th>Device Type</th>
+                                                <th>IP Address</th>
+                                                <th>MAC Address</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="bdevices"></tbody>
+                                    </table>
+                                </div>
+                                <!-- /.card-body -->
+                                <div class="card-footer">
+                                    <table id="loading">
+                                        <tr>
+                                            <td>
+                                                Searching For Devices
+                                            </td>
+                                            <td> &nbsp;</td>
+                                            <td>
+                                                <div class="spinner">
+
+                                                    <div class="rect1"></div>
+                                                    <div class="rect2"></div>
+                                                    <div class="rect3"></div>
+                                                    <div class="rect4"></div>
+                                                    <div class="rect5"></div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <table id="scan" style="display:none">
+                                        <tr>
+                                            <td>
+                                                <button type="button" class="btn-primary btn"
+                                                    style="margin: 0 auto;display: block;" id="rescan"
+                                                    title="Rescan network for devices"><i class="fas fa-podcast"
+                                                        aria-hidden="true"> </i>&nbsp;&nbsp;Rescan&nbsp;&nbsp;</button>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <!-- /.card-footer-->
+                                </div>
+                                <!-- /.card -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- /.content -->
+
+        </div>
+        <!-- /.content-wrapper -->
+        <footer class="main-footer">
+            <div class="float-right d-none d-sm-block">
+                <b>Version</b> 3.0.5
+            </div>
+            <strong>Copyright &copy; 2014-2019 <a href="http://adminlte.io">AdminLTE.io</a>.</strong> All rights
+            reserved.
+        </footer>
+
+
+
+        <!-- Control Sidebar -->
+        <aside class="control-sidebar control-sidebar-dark">
+            <!-- Control sidebar content goes here -->
+        </aside>
+        <!-- /.control-sidebar -->
+    </div>
+    <!-- ./wrapper -->
+    <!-- jQuery -->
+    <script src="./js/jquery.min.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="./js/bootstrap.bundle.min.js"></script>
+    <!-- AdminLTE App -->
+    <script src="./js/adminlte.min.js"></script>
+    <!-- AdminLTE for demo purposes -->
+    <script src="./js/home.js"></script>
+    <script src="./js/clipboard.min.js"></script>
+    <div class="modal fade" id="modal-lg" style="z-index: 99999;">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="modal-title"></h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table id="scaning">
+                        <tr>
+                            <td>
+                                Waiting For Signal....
+                            </td>
+                            <td> &nbsp;</td>
+                            <td>
+                                <div class="spinner">
+
+                                    <div class="rect1"></div>
+                                    <div class="rect2"></div>
+                                    <div class="rect3"></div>
+                                    <div class="rect4"></div>
+                                    <div class="rect5"></div>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="input-group input-group-sm" id="data-wrapper" style="margin-bottom: 10px;">
+                        <input type="text" class="form-control" id="data">
+                        <span class="input-group-append">
+                            <button type="button" class="btn btn-default" id="copydata"
+                                data-clipboard-target="#data"><img src="./img/clippy.svg" width="13"
+                                    title="copy to clipboard"></button>
+                        </span>
+                    </div>
+                    <p>
+                        So What Can be done here?
+                    <ul>
+                        <li>In Order to learn IR Code, just click "Learn IR Code" and then press the button on your
+                            remote.</li>
+
+                        <li>In Order to learn RF Code, just click "Learn RF Code" and follow the instructions.</li>
+
+                        <li>In Order to Send IR/RF Code, just click paste your code in Base64 format and click "Send
+                            Command".</li>
+                    </ul>
+
+                    </p>
+                </div>
+                <div class="modal-footer justify-content-between">
+
+                    <button type="button" class="btn btn-info learn" id="learnir" title="Learn IR Codes">Learn IR
+                        Code</button>
+                    <button type="button" class="btn btn-info learn" id="learnrf" title="Learn RF Codes">Learn RF
+                        Code</button>
+                    <button type="button" class="btn btn-info" id="send" title="Send IR/RF Codes">Send Command (IR/RF)
+                    </button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal" title="Close Form">Close</button>
+
+                    <input type="hidden" id="device_type" />
+                    <input type="hidden" id="device_name" />
+                    <input type="hidden" id="device_mac" />
+                    <input type="hidden" id="device_ip" />
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+
+</body>
+
+</html>

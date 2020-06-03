@@ -1,0 +1,298 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Broadlink Manager | Controll Your broadlink Devices</title>
+    <link rel="icon" type="image/png" href="./img/broadlink.png">
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="./css/all.min.css">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="./css/adminlte.min.css">
+    <!-- Google Font: Source Sans Pro -->
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131664523-2"></script>
+
+    <script src="./js/hex.js"></script>
+    <script src="./js/generator.js"></script>
+    <script src="./js/index.js"></script>
+    <script src="./js/pageActions.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"
+        integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh"
+        crossorigin="anonymous"></script>
+
+
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'UA-131664523-2');
+    </script>
+
+</head>
+
+<body class="hold-transition sidebar-mini layout-boxed">
+    <!-- Site wrapper -->
+    <div class="wrapper">
+
+        <!-- Main Sidebar Container -->
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+            <!-- Brand Logo -->
+            <a href="/" class="brand-link">
+                <img src="./img/broadlink.png" alt="Broadlink Manager" class="brand-image img-circle elevation-3"
+                    style="opacity: .8">
+                <span class="brand-text font-weight-light">Broadlink Manager</span>
+            </a>
+            <!-- Sidebar -->
+            <div class="sidebar">
+
+                <nav class="mt-2">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+                        data-accordion="false">
+
+                        <li class="nav-item" title="List Exising Devices, send and learn codes etc.">
+                            <a href="/" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Devices</p>
+                            </a>
+                        </li>
+                        <li class="nav-item" title="Generate Random RF Codes (433/315)">
+                            <a href="/generator" class="nav-link ">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Code Generator</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/livolo" class="nav-link" title="Generate Random Livolo Code">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Livolo Code Generator</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/energenie" class="nav-link" title="Generate Random Energenie Socket Set">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Energenie Code Generator</p>
+                            </a>
+                        </li>
+                        <li class="nav-item"
+                            title="Change number of repeats in existing code (also works for IR codes)">
+                            <a href="/repeats" class="nav-link ">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Change Repeats</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="/convert" class="nav-link active" title="Hex and Base64 Conversation">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Convert Hex-Base64</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/about" class="nav-link" title="About Broadlink Manager">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>About Broadlink Manager</p>
+                            </a>
+                        </li>
+
+                    </ul>
+                </nav>
+                <!-- /.sidebar-menu -->
+            </div>
+            <!-- /.sidebar -->
+        </aside>
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <!-- Content Header (Page header) -->
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <h1>Hex - Base64 Converting</h1>
+                        </div>
+
+                    </div>
+                </div><!-- /.container-fluid -->
+            </section>
+            <!-- Main content -->
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">Convert Hex to Base64</h3>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-tool " data-card-widget="collapse"
+                                            data-toggle="tooltip" title="Collapse">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="col-sm-12">
+                                        <!-- text input -->
+                                        <div class="form-group">
+                                            <label>Hex</label>
+                                            <div class="input-group input-group-sm">
+                                                <input type="text" class="form-control"
+                                                    placeholder="2600240100012094111310131113111311131 ..."
+                                                    id="fromhex">
+                                                <span class="input-group-append">
+                                                    <button type="button" class="btn btn-default" id="copybaseresult"
+                                                        data-clipboard-target="#fromhex"><img src="./img/clippy.svg"
+                                                            width="13" title="copy to clipboard"></button>
+                                                </span>
+                                            </div>
+
+
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-3" style="margin:0 auto;">
+
+                                        <button type="submit" class="btn btn-info " id="hextobase"> Convert Hex To
+                                            Base64</button>
+
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <!-- text input -->
+                                        <div class="form-group">
+                                            <label>Base64</label>
+
+                                            <div class="input-group input-group-sm">
+                                                <input type="text" class="form-control"
+                                                    placeholder="JgAkAQABIJQRExATERMRExETERMSEhETETYSE ..." id="tobase">
+                                                <span class="input-group-append">
+                                                    <button type="button" class="btn btn-default" id="copyhexresult"
+                                                        data-clipboard-target="#tobase"><img src="./img/clippy.svg"
+                                                            width="13" title="copy to clipboard"></button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">Convert Base to Hex</h3>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-tool" data-card-widget="collapse"
+                                            data-toggle="tooltip" title="Collapse">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="col-sm-12">
+                                        <!-- text input -->
+                                        <div class="form-group">
+                                            <label>Base64</label>
+                                            <div class="input-group input-group-sm">
+                                                <input type="text" class="form-control"
+                                                    placeholder="JgAkAQABIJQRExATERMRExETERMSEhETETYSE ..."
+                                                    id="frombase">
+                                                <span class="input-group-append">
+                                                    <button type="button" class="btn btn-default" id="copybaseresult"
+                                                        data-clipboard-target="#frombase"><img src="./img/clippy.svg"
+                                                            width="13" title="copy to clipboard"></button>
+                                                </span>
+                                            </div>
+
+
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-3" style="margin:0 auto;">
+
+                                        <button type="submit" class="btn btn-info " id="basetohex"
+                                            style="margin:6px;">Convert Base64 To Hex</button>
+
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <!-- text input -->
+                                        <div class="form-group">
+                                            <label>Hex</label>
+
+                                            <div class="input-group input-group-sm">
+                                                <input type="text" class="form-control"
+                                                    placeholder="2600240100012094111310131113111311131 ..." id="tohex">
+                                                <span class="input-group-append">
+                                                    <button type="button" class="btn btn-default" id="copyhexresult"
+                                                        data-clipboard-target="#tohex"><img src="./img/clippy.svg"
+                                                            width="13" title="copy to clipboard"></button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- /.content -->
+        </div>
+        <!-- /.content-wrapper -->
+        <footer class="main-footer">
+            <div class="float-right d-none d-sm-block">
+                <b>Version</b> 3.0.5
+            </div>
+            <strong>Copyright &copy; 2014-2019 <a href="http://adminlte.io">AdminLTE.io</a>.</strong> All rights
+            reserved.
+        </footer>
+        <!-- Control Sidebar -->
+        <aside class="control-sidebar control-sidebar-dark">
+            <!-- Control sidebar content goes here -->
+        </aside>
+        <!-- /.control-sidebar -->
+    </div>
+    <!-- ./wrapper -->
+    <!-- jQuery -->
+    <script src="./js/jquery.min.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="./js/bootstrap.bundle.min.js"></script>
+    <!-- AdminLTE App -->
+    <script src="./js/adminlte.min.js"></script>
+    <!-- AdminLTE for demo purposes -->
+    <script src="./js/hex.js"></script>
+    <script src="./js/clipboard.min.js"></script>
+
+
+    <script>
+        $(document).ready(function () {
+
+            $("#hextobase").click(function () {
+                var HexCode = $("#fromhex").val();
+                $("#tobase").val(hexToBase64(HexCode));
+            });
+
+            $("#basetohex").click(function () {
+                var Base64Code = $("#frombase").val();
+                $("#tohex").val(base64ToHex(Base64Code).replace(/\s/g, ''));
+
+            });
+            new ClipboardJS('.btn');
+        });
+    </script>
+</body>
+
+</html>

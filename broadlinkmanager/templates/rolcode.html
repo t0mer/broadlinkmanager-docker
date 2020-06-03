@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Rolling code rev eng test</title>
+    <link rel="icon" type="image/png" href="./img/broadlink.png">
+    <script src="hex.js"></script>
+    <script src="generator.js"></script>
+    <script src="rolcode.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"
+        integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css"
+        integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"
+        integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ"
+        crossorigin="anonymous"></script>
+    <style>
+        td {
+            word-break: break-all;
+            min-width: 90px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-body" style="width: 90rem;">
+                <h3>Rolling code rev eng</h3>
+                <br><br>
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label for="usercode">Your code (base64 of hex):</label>
+                        <input type="text" class="form-control" id="usercode"
+                            placeholder="sgw0AA0kDSQkDQ0kJA0NJA0kDSQNJCQNJA0NJCQNDSQNJA0kDSQkDSQNDSQNJA0kDSQkDQwAAW8AAAAA"
+                            style="width: 65rem;">
+                    </div>
+                    <button type="button" class="btn btn-success" onclick="startDecode()">Generate</button>
+                    <div class="form-group">
+                        <br>
+                        <label for="hex">Decoded Full Hex:</label>
+                        <textarea type="text" class="form-control" id="hex" style="width: 65rem;"> </textarea>
+
+                        <br>
+                        <label for="singlehex">Single code normilized hex stream:</label>
+                        <textarea type="text" class="form-control" id="singlehex" style="width: 65rem;"> </textarea>
+
+                        <br>
+                        <label for="fullbits">Full bit stream:</label>
+                        <input type="text" class="form-control" id="fullbits" style="width: 40rem;"> </input>
+
+
+                        <br>
+
+                        <div class="row">
+
+
+                            <div class="col col-md-4" style="display: none">
+                                <label for="fixedpart">Fixed part:</label>
+                                <input type="text" class="form-control" id="fixedpart" style="width: 24rem;"> </input>
+                            </div>
+
+
+                            <div class="col"></div>
+                            <div class="col"></div>
+
+                        </div>
+                        <br>
+
+
+                        <div class="row col-md-9">
+
+                            <div class="col">
+                                <label for="rv">Repeat, Vlow:</label>
+                                <input type="text" class="form-control" id="rv" style="width: 3rem;"> </input>
+                            </div>
+
+                            <div class="col">
+                                <label for="buttons">Button status:</label>
+                                <input type="text" class="form-control" id="buttons" style="width: 4rem;"> </input>
+                            </div>
+                            <div class="col">
+                                <label for="sn">Serial Number:</label>
+                                <input type="text" class="form-control" id="sn" style="width: 20rem;"> </input>
+                            </div>
+                            <div class="col">
+                                <label for="encpart">Encrypted part (or seed):</label>
+                                <input type="text" class="form-control" id="encpart" style="width: 20rem;"> </input>
+                            </div>
+
+
+                        </div>
+
+                        <br><br>
+                        <div class="row">
+                            <div class="col">
+                                Protocol:
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col">
+                                <img src="protocol.png" class="img-responsive">
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+
+
+            </div>
+        </div>
+
+    </div>
+
+    <div style="margin-top: 100px; margin-left: 20px;">
+        you are welcome to contribute: <a
+            href="https://github.com/dimagoltsman/Random-Broadlink-RM-Code-Generator">https://github.com/dimagoltsman/Random-Broadlink-RM-Code-Generator</a>
+
+    </div>
+
+</body>
+
+</html>

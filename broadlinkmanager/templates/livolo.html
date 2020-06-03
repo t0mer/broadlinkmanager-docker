@@ -1,0 +1,225 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="icon" type="image/png" href="./img/broadlink.png">
+    <title>Broadlink Manager | Controll Your broadlink Devices</title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="./css/all.min.css">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="./css/adminlte.min.css">
+    <!-- Google Font: Source Sans Pro -->
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131664523-2"></script>
+
+    <script src="./js/hex.js"></script>
+    <script src="./js/generator.js"></script>
+    <script src="./js/index.js"></script>
+    <script src="./js/pageActions.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"
+        integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh"
+        crossorigin="anonymous"></script>
+
+
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'UA-131664523-2');
+    </script>
+
+</head>
+
+<body class="hold-transition sidebar-mini layout-boxed">
+    <!-- Site wrapper -->
+    <div class="wrapper">
+
+        <!-- Main Sidebar Container -->
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+            <!-- Brand Logo -->
+            <a href="/" class="brand-link">
+                <img src="./img/broadlink.png" alt="Broadlink Manager" class="brand-image img-circle elevation-3"
+                    style="opacity: .8">
+                <span class="brand-text font-weight-light">Broadlink Manager</span>
+            </a>
+            <!-- Sidebar -->
+            <div class="sidebar">
+
+                <nav class="mt-2">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+                        data-accordion="false">
+
+                        <li class="nav-item" title="List Exising Devices, send and learn codes etc.">
+                            <a href="/" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Devices</p>
+                            </a>
+                        </li>
+                        <li class="nav-item" title="Generate Random RF Codes (433/315)">
+                            <a href="/generator" class="nav-link ">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Code Generator</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/livolo" class="nav-link active" title="Generate Random Livolo Code">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Livolo Code Generator</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/energenie" class="nav-link" title="Generate Random Energenie Socket Set">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Energenie Code Generator</p>
+                            </a>
+                        </li>
+                        <li class="nav-item"
+                            title="Change number of repeats in existing code (also works for IR codes)">
+                            <a href="/repeats" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Change Repeats</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="/convert" class="nav-link" title="Hex and Base64 Conversation">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Convert Hex-Base64</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/about" class="nav-link" title="About Broadlink Manager">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>About Broadlink Manager</p>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <!-- /.sidebar-menu -->
+            </div>
+            <!-- /.sidebar -->
+        </aside>
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <!-- Content Header (Page header) -->
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <h1>Random Livolo Code Generator</h1>
+                        </div>
+
+                    </div>
+                </div><!-- /.container-fluid -->
+            </section>
+            <!-- Main content -->
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-12">
+                            <!-- Default box -->
+                            <div class="card">
+
+                                <div class="card-body">
+                                    <div class="card-body col-12">
+                                        <h3>Generate Random Livolo Code</h3>
+                                        <form class="form-horizontal mt-4">
+                                            <div class="form-group">
+                                                <label for="remoteId">Remote ID:</label>
+                                                <input type="text" class="form-control" id="remoteId"
+                                                    placeholder="7400">
+                                                <label>Working sample eg. 7400, 6550, 10550. Range 1 - 65500. Usually
+                                                    divisible by 4</label>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="liv_btn" class="badge-pill col">Button:</label>
+                                                <select id="liv_btn" class="custom-select">
+                                                    <option value='90'>On Only(scn1)</option>
+                                                    <option value='40'>On/Off (toggle/button10)</option>
+                                                    <option value='106'>Off Only</option>
+                                                    <option value='0'>Button 1</option>
+                                                    <option value='96'>Button 2</option>
+                                                    <option value='120'>Button 3</option>
+                                                    <option value='24'>Button 4</option>
+                                                    <option value='108'>Button 5</option>
+                                                    <option value='80'>Button 6</option>
+                                                    <option value='48'>Button 7</option>
+                                                    <option value='12'>Button 8</option>
+                                                    <option value='72'>Button 9</option>
+                                                    <option value='40'>Button 10</option>
+                                                    <option value='90'>Scene 1</option>
+                                                    <option value='114'>Scene 2</option>
+                                                    <option value='10'>Scene 3</option>
+                                                    <option value='18'>Scene 4</option>
+                                                </select>
+                                                <br>
+                                            </div>
+                                            <button type="button" class="btn btn-success"
+                                                onclick="startGenerateLivolo()">Generate</button>
+                                        </form>
+                                        <div class="table-responsive mt-4">
+                                            <table class="table table-striped table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col">Type</th>
+                                                        <th scope="col">Code</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="livtable"></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+
+                                    You are welcome to contribute: <a
+                                        href="https://github.com/dimagoltsman/Random-Broadlink-RM-Code-Generator">https://github.com/dimagoltsman/Random-Broadlink-RM-Code-Generator</a>
+
+                                </div>
+                            </div>
+
+                        </div>
+                        <!-- /.card -->
+                    </div>
+                </div>
+
+            </section>
+            <!-- /.content -->
+        </div>
+        <!-- /.content-wrapper -->
+        <footer class="main-footer">
+            <div class="float-right d-none d-sm-block">
+                <b>Version</b> 3.0.5
+            </div>
+            <strong>Copyright &copy; 2014-2019 <a href="http://adminlte.io">AdminLTE.io</a>.</strong> All rights
+            reserved.
+        </footer>
+        <!-- Control Sidebar -->
+        <aside class="control-sidebar control-sidebar-dark">
+            <!-- Control sidebar content goes here -->
+        </aside>
+        <!-- /.control-sidebar -->
+    </div>
+    <!-- ./wrapper -->
+    <!-- jQuery -->
+    <script src="./js/jquery.min.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="./js/bootstrap.bundle.min.js"></script>
+    <!-- AdminLTE App -->
+    <script src="./js/adminlte.min.js"></script>
+    <!-- AdminLTE for demo purposes -->
+    <script src="./js/demo.js"></script>
+</body>
+
+</html>

@@ -16,4 +16,4 @@ EXPOSE 7020
 
 COPY broadlinkmanager /opt/broadlinkmanager
 
-ENTRYPOINT ["/usr/bin/python3", "/opt/broadlinksvc/broadlinkmanager.py"]
+ENTRYPOINT ["/usr/bin/python3", "/opt/broadlinkmanager/broadlinkmanager.py"]

@@ -24,18 +24,70 @@ With Broadlink manager you can:
 
 
 ## Supported Devices and Models
- #### - sp2:  
-          0x2711,  # SP2
-          0x2719, 0x7919, 0x271a, 0x791a,  # Honeywell SP2
-          0x2720,  # SPMini
-          0x753e,  # SP3
-          0x7D00,  # OEM branded SP3
-          0x947a, 0x9479,  # SP3S
-          0x2728,  # SPMini2
-          0x2733, 0x273e,  # OEM branded SPMini
-          0x7530, 0x7546, 0x7918,  # OEM branded SPMini2
-          0x7D0D,  # TMall OEM SPMini3
-          0x2736  # SPMiniPlus
+ #### sp2:  
+      0x2711,  # SP2
+      0x2719, 0x7919, 0x271a, 0x791a,  # Honeywell SP2
+      0x2720,  # SPMini
+      0x753e,  # SP3
+      0x7D00,  # OEM branded SP3
+      0x947a, 0x9479,  # SP3S
+      0x2728,  # SPMini2
+      0x2733, 0x273e,  # OEM branded SPMini
+      0x7530, 0x7546, 0x7918,  # OEM branded SPMini2
+      0x7D0D,  # TMall OEM SPMini3
+      0x2736  # SPMiniPlus
+   
+### rm:
+     0x2712,  # RM2
+     0x2737,  # RM Mini
+     0x273d,  # RM Pro Phicomm
+     0x2783,  # RM2 Home Plus
+     0x277c,  # RM2 Home Plus GDT
+     0x272a,  # RM2 Pro Plus
+     0x2787,  # RM2 Pro Plus2
+     0x279d,  # RM2 Pro Plus3
+     0x27a9,  # RM2 Pro Plus_300
+     0x278b,  # RM2 Pro Plus BL
+     0x2797,  # RM2 Pro Plus HYC
+     0x27a1,  # RM2 Pro Plus R1
+     0x27a6,  # RM2 Pro PP
+     0x278f,  # RM Mini Shate
+     0x27c2,  # RM Mini 3
+     0x27d1,  # new RM Mini3
+     0x27de  # RM Mini 3 (C)
+    
+### rm4:
+    0x51da,  # RM4 Mini
+    0x5f36,  # RM Mini 3
+    0x6026,  # RM4 Pro
+    0x6070,  # RM4c Mini
+    0x61a2,  # RM4 Pro
+    0x610e,  # RM4 Mini
+    0x610f,  # RM4c
+    0x62bc,  # RM4 Mini
+    0x62be  # RM4c Mini
+           
+### a1:
+    0x2714,  # A1
+        
+### mp1:
+    0x4EB5,  # MP1
+    0x4EF7  # Honyar oem mp1
+            
+### hysen:
+    0x4EAD,  # Hysen controller
+
+### S1C:
+    0x2722   # S1 (SmartOne Alarm Kit)
+
+### dooya:
+    0x4E4D,  # Dooya DT360E (DOOYA_CURTAIN_V2)
+        
+### bg1:
+    0x51E3, # BG Electrical Smart Power Socket
+        
+### lb1:
+    0x60c8,    # RGB Smart Bulb
 
 ## Usage
 ### Run from hub

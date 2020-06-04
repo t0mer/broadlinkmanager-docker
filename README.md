@@ -7,7 +7,7 @@ With Broadlink manager you can:
 - Random generate RF Codes
 - Change Repeats for Exisiting codes (IR/EF)
 
-<br>
+
 #### Credits:
 =======
 
@@ -22,8 +22,20 @@ With Broadlink manager you can:
 
 - [clipboard.js](https://clipboardjs.com/)
 
-<br><br>
 
+## Supported Devices and Models
+ #### - sp2:  
+          0x2711,  # SP2
+          0x2719, 0x7919, 0x271a, 0x791a,  # Honeywell SP2
+          0x2720,  # SPMini
+          0x753e,  # SP3
+          0x7D00,  # OEM branded SP3
+          0x947a, 0x9479,  # SP3S
+          0x2728,  # SPMini2
+          0x2733, 0x273e,  # OEM branded SPMini
+          0x7530, 0x7546, 0x7918,  # OEM branded SPMini2
+          0x7D0D,  # TMall OEM SPMini3
+          0x2736  # SPMiniPlus
 
 ## Usage
 ### Run from hub

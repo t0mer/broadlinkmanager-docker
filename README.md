@@ -40,7 +40,8 @@ services:
     restart: unless-stopped
 
 ```
-
+Now open your browser and enter your docker container ip with port 7020:
+http://docker-ip:7020
 
 # Screenshots
 

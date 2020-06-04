@@ -43,13 +43,13 @@ services:
 
 
 # Screenshots
-<br>
+
 [![Device Listing](https://github.com/t0mer/broadlinkmanager-docker/blob/master/screenshots/Devices%20List.png?raw=true "Device Listing")](https://github.com/t0mer/broadlinkmanager-docker/blob/master/screenshots/Devices%20List.png?raw=true "Device Listing")
-<br>
+
 [![RF Code Generator](https://github.com/t0mer/broadlinkmanager-docker/blob/master/screenshots/Random%20RF%20Code%20Generator.PNG?raw=true "RF Code Generator")](https://github.com/t0mer/broadlinkmanager-docker/blob/master/screenshots/Random%20RF%20Code%20Generator.PNG?raw=true "RF Code Generator")
-<br>
+
 [![Learn and Send IR/RF Codes](https://github.com/t0mer/broadlinkmanager-docker/blob/master/screenshots/Learn%20and%20Send%20commands.png?raw=true "Learn and Send IR/RF Codes")](https://github.com/t0mer/broadlinkmanager-docker/blob/master/screenshots/Learn%20and%20Send%20commands.png?raw=true "Learn and Send IR/RF Codes")
-<br>
+
 [![Base64 and Hex Conversation](https://github.com/t0mer/broadlinkmanager-docker/blob/master/screenshots/Hex-Base64-Hex%20converting.PNG?raw=true "Base64 and Hex Conversation")](https://github.com/t0mer/broadlinkmanager-docker/blob/master/screenshots/Hex-Base64-Hex%20converting.PNG?raw=true "Base64 and Hex Conversation")
 # Donation
 <br>

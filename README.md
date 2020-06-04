@@ -10,6 +10,7 @@ With Broadlink manager you can:
 <br>
 #### Credits:
 =======
+
 - [Matthew Garrett](https://github.com/mjg59)
   * [python-broadlink](https://github.com/mjg59/python-broadlink)
   * [broadlink_cli](https://github.com/mjg59/python-broadlink/tree/master/cli)

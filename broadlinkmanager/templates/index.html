@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -166,6 +166,20 @@
                             </a>
                         </li>
                     </ul>
+                    <div style="display: block;margin:20px 60px;text-align: center;">
+                        <span style="color: white;text-align: center;">
+                            Coffee?<br>
+                        </span>
+                        <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
+                            <input type="hidden" name="cmd" value="_s-xclick" />
+                            <input type="hidden" name="hosted_button_id" value="G3LNNZEUT8WLW" />
+                            <input type="image" src="https://www.paypalobjects.com/en_US/IL/i/btn/btn_donateCC_LG.gif"
+                                border="0" name="submit" title="PayPal - The safer, easier way to pay online!"
+                                alt="Donate with PayPal button" />
+                            <img alt="" border="0" src="https://www.paypal.com/en_IL/i/scr/pixel.gif" width="1"
+                                height="1" />
+                        </form>
+                    </div>
                 </nav>
                 <!-- /.sidebar-menu -->
             </div>
@@ -277,7 +291,7 @@
     <!-- AdminLTE for demo purposes -->
     <script src="./js/home.js"></script>
     <script src="./js/clipboard.min.js"></script>
-    <div class="modal fade" id="modal-lg" style="z-index: 99999;">
+    <div class="modal fade" id="modal-lg" style="z-index: 99999;"></div>
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -311,9 +325,11 @@
                             <button type="button" class="btn btn-default" id="copydata"
                                 data-clipboard-target="#data"><img src="./img/clippy.svg" width="13"
                                     title="copy to clipboard"></button>
+                           
                         </span>
                     </div>
-                    <p>
+                    <div id="info">
+                    <p >
                         So What Can be done here?
                     <ul>
                         <li>In Order to learn IR Code, just click "Learn IR Code" and then press the button on your
@@ -326,6 +342,7 @@
                     </ul>
 
                     </p>
+                </div>
                 </div>
                 <div class="modal-footer justify-content-between">
 

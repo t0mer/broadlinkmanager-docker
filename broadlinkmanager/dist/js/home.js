@@ -1,3 +1,5 @@
+var con = 1;
+var RfStatus;
 $(document).ready(function () {
 
   $("#rescan").click(function () {
@@ -6,7 +8,11 @@ $(document).ready(function () {
     $("#loading").show();
     getDevices();
   });
-  getDevices();
+
+  if (localStorage.getItem('devices') == null)
+    getDevices();
+  else
+    showDevices(localStorage.getItem('devices'));
 
   $("#convert").click(function () {
     var hex = $("#hex").val();
@@ -22,9 +28,7 @@ $(document).ready(function () {
   });
 
   $("#learnrf").click(function () {
-    $("#data-wrapper").hide();
-
-
+    RfStatus = setInterval(getRfStatus, 1000);
   });
 
 
@@ -62,22 +66,9 @@ function getDevices() {
       url: '/discover',
       dataType: "json",
       success: function (data) {
-        data = $.parseJSON(data);
-        i = 0;
-        $.each(data, function (i, item) {
-          var $tr = $('<tr>').append(
-            $('<td id="_name_' + i + '">').text(item.name),
-            $('<td id="_type_' + i + '">').text(item.type),
-            $('<td id="_ip_' + i + '">').text(item.ip),
-            $('<td id="_mac_' + i + '">').text(item.mac),
-            $('<td id="_' + i + '">').html('<button type="button" class="btn btn-primary  actions" data-toggle="modal" data-target="#modal-lg" title="Learn and Send IR/RF Codes">Actions</button>')
+        localStorage.setItem('devices', data)
+        showDevices(data);
 
-          );
-          i++;
-          $('#bdevices').append('<tr>' + $tr.wrap('<tr>').html() + '</tr>');
-        });
-        $("#loading").hide();
-        $("#scan").show();
       },
       error: function (e) {
 
@@ -85,6 +76,25 @@ function getDevices() {
     });
 }
 
+
+function showDevices(data) {
+  data = $.parseJSON(data);
+  i = 0;
+  $.each(data, function (i, item) {
+    var $tr = $('<tr>').append(
+      $('<td id="_name_' + i + '">').text(item.name),
+      $('<td id="_type_' + i + '">').text(item.type),
+      $('<td id="_ip_' + i + '">').text(item.ip),
+      $('<td id="_mac_' + i + '">').text(item.mac),
+      $('<td id="_' + i + '">').html('<button type="button" class="btn btn-primary  actions" data-toggle="modal" data-target="#modal-lg" title="Learn and Send IR/RF Codes">Actions</button>')
+
+    );
+    i++;
+    $('#bdevices').append('<tr>' + $tr.wrap('<tr>').html() + '</tr>');
+  });
+  $("#loading").hide();
+  $("#scan").show();
+}
 
 //IR Learn / Send
 
@@ -129,3 +139,21 @@ function sendcommand(_type, _host, _mac, _command) {
     });
 
 }
+
+
+
+function getRfStatus() {
+  $.ajax(
+    {
+      url: '/rf/status',
+      dataType: "json",
+      success: function (data) {
+        data = $.parseJSON(data);
+        console.log(data);
+      },
+      error: function (e) {
+        clearInterval(RfStatus);
+      }
+    });
+}
+

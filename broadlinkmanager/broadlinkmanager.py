@@ -1,11 +1,19 @@
+#region Importing
+
 from flask import Flask, request, make_response, render_template, url_for, g
 from flask import send_from_directory, jsonify
 from flask_restful import Resource, Api
 from json import dumps
+import os
+from os import environ 
 import json, argparse, datetime, subprocess, time
 import broadlink
 from broadlink.exceptions import ReadError, StorageError
 from subprocess import call
+
+#endregion
+
+#region Parsing Default arguments for descovery
 
 parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
 parser.add_argument("--timeout", type=int, default=5,
@@ -16,12 +24,27 @@ parser.add_argument("--dst-ip", default="255.255.255.255",
                     help="destination ip address to use in the discovery")
 args = parser.parse_args()
 
+#endregion
+
+#region Declaring Flask app
+
 app = Flask(__name__)
 api = Api(app)
 
+#endregion
+
+#region Global Properties
 _continu_to_sweep=False
 _rf_sweep_message=''
 _rf_sweep_status=False
+
+TICK = 32.84
+IR_TOKEN = 0x26
+TIMEOUT = 30
+
+#endregion
+
+#region Broadlink Helper Methods
 
 def getDeviceName(deviceType):
     name = {
@@ -78,15 +101,8 @@ def getDeviceName(deviceType):
     }
     return name.get(deviceType, "Not Supported")
 
-
-TICK = 32.84
-IR_TOKEN = 0x26
-TIMEOUT = 30
-
-
 def auto_int(x):
     return int(x, 0)
-
 
 def to_microseconds(bytes):
     result = []
@@ -104,7 +120,6 @@ def to_microseconds(bytes):
             break
     return result
 
-
 def durations_to_broadlink(durations):
     result = bytearray()
     result.append(IR_TOKEN)
@@ -119,7 +134,6 @@ def durations_to_broadlink(durations):
         result.append(num % 256)
     return result
 
-
 def format_durations(data):
     result = ''
     for i in range(0, len(data)):
@@ -128,16 +142,17 @@ def format_durations(data):
         result += ('+' if i % 2 == 0 else '-') + str(data[i])
     return result
 
-
 def parse_durations(str):
     result = []
     for s in str.split():
         result.append(abs(int(s)))
     return result
 
+#endregion
 
-# Start OF UI Rendering Methods
+#region UI Rendering Methods
 
+#Homepage (Devices)
 @app.route('/')
 def devices():
     return render_template('index.html')
@@ -171,13 +186,9 @@ def convert():
 def about():
     return render_template('about.html')
 
+#endregion UI Rendering Methods
 
-
-# End OF UI Rendering Methods
-
-
-# Start Of API Methods
-
+#region API Methods
 
 # Learn IR
 @app.route('/ir/learn')
@@ -203,7 +214,7 @@ def learnir():
     return jsonify('{"data":"' + learned + '"}')
 
 
-# Send IR
+# Send IR/RF
 @app.route('/command/send')
 def command():
     dtype = int(request.args.get('type'), 0)
@@ -218,6 +229,7 @@ def command():
     except:
         return jsonify('{"data":"Error occurred while Sending, please try again"}')
 
+#Learn RF
 @app.route('/rf/learn')
 def sweep():
     global _continu_to_sweep
@@ -270,14 +282,13 @@ def sweep():
     learned = ''.join(format(x, '02x') for x in bytearray(data))
     return jsonify('{"data":"' + learned + '"}')
 
+#Get RF Learning state
 @app.route('/rf/status')
 def rfstatus():
     global _continu_to_sweep
     global _rf_sweep_message
     global _rf_sweep_status
     return jsonify('{"_continu_to_sweep":"' + str(_continu_to_sweep) + '","_rf_sweep_message":"' + _rf_sweep_message + '","_rf_sweep_status":"' + str(_rf_sweep_status) + '" }')
-
-
 
 # Discover Devices
 @app.route('/discover')
@@ -299,30 +310,30 @@ def discover():
     return jsonify(_devices)
 
 
+#endregion API Methods
 
-# Start Serving Static Files
+#region Serving Static Files
 
+#Serve Javascript
 @app.route('/js/<path:path>')
 def send_js(path):
     return send_from_directory('dist/js', path)
 
-
+#Serve CSS
 @app.route('/css/<path:path>')
 def send_css(path):
     return send_from_directory('dist/css', path)
 
-
+#Serve Images
 @app.route('/img/<path:path>')
 def send_img(path):
     return send_from_directory('dist/img', path)
 
-
+#Serve Fonts
 @app.route('/webfonts/<path:path>')
 def send_webfonts(path):
     return send_from_directory('dist/webfonts', path)
 
-# End Serving Static Content
-
-
+#endregion
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=7020)

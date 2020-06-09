@@ -21,6 +21,7 @@ $(document).ready(function () {
   });
 
   $("#learnir").click(function () {
+    $("#progress").text("Waiting For Signal....");
     $("#scaning").show();
     $("#data-wrapper").hide();
     $("#data").val('');
@@ -28,24 +29,28 @@ $(document).ready(function () {
   });
 
   $("#learnrf").click(function () {
+    $("#scaning").show();
+    $("#data-wrapper").hide();
+    $("#data").val('');
     RfStatus = setInterval(getRfStatus, 1000);
+    learnrf($("#device_type").val(), $("#device_ip").val(), $("#device_mac").val())
+
   });
 
-
   $("#send").click(function () {
+    $("#progress").text("Ending Command....");
+    $("#scaning").show();
     var command = $("#data").val();
     sendcommand($("#device_type").val(), $("#device_ip").val(), $("#device_mac").val(), command)
   });
 
-
-
   $(document).on("click", ".actions", function (event) {
-    // alert($(this).parent().attr('id'));
     var perifx = $(this).parent().attr('id');
     var device_name = $('#_name' + perifx).text();
     var device_type = $('#_type' + perifx).text();
     var device_ip = $('#_ip' + perifx).text();
     var device_mac = $('#_mac' + perifx).text();
+    clearInterval(RfStatus);
     $("#scaning").hide();
     $("#device_name").val(device_name);
     $("#device_type").val(device_type);
@@ -53,10 +58,29 @@ $(document).ready(function () {
     $("#device_mac").val(device_mac);
     $("#modal-title").text(device_name + ' (' + device_ip + ')');
     $('#data').val('');
+    $('#con').hide();
+    $('#message').text('');
+    
   });
 
 
   new ClipboardJS('#copydata');
+
+  $('#sweeprf').click(function () {
+
+    $.ajax(
+      {
+        url: '/rf/continue',
+        dataType: "json",
+        success: function (data) {
+
+        },
+        error: function (e) {
+
+        }
+      });
+
+  });
 
 });
 
@@ -66,7 +90,7 @@ function getDevices() {
       url: '/discover',
       dataType: "json",
       success: function (data) {
-        localStorage.setItem('devices', data)
+        localStorage.setItem('devices', data);
         showDevices(data);
 
       },
@@ -76,9 +100,13 @@ function getDevices() {
     });
 }
 
-
 function showDevices(data) {
-  data = $.parseJSON(data);
+  try {
+    data = $.parseJSON(data);
+  }
+  catch (err) {
+    getDevices();
+  }
   i = 0;
   $.each(data, function (i, item) {
     var $tr = $('<tr>').append(
@@ -99,22 +127,31 @@ function showDevices(data) {
 //IR Learn / Send
 
 function learnIr(_type, _host, _mac) {
-
+  $("#message").text('');
+  $("#message").css('color', 'black');
   $.ajax(
     {
+
       url: 'ir/learn?type=' + _type + '&host=' + _host + '&mac=' + _mac,
       dataType: "json",
       success: function (data) {
         data = $.parseJSON(data);
-        if (data.data == "No Data Recived")
+        if (data.success == 0) {
           $('#data').val(data.data);
-        else
-          $('#data').val(hexToBase64(data.data));
-
+          $("#message").text(data.message);
+          $("#message").css('color', 'red');
+        }
+        else {
+          $("#message").text(data.message);
+          $("#message").css('color', 'green');
+          //$('#data').val(hexToBase64(data.data));
+          $('#data').val(data.data);
+        }
         $("#scaning").hide();
         $("#data-wrapper").show();
       },
       error: function (e) {
+
         $('#data').val('Error occurred while scanning, please try again');
         $("#scaning").hide();
         $("#data-wrapper").show();
@@ -124,6 +161,7 @@ function learnIr(_type, _host, _mac) {
 }
 
 function sendcommand(_type, _host, _mac, _command) {
+  $("#message").css('color', 'black').text('');
   _command = base64ToHex(_command);
   $.ajax(
     {
@@ -131,16 +169,53 @@ function sendcommand(_type, _host, _mac, _command) {
       dataType: "json",
       success: function (data) {
         data = $.parseJSON(data);
-        alert(data.data);
+        if (data.success == 0) {
+          $('#data').val(data.data);
+          $("#message").text(data.message);
+          $("#message").css('color', 'red');
+        }
+        else {
+          $("#message").text(data.message);
+          $("#message").css('color', 'green');
+          $('#data').val('');
+        }
+        $("#scaning").hide();
       },
       error: function (e) {
-        alert(err);
+
+        $("#scaning").hide();
+        $("#message").css('color', 'red');
+        $("#message").text("Error sending Commad");
       }
     });
 
 }
 
+function learnrf(_type, _host, _mac) {
+  $.ajax(
+    {
+      url: 'rf/learn?type=' + _type + '&host=' + _host + '&mac=' + _mac,
+      dataType: "json",
+      success: function (data) {
+        data = $.parseJSON(data);
+        if (data.success == 0)
+          $('#message').text(data.data);
+        else
+          $('#data').val(hexToBase64(data.data));
 
+        clearInterval(RfStatus);
+        $("#scaning").hide();
+        $("#data-wrapper").show();
+      },
+      error: function (e) {
+        $('#data').val('Error occurred while scanning, please try again');
+        clearInterval(RfStatus);
+        $("#scaning").hide();
+        $("#data-wrapper").show();
+      }
+    });
+
+}
 
 function getRfStatus() {
   $.ajax(
@@ -149,10 +224,16 @@ function getRfStatus() {
       dataType: "json",
       success: function (data) {
         data = $.parseJSON(data);
-        console.log(data);
+        $('#message').text(data._rf_sweep_message);
+               
+        if (data._rf_sweep_status == "True")
+          $('#con').show();
+       
+
       },
       error: function (e) {
         clearInterval(RfStatus);
+        $('#message').text(data._rf_sweep_message);
       }
     });
 }

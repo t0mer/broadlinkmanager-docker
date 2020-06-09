@@ -209,9 +209,9 @@ def learnir():
         else:
             break
     else:
-        return jsonify('{"data":"No Data Recived"}')
+        return jsonify('{"data":"","success":0,"message":"No Data Recived"}')
     learned = ''.join(format(x, '02x') for x in bytearray(data))
-    return jsonify('{"data":"' + learned + '"}')
+    return jsonify('{"data":"' + learned + '","success":1,"message":"IR Data Recived"}')
 
 
 # Send IR/RF
@@ -225,9 +225,10 @@ def command():
     dev.auth()
     try:
         dev.send_data(bytearray.fromhex(''.join(command)))
-        return jsonify('{"data":"Command sent successfully "}')
+        return jsonify('{"data":"","success":1,"message":"Command sent successfully"}')
     except:
-        return jsonify('{"data":"Error occurred while Sending, please try again"}')
+        return jsonify('{"data":"","success":0,"message":"Error occurred while Sending command!"}')
+        
 
 #Learn RF
 @app.route('/rf/learn')
@@ -253,7 +254,7 @@ def sweep():
     else:
       _rf_sweep_message = "RF Frequency not found!"
       dev.cancel_sweep_frequency()
-      return jsonify('{"data":"RF Frequency not found!"}')
+      return jsonify('{"data":"RF Frequency not found!","success":0}')
     
     _rf_sweep_message = "Found RF Frequency - 1 of 2!"
     time.sleep(1)
@@ -263,8 +264,8 @@ def sweep():
       _rf_sweep_message = "Click The Continue button"
     
     _rf_sweep_message = "To complete learning, single press the button you want to learn"
+    _rf_sweep_status=False
     dev.find_rf_packet()
-  
     start = time.time()
     while time.time() - start < TIMEOUT:
       time.sleep(1)
@@ -280,7 +281,7 @@ def sweep():
 
     _rf_sweep_message = "Found RF Frequency - 2 of 2!"
     learned = ''.join(format(x, '02x') for x in bytearray(data))
-    return jsonify('{"data":"' + learned + '"}')
+    return jsonify('{"data":"' + data + '"}')
 
 #Get RF Learning state
 @app.route('/rf/status')
@@ -289,6 +290,16 @@ def rfstatus():
     global _rf_sweep_message
     global _rf_sweep_status
     return jsonify('{"_continu_to_sweep":"' + str(_continu_to_sweep) + '","_rf_sweep_message":"' + _rf_sweep_message + '","_rf_sweep_status":"' + str(_rf_sweep_status) + '" }')
+
+@app.route('/rf/continue')
+def rfcontinue():
+    global _continu_to_sweep
+    global _rf_sweep_status
+    _rf_sweep_status = True
+    _continu_to_sweep = True
+    return jsonify('{"_continu_to_sweep":"' + str(_continu_to_sweep) + '","_rf_sweep_message":"' + _rf_sweep_message + '","_rf_sweep_status":"' + str(_rf_sweep_status) + '" }')
+
+
 
 # Discover Devices
 @app.route('/discover')
@@ -308,7 +319,6 @@ def discover():
 
     _devices = _devices[:-1] + ']'
     return jsonify(_devices)
-
 
 #endregion API Methods
 
@@ -335,5 +345,8 @@ def send_webfonts(path):
     return send_from_directory('dist/webfonts', path)
 
 #endregion
+
+#Start Application
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=7020)

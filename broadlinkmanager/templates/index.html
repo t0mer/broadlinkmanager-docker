@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 
 <head>
@@ -289,9 +289,10 @@
     <!-- AdminLTE App -->
     <script src="./js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
-    <script src="./js/home.js"></script>
+    <script src="./js/home.js?V=4"></script>
     <script src="./js/clipboard.min.js"></script>
-    <div class="modal fade" id="modal-lg" style="z-index: 99999;"></div>
+ 
+      <div class="modal fade" id="modal-lg" style="z-index: 99999;">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -301,11 +302,13 @@
                     </button>
                 </div>
                 <div class="modal-body">
+                    <div style="margin-bottom: 5px;">
+                      Status: &nbsp;  <span id='message'></span> &nbsp;&nbsp;&nbsp; <span id="con" style="display:none;" ><button class="btn-xs btn-info" id="sweeprf">Continue Scannig</button></span>
+                    </div>
                     <table id="scaning">
                         <tr>
-                            <td>
-                                Waiting For Signal....
-                            </td>
+                            <td id="progress">
+                                
                             <td> &nbsp;</td>
                             <td>
                                 <div class="spinner">
@@ -325,11 +328,10 @@
                             <button type="button" class="btn btn-default" id="copydata"
                                 data-clipboard-target="#data"><img src="./img/clippy.svg" width="13"
                                     title="copy to clipboard"></button>
-                           
                         </span>
                     </div>
-                    <div id="info">
-                    <p >
+                    <p></p>
+                    <p>
                         So What Can be done here?
                     <ul>
                         <li>In Order to learn IR Code, just click "Learn IR Code" and then press the button on your
@@ -342,7 +344,6 @@
                     </ul>
 
                     </p>
-                </div>
                 </div>
                 <div class="modal-footer justify-content-between">
 
@@ -364,7 +365,6 @@
         </div>
         <!-- /.modal-dialog -->
     </div>
-
 </body>
 
 </html>

@@ -1,6 +1,6 @@
-# BroadlonkManager
+# BroadlinkManager
 
-BroadlonkManager is a [Flask](https://github.com/joemccann/dillinge) powerd, easy to use system that hepls you to work with Broadlink Devices.
+BroadlinkManager is a [Flask](https://github.com/joemccann/dillinge) powerd, easy to use system that hepls you to work with Broadlink Devices.
 With Broadlink manager you can:
 - Scan your network for devices.
 - Lean and Send IR or RF Codes
@@ -96,10 +96,10 @@ With Broadlink manager you can:
 ```yaml
 version: "3.6"
 services:
-  broadlonkmanager:
-    image: techblog/broadlonkmanager
+  broadlinkmanager:
+    image: techblog/broadlinkmanager
     network_mode: host
-    container_name: broadlonkmanager
+    container_name: broadlinkmanager
     restart: always
     restart: unless-stopped
 

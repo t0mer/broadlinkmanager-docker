@@ -7,7 +7,7 @@ ENV PYTHONIOENCODING=utf-8
 #install pip3
 RUN apt update
 
-RUN apt install python3-pip --yes
+RUN apt install python3-pip libffi-dev libssl-dev --yes
 
 RUN  pip3 install flask flask_restful cryptography==2.6.1 broadlink --no-cache-dir
 

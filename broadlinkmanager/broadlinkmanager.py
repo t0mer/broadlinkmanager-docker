@@ -281,7 +281,9 @@ def sweep():
 
     _rf_sweep_message = "Found RF Frequency - 2 of 2!"
     learned = ''.join(format(x, '02x') for x in bytearray(data))
-    return jsonify('{"data":"' + data + '"}')
+    _rf_sweep_message = "RF Scan Completed Successfully"
+    time.sleep(1)
+    return jsonify('{"data":"' + learned + '"}')
 
 #Get RF Learning state
 @app.route('/rf/status')

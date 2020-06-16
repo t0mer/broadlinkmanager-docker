@@ -38,7 +38,7 @@ $(document).ready(function () {
   });
 
   $("#send").click(function () {
-    $("#progress").text("Ending Command....");
+    $("#progress").text("Sending Command....");
     $("#scaning").show();
     var command = $("#data").val();
     sendcommand($("#device_type").val(), $("#device_ip").val(), $("#device_mac").val(), command)
@@ -73,10 +73,10 @@ $(document).ready(function () {
         url: '/rf/continue',
         dataType: "json",
         success: function (data) {
-
+          $(this).hide();
         },
         error: function (e) {
-
+          $(this).hide();
         }
       });
 
@@ -201,10 +201,14 @@ function learnrf(_type, _host, _mac) {
         if (data.success == 0)
           $('#message').text(data.data);
         else
-          $('#data').val(hexToBase64(data.data));
+          {
+            $('#data').val(hexToBase64(data.data));
+            $('#message').text("RF Scan Completed Successfully");
+          }
 
         clearInterval(RfStatus);
         $("#scaning").hide();
+        $("#con").hide();
         $("#data-wrapper").show();
       },
       error: function (e) {
@@ -212,6 +216,7 @@ function learnrf(_type, _host, _mac) {
         clearInterval(RfStatus);
         $("#scaning").hide();
         $("#data-wrapper").show();
+        $("#con").hide();
       }
     });
 

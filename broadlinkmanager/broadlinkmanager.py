@@ -10,8 +10,6 @@ import argparse, datetime
 import subprocess, time, broadlink
 from broadlink.exceptions import ReadError, StorageError
 from subprocess import call
-from json2xml import json2xml
-from json2xml.utils import readfromurl, readfromstring, readfromjson
 
 
 

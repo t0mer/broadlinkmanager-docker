@@ -102,6 +102,8 @@ services:
     container_name: broadlinkmanager
     restart: always
     restart: unless-stopped
+    volumes:
+      - ./broadlinkmanager:/opt/broadlinkmanager/data
 
 ```
 Now open your browser and enter your docker container ip with port 7020:

@@ -211,10 +211,10 @@
                                         <thead>
                                             <tr>
 
-                                                <th>Device Name</th>
-                                                <th>Device Type</th>
-                                                <th>IP Address</th>
-                                                <th>MAC Address</th>
+                                                <th class="_th_json" data-json="name">Device Name</th>
+                                                <th class="_th_json" data-json="type">Device Type</th>
+                                                <th class="_th_json" data-json="ip">IP Address</th>
+                                                <th class="_th_json" data-json="mac">MAC Address</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
@@ -242,17 +242,30 @@
                                         </tr>
                                     </table>
 
-                                    <table id="scan" style="display:none">
-                                        <tr>
-                                            <td>
+                                    <table >
+                                        <tr >
+                                            <td id="scan" style="display:none">
                                                 <button type="button" class="btn-primary btn"
                                                     style="margin: 0 auto;display: block;" id="rescan"
                                                     title="Rescan network for devices"><i class="fas fa-podcast"
                                                         aria-hidden="true"> </i>&nbsp;&nbsp;Rescan&nbsp;&nbsp;</button>
                                             </td>
+                                            <td id="_save">
+                                                <button type="button" class="btn-primary btn"
+                                                    style="margin: 0 auto;display: block;" id="save"
+                                                    title="Rescan network for devices"><i class="fas fa-save"
+                                                        aria-hidden="true"> </i>&nbsp;&nbsp;Save To File&nbsp;&nbsp;</button>
+                                            </td>
+                                            <td id="_load">
+                                                <button type="button" class="btn-primary btn"
+                                                    style="margin: 0 auto;display: block;" id="load"
+                                                    title="Rescan network for devices"><i class="fas fa-upload"
+                                                        aria-hidden="true"> </i>&nbsp;&nbsp;Load from File&nbsp;&nbsp;</button>
+                                            </td>
+
                                         </tr>
                                     </table>
-
+                                   
                                     <!-- /.card-footer-->
                                 </div>
                                 <!-- /.card -->
@@ -291,8 +304,8 @@
     <!-- AdminLTE for demo purposes -->
     <script src="./js/home.js?V=4"></script>
     <script src="./js/clipboard.min.js"></script>
- 
-      <div class="modal fade" id="modal-lg" style="z-index: 99999;">
+
+    <div class="modal fade" id="modal-lg" style="z-index: 99999;">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -303,12 +316,14 @@
                 </div>
                 <div class="modal-body">
                     <div style="margin-bottom: 5px;">
-                      Status: &nbsp;  <span id='message'></span> &nbsp;&nbsp;&nbsp; <span id="con" style="display:none;" ><button class="btn-xs btn-info" id="sweeprf">Continue Scannig</button></span>
+                        Status: &nbsp; <span id='message'></span> &nbsp;&nbsp;&nbsp; <span id="con"
+                            style="display:none;"><button class="btn-xs btn-info" id="sweeprf">Continue
+                                Scannig</button></span>
                     </div>
                     <table id="scaning">
                         <tr>
                             <td id="progress">
-                                
+
                             <td> &nbsp;</td>
                             <td>
                                 <div class="spinner">

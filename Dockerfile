@@ -13,6 +13,7 @@ RUN  pip3 install flask flask_restful cryptography==2.6.1 broadlink --no-cache-d
 
 #Create working directory
 RUN mkdir /opt/broadlinkmanager
+RUN mkdir /opt/broadlinkmanager/data
 
 EXPOSE 7020
 

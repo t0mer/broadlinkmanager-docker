@@ -1,19 +1,24 @@
-#region Importing
-
+# region Importing
 from flask import Flask, request, make_response, render_template, url_for, g
 from flask import send_from_directory, jsonify
 from flask_restful import Resource, Api
 from json import dumps
-import os
-from os import environ 
-import json, argparse, datetime, subprocess, time
-import broadlink
+import os, json
+from os import environ
+from os import path
+import argparse, datetime
+import subprocess, time, broadlink
 from broadlink.exceptions import ReadError, StorageError
 from subprocess import call
+from json2xml import json2xml
+from json2xml.utils import readfromurl, readfromstring, readfromjson
 
-#endregion
 
-#region Parsing Default arguments for descovery
+
+
+# endregion
+
+# region Parsing Default arguments for descovery
 
 parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
 parser.add_argument("--timeout", type=int, default=5,
@@ -24,27 +29,28 @@ parser.add_argument("--dst-ip", default="255.255.255.255",
                     help="destination ip address to use in the discovery")
 args = parser.parse_args()
 
-#endregion
+# endregion
 
-#region Declaring Flask app
+# region Declaring Flask app
 
 app = Flask(__name__)
 api = Api(app)
 
-#endregion
+# endregion
 
-#region Global Properties
-_continu_to_sweep=False
-_rf_sweep_message=''
-_rf_sweep_status=False
+# region Global Properties
+_continu_to_sweep = False
+_rf_sweep_message = ''
+_rf_sweep_status = False
 
 TICK = 32.84
 IR_TOKEN = 0x26
 TIMEOUT = 30
 
-#endregion
+# endregion
 
-#region Broadlink Helper Methods
+# region Broadlink Helper Methods
+
 
 def getDeviceName(deviceType):
     name = {
@@ -148,11 +154,30 @@ def parse_durations(str):
         result.append(abs(int(s)))
     return result
 
-#endregion
+def initDevice(dtype, host, mac):
+    _dtype = int(dtype, 0)
+    _host = host
+    _mac = bytearray.fromhex(mac)
+    return broadlink.gendevice(_dtype, (_host, 80), _mac)
 
-#region UI Rendering Methods
+def GetDevicesFilePath():
+    return os.path.join(app.root_path, 'data', 'devices.json')
+
+def writeXml(_file):
+    root= ET.Element("root")
+    doc=ET.SubElement(root,"doc")
+    ET.SubElement(doc, "field1", name="blah").text = "some value1"
+    ET.SubElement(doc, "field2", name="asdfasd").text = "some vlaue2"
+    tree = ET.ElementTree(root)
+    tree.write(_file)
+
+# endregion
+
+# region UI Rendering Methods
 
 #Homepage (Devices)
+
+
 @app.route('/')
 def devices():
     return render_template('index.html')
@@ -182,21 +207,34 @@ def repeats():
 def convert():
     return render_template('convert.html')
 
+
 @app.route('/about')
 def about():
     return render_template('about.html')
 
-#endregion UI Rendering Methods
+# endregion UI Rendering Methods
 
-#region API Methods
+# region API Methods
 
 # Learn IR
+
+
+@app.route('/temperature')
+def temperature():
+    dev = initDevice(request.args.get('type'), request.args.get(
+        'host'), request.args.get('mac'))
+    dev.auth()
+    try:
+        return jsonify('{"data":"'+dev.check_temperature()+'","success":"1"}')
+    except:
+        return jsonify('{"data":"Method Not Supported","success":"0"}')
+
+
+
 @app.route('/ir/learn')
 def learnir():
-    dtype = int(request.args.get('type'), 0)
-    host = request.args.get('host')
-    mac = bytearray.fromhex(request.args.get('mac'))
-    dev = broadlink.gendevice(dtype, (host, 80), mac)
+    dev = initDevice(request.args.get('type'), request.args.get(
+        'host'), request.args.get('mac'))
     dev.auth()
     dev.enter_learning()
     start = time.time()
@@ -213,14 +251,13 @@ def learnir():
     learned = ''.join(format(x, '02x') for x in bytearray(data))
     return jsonify('{"data":"' + learned + '","success":1,"message":"IR Data Recived"}')
 
-
 # Send IR/RF
+
+
 @app.route('/command/send')
 def command():
-    dtype = int(request.args.get('type'), 0)
-    host = request.args.get('host')
-    mac = bytearray.fromhex(request.args.get('mac'))
-    dev = broadlink.gendevice(dtype, (host, 80), mac)
+    dev = initDevice(request.args.get('type'), request.args.get(
+        'host'), request.args.get('mac'))
     command = request.args.get('command')
     dev.auth()
     try:
@@ -228,21 +265,19 @@ def command():
         return jsonify('{"data":"","success":1,"message":"Command sent successfully"}')
     except:
         return jsonify('{"data":"","success":0,"message":"Error occurred while Sending command!"}')
-        
 
-#Learn RF
+
+# Learn RF
 @app.route('/rf/learn')
 def sweep():
     global _continu_to_sweep
     global _rf_sweep_message
     global _rf_sweep_status
-    _continu_to_sweep=False
-    _rf_sweep_message=''
-    _rf_sweep_status=False
-    dtype = int(request.args.get('type'), 0)
-    host = request.args.get('host')
-    mac = bytearray.fromhex(request.args.get('mac'))
-    dev = broadlink.gendevice(dtype, (host, 80), mac)
+    _continu_to_sweep = False
+    _rf_sweep_message = ''
+    _rf_sweep_status = False
+    dev = initDevice(request.args.get('type'), request.args.get(
+        'host'), request.args.get('mac'))
     dev.auth()
     dev.sweep_frequency()
     _rf_sweep_message = "Learning RF Frequency, press and hold the button to learn..."
@@ -252,29 +287,29 @@ def sweep():
         if dev.check_frequency():
             break
     else:
-      _rf_sweep_message = "RF Frequency not found!"
-      dev.cancel_sweep_frequency()
-      return jsonify('{"data":"RF Frequency not found!","success":0}')
-    
+        _rf_sweep_message = "RF Frequency not found!"
+        dev.cancel_sweep_frequency()
+        return jsonify('{"data":"RF Frequency not found!","success":0}')
+
     _rf_sweep_message = "Found RF Frequency - 1 of 2!"
     time.sleep(1)
     _rf_sweep_message = "You can now let go of the button"
-    _rf_sweep_status=True
+    _rf_sweep_status = True
     while _continu_to_sweep == False:
-      _rf_sweep_message = "Click The Continue button"
-    
+        _rf_sweep_message = "Click The Continue button"
+
     _rf_sweep_message = "To complete learning, single press the button you want to learn"
-    _rf_sweep_status=False
+    _rf_sweep_status = False
     dev.find_rf_packet()
     start = time.time()
     while time.time() - start < TIMEOUT:
-      time.sleep(1)
-      try:
-        data = dev.check_data()
-      except (ReadError, StorageError):
-        continue
-      else:
-        break
+        time.sleep(1)
+        try:
+            data = dev.check_data()
+        except (ReadError, StorageError):
+            continue
+        else:
+            break
     else:
         _rf_sweep_message = "No Data Found"
         return jsonify('{"data":"No Data Found"}')
@@ -285,13 +320,18 @@ def sweep():
     time.sleep(1)
     return jsonify('{"data":"' + learned + '"}')
 
-#Get RF Learning state
+# Get RF Learning state
+
+
 @app.route('/rf/status')
 def rfstatus():
     global _continu_to_sweep
     global _rf_sweep_message
     global _rf_sweep_status
     return jsonify('{"_continu_to_sweep":"' + str(_continu_to_sweep) + '","_rf_sweep_message":"' + _rf_sweep_message + '","_rf_sweep_status":"' + str(_rf_sweep_status) + '" }')
+
+# Continue with RF Scan
+
 
 @app.route('/rf/continue')
 def rfcontinue():
@@ -301,9 +341,62 @@ def rfcontinue():
     _continu_to_sweep = True
     return jsonify('{"_continu_to_sweep":"' + str(_continu_to_sweep) + '","_rf_sweep_message":"' + _rf_sweep_message + '","_rf_sweep_status":"' + str(_rf_sweep_status) + '" }')
 
+# Join Wifi
+@app.route('/setup')
+def setup():
+    try:
+        essid = request.args.get('essid')
+        wifipass = request.args.get('wifipass')
+        broadlink.setup(essid, wifipass, 4)
+        return "{'data':'1'}"
+    except:
+        return "{'data':'0'}"
+
+# Save Devices List to json file
+@app.route('/devices/save', methods=['POST','GET'])
+def save_devices():
+    try:
+        data = readfromstring(list(request.form.keys())[0])
+        with open(GetDevicesFilePath(), 'w') as f:
+            f.write(str(data).replace("'","\""))
+        return jsonify('{"success":1}')
+    except:
+        return jsonify('{"success":0}')
+  
+# Load Devices from json file
+@app.route('/devices/load')
+def load_devices():
+    try:
+        time.sleep(3)
+        f = open(GetDevicesFilePath(), "r")
+        return jsonify(f.read().replace("'","\""))
+    except:
+        return jsonify('{"success":0}')
+  
+# Search for devices in the network
+@app.route('/autodiscover')
+def autodiscover():
+    if path.exists(GetDevicesFilePath()):
+        return load_devices()
+    else:
+        _devices = '['
+        devices = broadlink.discover(
+            timeout=5, local_ip_address=None, discover_ip_address="255.255.255.255")
+        for device in devices:
+            if device.auth():
+                _devices = _devices + '{"name":"' + \
+                    getDeviceName(device.devtype) + '",'
+                _devices = _devices + '"type":"' + \
+                    format(hex(device.devtype)) + '",'
+                _devices = _devices + '"ip":"' + device.host[0] + '",'
+                _devices = _devices + '"mac":"' + \
+                    ''.join(format(x, '02x') for x in device.mac[::-1]) + '"},'
+
+        _devices = _devices[:-1] + ']'
+        return jsonify(_devices)
 
 
-# Discover Devices
+
 @app.route('/discover')
 def discover():
     _devices = '['
@@ -322,33 +415,35 @@ def discover():
     _devices = _devices[:-1] + ']'
     return jsonify(_devices)
 
-#endregion API Methods
 
-#region Serving Static Files
+# endregion API Methods
 
-#Serve Javascript
+
+# region Serving Static Files
+
+# Serve Javascript
 @app.route('/js/<path:path>')
 def send_js(path):
     return send_from_directory('dist/js', path)
 
-#Serve CSS
+# Serve CSS
 @app.route('/css/<path:path>')
 def send_css(path):
     return send_from_directory('dist/css', path)
 
-#Serve Images
+# Serve Images
 @app.route('/img/<path:path>')
 def send_img(path):
     return send_from_directory('dist/img', path)
 
-#Serve Fonts
+# Serve Fonts
 @app.route('/webfonts/<path:path>')
 def send_webfonts(path):
     return send_from_directory('dist/webfonts', path)
 
-#endregion
+# endregion
 
-#Start Application
 
+# Start Application
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=7020)

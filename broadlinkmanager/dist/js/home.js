@@ -3,14 +3,44 @@ var RfStatus;
 $(document).ready(function () {
 
   $("#rescan").click(function () {
+    ga('send', 'event', 'devices', 'action', 'rescan');
     $("#scan").hide();
     $("#bdevices").html('');
     $("#loading").show();
-    getDevices();
+    getDevices('/discover');
+  });
+
+  $('#load').click(function(){
+    $("#scan").hide();
+    $("#bdevices").html('');
+    $("#loading").show();
+    ga('send', 'event', 'devices', 'action', 'Load From File');
+    $.ajax(
+      {
+        url: '/devices/load',
+        dataType: "json",
+        success: function (data) {
+         
+          showDevices(data);
+          localStorage.setItem('devices', data);
+
+   
+        },
+        error: function (e) {
+  
+        }
+      });
+
+  });
+
+
+  $('#save').click(function () {
+    ga('send', 'event', 'devices', 'action', 'Save To File');
+    Table2Json();
   });
 
   if (localStorage.getItem('devices') == null)
-    getDevices();
+    getDevices('/autodiscover');
   else
     showDevices(localStorage.getItem('devices'));
 
@@ -21,6 +51,7 @@ $(document).ready(function () {
   });
 
   $("#learnir").click(function () {
+    ga('send', 'event', 'codes', 'action', 'Learn IR');
     $("#progress").text("Waiting For Signal....");
     $("#scaning").show();
     $("#data-wrapper").hide();
@@ -29,6 +60,7 @@ $(document).ready(function () {
   });
 
   $("#learnrf").click(function () {
+    ga('send', 'event', 'codes', 'action', 'Learn RF');
     $("#scaning").show();
     $("#data-wrapper").hide();
     $("#data").val('');
@@ -38,6 +70,7 @@ $(document).ready(function () {
   });
 
   $("#send").click(function () {
+    ga('send', 'event', 'codes', 'action', 'Send Command');
     $("#progress").text("Sending Command....");
     $("#scaning").show();
     var command = $("#data").val();
@@ -60,7 +93,7 @@ $(document).ready(function () {
     $('#data').val('');
     $('#con').hide();
     $('#message').text('');
-    
+
   });
 
 
@@ -84,10 +117,11 @@ $(document).ready(function () {
 
 });
 
-function getDevices() {
+function getDevices(url) {
+  ga('send', 'event', 'devices', 'action', 'getDevices');
   $.ajax(
     {
-      url: '/discover',
+      url: url,
       dataType: "json",
       success: function (data) {
         localStorage.setItem('devices', data);
@@ -110,11 +144,11 @@ function showDevices(data) {
   i = 0;
   $.each(data, function (i, item) {
     var $tr = $('<tr>').append(
-      $('<td id="_name_' + i + '">').text(item.name),
+      $('<td id="_name_' + i + '" contenteditable="true">').text(item.name),
       $('<td id="_type_' + i + '">').text(item.type),
       $('<td id="_ip_' + i + '">').text(item.ip),
       $('<td id="_mac_' + i + '">').text(item.mac),
-      $('<td id="_' + i + '">').html('<button type="button" class="btn btn-primary  actions" data-toggle="modal" data-target="#modal-lg" title="Learn and Send IR/RF Codes">Actions</button>')
+      $('<td id="_' + i + '" class="_no_json">').html('<button type="button" class="btn btn-primary  actions" data-toggle="modal" data-target="#modal-lg" title="Learn and Send IR/RF Codes">Actions</button>')
 
     );
     i++;
@@ -144,8 +178,7 @@ function learnIr(_type, _host, _mac) {
         else {
           $("#message").text(data.message);
           $("#message").css('color', 'green');
-          //$('#data').val(hexToBase64(data.data));
-          $('#data').val(data.data);
+          $('#data').val(hexToBase64(data.data));
         }
         $("#scaning").hide();
         $("#data-wrapper").show();
@@ -200,11 +233,10 @@ function learnrf(_type, _host, _mac) {
         data = $.parseJSON(data);
         if (data.success == 0)
           $('#message').text(data.data);
-        else
-          {
-            $('#data').val(hexToBase64(data.data));
-            $('#message').text("RF Scan Completed Successfully");
-          }
+        else {
+          $('#data').val(hexToBase64(data.data));
+          $('#message').text("RF Scan Completed Successfully");
+        }
 
         clearInterval(RfStatus);
         $("#scaning").hide();
@@ -230,10 +262,10 @@ function getRfStatus() {
       success: function (data) {
         data = $.parseJSON(data);
         $('#message').text(data._rf_sweep_message);
-               
+
         if (data._rf_sweep_status == "True")
           $('#con').show();
-       
+
 
       },
       error: function (e) {
@@ -243,3 +275,35 @@ function getRfStatus() {
     });
 }
 
+function Table2Json() {
+  var devices = [];
+  var $headers = $("._th_json");
+  var $rows = $("#bdevices tr").each(function (index) {
+    $cells = $(this).find("td:not(._no_json)");
+    devices[index] = {};
+    $cells.each(function (cellIndex) {
+
+      devices[index][$($headers[cellIndex]).data('json')] = $(this).html();
+    });
+  });
+
+  // Let's put this in the object like you want and convert to JSON (Note: jQuery will also do this for you on the Ajax request)
+  var myObj = {};
+  myObj.devices = devices;
+  localStorage.setItem('devices', JSON.stringify(devices));
+  $.ajax({
+    type: "POST",
+    url: '/devices/save',
+    data: JSON.stringify(devices),
+    success: function (data) {
+    
+    },
+    error: function (data) {
+     
+    },
+    dataType: 'json'
+  });
+
+
+  
+}

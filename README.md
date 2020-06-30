@@ -1,6 +1,6 @@
 # BroadlinkManager
 
-BroadlinkManager is a [Flask](https://github.com/joemccann/dillinge) powerd, easy to use system that hepls you to work with Broadlink Devices.
+BroadlinkManager is a [Flask](https://flask.palletsprojects.com/en/1.1.x/) powerd, easy to use system that hepls you to work with Broadlink Devices.
 With Broadlink manager you can:
 - Scan your network for devices.
 - Lean and Send IR or RF Codes

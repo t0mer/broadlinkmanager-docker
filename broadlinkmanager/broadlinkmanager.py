@@ -388,7 +388,7 @@ def autodiscover():
                     format(hex(device.devtype)) + '",'
                 _devices = _devices + '"ip":"' + device.host[0] + '",'
                 _devices = _devices + '"mac":"' + \
-                    ''.join(format(x, '02x') for x in device.mac[::-1]) + '"},'
+                    ''.join(format(x, '02x') for x in device.mac) + '"},'
 
         _devices = _devices[:-1] + ']'
         return jsonify(_devices)
@@ -408,7 +408,7 @@ def discover():
                 format(hex(device.devtype)) + '",'
             _devices = _devices + '"ip":"' + device.host[0] + '",'
             _devices = _devices + '"mac":"' + \
-                ''.join(format(x, '02x') for x in device.mac[::-1]) + '"},'
+                ''.join(format(x, '02x') for x in device.mac) + '"},'
 
     _devices = _devices[:-1] + ']'
     return jsonify(_devices)

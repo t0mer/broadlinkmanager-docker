@@ -9,7 +9,7 @@ RUN apt update
 
 RUN apt install python3-pip libffi-dev libssl-dev --yes
 
-RUN  pip3 install flask flask_restful cryptography==2.6.1 broadlink --no-cache-dir
+RUN  pip3 install flask flask_restful cryptography==2.6.1  --no-cache-dir
 
 #Create working directory
 RUN mkdir /opt/broadlinkmanager

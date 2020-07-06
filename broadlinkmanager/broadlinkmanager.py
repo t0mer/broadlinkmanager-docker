@@ -354,7 +354,7 @@ def setup():
 @app.route('/devices/save', methods=['POST','GET'])
 def save_devices():
     try:
-        data = readfromstring(list(request.form.keys())[0])
+        data = list(request.form.keys())[0]
         with open(GetDevicesFilePath(), 'w') as f:
             f.write(str(data).replace("'","\""))
         return jsonify('{"success":1}')

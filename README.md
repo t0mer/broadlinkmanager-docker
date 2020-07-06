@@ -1,6 +1,6 @@
 # BroadlinkManager
 
-BroadlinkManager is a [Flask](https://github.com/joemccann/dillinge) powerd, easy to use system that hepls you to work with Broadlink Devices.
+BroadlinkManager is a [Flask](https://flask.palletsprojects.com/en/1.1.x/) powerd, easy to use system that hepls you to work with Broadlink Devices.
 With Broadlink manager you can:
 - Scan your network for devices.
 - Lean and Send IR or RF Codes
@@ -102,6 +102,8 @@ services:
     container_name: broadlinkmanager
     restart: always
     restart: unless-stopped
+    volumes:
+      - ./broadlinkmanager:/opt/broadlinkmanager/data
 
 ```
 Now open your browser and enter your docker container ip with port 7020:

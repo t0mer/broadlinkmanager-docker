@@ -3,7 +3,6 @@ var RfStatus;
 $(document).ready(function () {
 
   $("#rescan").click(function () {
-    ga('send', 'event', 'devices', 'action', 'rescan');
     $("#scan").hide();
     $("#bdevices").html('');
     $("#loading").show();
@@ -14,7 +13,6 @@ $(document).ready(function () {
     $("#scan").hide();
     $("#bdevices").html('');
     $("#loading").show();
-    ga('send', 'event', 'devices', 'action', 'Load From File');
     $.ajax(
       {
         url: '/devices/load',
@@ -35,7 +33,6 @@ $(document).ready(function () {
 
 
   $('#save').click(function () {
-    ga('send', 'event', 'devices', 'action', 'Save To File');
     Table2Json();
   });
 
@@ -51,7 +48,6 @@ $(document).ready(function () {
   });
 
   $("#learnir").click(function () {
-    ga('send', 'event', 'codes', 'action', 'Learn IR');
     $("#progress").text("Waiting For Signal....");
     $("#scaning").show();
     $("#data-wrapper").hide();
@@ -60,8 +56,7 @@ $(document).ready(function () {
   });
 
   $("#learnrf").click(function () {
-    ga('send', 'event', 'codes', 'action', 'Learn RF');
-    $("#scaning").show();
+     $("#scaning").show();
     $("#data-wrapper").hide();
     $("#data").val('');
     RfStatus = setInterval(getRfStatus, 1000);
@@ -70,7 +65,6 @@ $(document).ready(function () {
   });
 
   $("#send").click(function () {
-    ga('send', 'event', 'codes', 'action', 'Send Command');
     $("#progress").text("Sending Command....");
     $("#scaning").show();
     var command = $("#data").val();
@@ -118,7 +112,6 @@ $(document).ready(function () {
 });
 
 function getDevices(url) {
-  ga('send', 'event', 'devices', 'action', 'getDevices');
   $.ajax(
     {
       url: url,

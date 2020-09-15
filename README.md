@@ -1,3 +1,12 @@
+*Please :star: this repo if you find it useful*
+
+<p align="left"><br>
+<a href="https://www.paypal.com/paypalme/techblogil?locale.x=he_IL" target="_blank"><img src="http://khrolenok.ru/support_paypal.png" alt="PayPal" width="250" height="48"></a>
+</p>
+
+
+
+
 # BroadlinkManager
 
 BroadlinkManager is a [Flask](https://flask.palletsprojects.com/en/1.1.x/) powerd, easy to use system that hepls you to work with Broadlink Devices.
@@ -120,6 +129,3 @@ http://docker-ip:7020
 [![Base64 and Hex Conversation](https://github.com/t0mer/broadlinkmanager-docker/blob/master/screenshots/Hex-Base64-Hex%20converting.PNG?raw=true "Base64 and Hex Conversation")](https://github.com/t0mer/broadlinkmanager-docker/blob/master/screenshots/Hex-Base64-Hex%20converting.PNG?raw=true "Base64 and Hex Conversation")
 # Donation
 <br>
-If you find this project helpful, you can give me a cup of coffee :) 
-
-[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=8CGLEHN2NDXDE)

@@ -13,10 +13,11 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 from .exceptions import check_error, exception
+from .helpers import get_local_ip
 
 
-def gendevice(devtype, host, mac, name=None, cloud=None):
-    devices = {
+def get_devices():
+    return {
         0x0000: (sp1, "SP1", "Broadlink"),
 
         0x2711: (sp2, "SP2", "Broadlink"),
@@ -31,6 +32,7 @@ def gendevice(devtype, host, mac, name=None, cloud=None):
         0x753e: (sp2, "SP mini 3", "Broadlink"),
         0X7544: (sp2, "SP2-CL", "Broadlink"),
         0x7546: (sp2, "SP2-UK/BR/IN", "Broadlink (OEM)"),
+        0x7547: (sp2, "SC1", "Broadlink"),
         0x7918: (sp2, "SP2", "Broadlink (OEM)"),
         0x7919: (sp2, "SP2-compatible", "Honeywell"),
         0x791a: (sp2, "SP2-compatible", "Honeywell"),
@@ -66,6 +68,7 @@ def gendevice(devtype, host, mac, name=None, cloud=None):
         0x61a2: (rm4, "RM4 pro", "Broadlink"),
         0x62bc: (rm4, "RM4 mini", "Broadlink"),
         0x62be: (rm4, "RM4C mini", "Broadlink"),
+        0x648d: (rm4, "RM4 mini", "Broadlink"),
 
         0x2714: (a1, "e-Sensor", "Broadlink"),
 
@@ -88,24 +91,33 @@ def gendevice(devtype, host, mac, name=None, cloud=None):
         0x51e3: (bg1, "BG800/BG900", "BG Electrical"),
     }
 
-    # Look for the class associated to devtype in devices
+
+def gendevice(dev_type, host, mac, name=None, is_locked=None):
+    """Generate a device."""
     try:
-        dev_class, model, manufacturer = devices[devtype]
+        dev_class, model, manufacturer = get_devices()[dev_type]
+
     except KeyError:
-        return device(host, mac, devtype, name=name, cloud=cloud)
+        return device(host, mac, dev_type, name=name, is_locked=is_locked)
 
-    dev = dev_class(host, mac, devtype, name=name, cloud=cloud)
-    dev.model = model
-    dev.manufacturer = manufacturer
-    return dev
+    return dev_class(
+        host,
+        mac,
+        dev_type,
+        name=name,
+        model=model,
+        manufacturer=manufacturer,
+        is_locked=is_locked,
+    )
 
 
-def discover(timeout=None, local_ip_address=None, discover_ip_address='255.255.255.255'):
-    if local_ip_address is None:
-        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-            s.connect(('8.8.8.8', 53))  # connecting to a UDP address doesn't send packets
-            local_ip_address = s.getsockname()[0]
-
+def discover(
+        timeout=None,
+        local_ip_address=None,
+        discover_ip_address='255.255.255.255',
+        discover_ip_port=80
+):
+    local_ip_address = local_ip_address or get_local_ip()
     address = local_ip_address.split('.')
     cs = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     cs.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -147,15 +159,12 @@ def discover(timeout=None, local_ip_address=None, discover_ip_address='255.255.2
     packet[0x1c] = port & 0xff
     packet[0x1d] = port >> 8
     packet[0x26] = 6
-    
-    checksum = 0xbeaf
-    for b in packet:
-        checksum = (checksum + b) & 0xffff
 
+    checksum = sum(packet, 0xbeaf) & 0xffff
     packet[0x20] = checksum & 0xff
     packet[0x21] = checksum >> 8
 
-    cs.sendto(packet, (discover_ip_address, 80))
+    cs.sendto(packet, (discover_ip_address, discover_ip_port))
     if timeout is None:
         response = cs.recvfrom(1024)
         responsepacket = bytearray(response[0])
@@ -163,8 +172,8 @@ def discover(timeout=None, local_ip_address=None, discover_ip_address='255.255.2
         devtype = responsepacket[0x34] | responsepacket[0x35] << 8
         mac = responsepacket[0x3f:0x39:-1]
         name = responsepacket[0x40:].split(b'\x00')[0].decode('utf-8')
-        cloud = bool(responsepacket[-1])
-        device = gendevice(devtype, host, mac, name=name, cloud=cloud)
+        is_locked = bool(responsepacket[-1])
+        device = gendevice(devtype, host, mac, name=name, is_locked=is_locked)
         cs.close()
         return device
 
@@ -180,23 +189,33 @@ def discover(timeout=None, local_ip_address=None, discover_ip_address='255.255.2
         devtype = responsepacket[0x34] | responsepacket[0x35] << 8
         mac = responsepacket[0x3f:0x39:-1]
         name = responsepacket[0x40:].split(b'\x00')[0].decode('utf-8')
-        cloud = bool(responsepacket[-1])
-        device = gendevice(devtype, host, mac, name=name, cloud=cloud)
+        is_locked = bool(responsepacket[-1])
+        device = gendevice(devtype, host, mac, name=name, is_locked=is_locked)
         devices.append(device)
     cs.close()
     return devices
 
 
 class device:
-    def __init__(self, host, mac, devtype, timeout=10, name=None, cloud=None):
+    def __init__(
+        self,
+        host,
+        mac,
+        devtype,
+        timeout=10,
+        name=None,
+        model=None,
+        manufacturer=None,
+        is_locked=None
+    ):
         self.host = host
         self.mac = mac.encode() if isinstance(mac, str) else mac
         self.devtype = devtype if devtype is not None else 0x272a
-        self.name = name
-        self.cloud = cloud
-        self.model = None
-        self.manufacturer = None
         self.timeout = timeout
+        self.name = name
+        self.model = model
+        self.manufacturer = manufacturer
+        self.is_locked = is_locked
         self.count = random.randrange(0xffff)
         self.iv = bytearray(
             [0x56, 0x2e, 0x17, 0x99, 0x6d, 0x09, 0x3d, 0x28, 0xdd, 0xb3, 0xba, 0x69, 0x5a, 0x2e, 0x6f, 0x58])
@@ -266,13 +285,13 @@ class device:
         response = self.send_packet(0x6a, packet)
         check_error(response[0x22:0x24])
         payload = self.decrypt(response[0x38:])
-        return payload[0x4] | payload[0x5] << 8        
+        return payload[0x4] | payload[0x5] << 8
 
     def set_name(self, name):
         packet = bytearray(4)
         packet += name.encode('utf-8')
         packet += bytearray(0x50 - len(packet))
-        packet[0x43] = self.cloud
+        packet[0x43] = bool(self.is_locked)
         response = self.send_packet(0x6a, packet)
         check_error(response[0x22:0x24])
         self.name = name
@@ -281,10 +300,10 @@ class device:
         packet = bytearray(4)
         packet += self.name.encode('utf-8')
         packet += bytearray(0x50 - len(packet))
-        packet[0x43] = state
+        packet[0x43] = bool(state)
         response = self.send_packet(0x6a, packet)
         check_error(response[0x22:0x24])
-        self.cloud = bool(state)
+        self.is_locked = bool(state)
 
     def get_type(self):
         return self.type
@@ -320,10 +339,7 @@ class device:
         if payload:
             payload += bytearray((16 - len(payload)) % 16)
 
-        checksum = 0xbeaf
-        for b in payload:
-            checksum = (checksum + b) & 0xffff
-
+        checksum = sum(payload, 0xbeaf) & 0xffff
         packet[0x34] = checksum & 0xff
         packet[0x35] = checksum >> 8
 
@@ -331,10 +347,7 @@ class device:
         for i in range(len(payload)):
             packet.append(payload[i])
 
-        checksum = 0xbeaf
-        for b in packet:
-            checksum = (checksum + b) & 0xffff
-
+        checksum = sum(packet, 0xbeaf) & 0xffff
         packet[0x20] = checksum & 0xff
         packet[0x21] = checksum >> 8
 
@@ -347,14 +360,23 @@ class device:
                 try:
                     cs.sendto(packet, self.host)
                     cs.settimeout(1)
-                    response = cs.recvfrom(2048)
+                    resp, _ = cs.recvfrom(2048)
+                    resp = bytearray(resp)
                     break
                 except socket.timeout:
                     if (time.time() - start_time) > self.timeout:
                         cs.close()
-                        raise exception(0xfffd)
+                        raise exception(-4000)  # Network timeout.
             cs.close()
-        return bytearray(response[0])
+
+        if len(resp) < 0x30:
+            raise exception(-4007)  # Length error.
+
+        checksum = resp[0x20] | (resp[0x21] << 8)
+        if sum(resp, 0xbeaf) - sum(resp[0x20:0x22]) & 0xffff != checksum:
+            raise exception(-4008)  # Checksum error.
+
+        return resp
 
 
 class mp1(device):
@@ -427,7 +449,6 @@ class bg1(device):
 
     def get_state(self):
         """Get state of device.
-        
         Returns:
             dict: Dictionary of current state
             eg. `{"pwr":1,"pwr1":1,"pwr2":0,"maxworktime":60,"maxworktime1":60,"maxworktime2":0,"idcbrightness":50}`"""
@@ -473,9 +494,7 @@ class bg1(device):
         for i in range(len(js)):
             packet.append(js[i])
 
-        checksum = 0xc0ad
-        for b in packet[0x08:]:
-            checksum = (checksum + b) & 0xffff
+        checksum = sum(packet[0x08:], 0xc0ad) & 0xffff
 
         packet[0x06] = checksum & 0xff
         packet[0x07] = checksum >> 8
@@ -680,7 +699,7 @@ class rm4(rm):
         device.__init__(self, *args, **kwargs)
         self.type = "RM4"
         self._request_header = b'\x04\x00'
-        self._code_sending_header = b'\xd0\x00'
+        self._code_sending_header = b'\xda\x00'
 
     def check_temperature(self):
         data = self._check_sensors(0x24)
@@ -1030,8 +1049,9 @@ class lb1(device):
         device.__init__(self, *args, **kwargs)
         self.type = "SmartBulb"
 
-    def send_command(self,command, type = 'set'):
+    def send_command(self, command, type='set'):
         packet = bytearray(16+(int(len(command)/16) + 1)*16)
+        packet[0x00] = 0x0c + len(command) & 0xff
         packet[0x02] = 0xa5
         packet[0x03] = 0xa5
         packet[0x04] = 0x5a
@@ -1041,11 +1061,7 @@ class lb1(device):
         packet[0x0a] = len(command)
         packet[0x0e:] = map(ord, command)
 
-        checksum = 0xbeaf
-        for b in packet:
-            checksum = (checksum + b) & 0xffff
-
-        packet[0x00] = (0x0c + len(command)) & 0xff
+        checksum = sum(packet, 0xbeaf) & 0xffff
         packet[0x06] = checksum & 0xff  # Checksum 1 position
         packet[0x07] = checksum >> 8  # Checksum 2 position
 
@@ -1097,10 +1113,7 @@ def setup(ssid, password, security_mode):
     payload[0x85] = pass_length  # Character length of password
     payload[0x86] = security_mode  # Type of encryption (00 - none, 01 = WEP, 02 = WPA1, 03 = WPA2, 04 = WPA1/2)
 
-    checksum = 0xbeaf
-    for b in payload:
-        checksum = (checksum + b) & 0xffff
-
+    checksum = sum(payload, 0xbeaf) & 0xffff
     payload[0x20] = checksum & 0xff  # Checksum 1 position
     payload[0x21] = checksum >> 8  # Checksum 2 position
 

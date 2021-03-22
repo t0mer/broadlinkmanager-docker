@@ -512,5 +512,5 @@ def send_webfonts(path):
 
 # Start Application
 if __name__ == '__main__':
-    logger.info(f"Broadllink Manager is up and running")
+    logger.info("Broadllink Manager is up and running")
     app.run(debug=True, host='0.0.0.0', port=7020)

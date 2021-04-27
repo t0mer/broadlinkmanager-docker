@@ -97,6 +97,7 @@ def getDeviceName(deviceType):
         0x62be: "RM4c Mini",
         0x51E3: "BG Electrical Smart Power Socket",
         0x60c8: "RGB Smart Bulb",
+        0x6539: "RM4c Mini",
     }
     return name.get(deviceType, "Not Supported")
 
@@ -154,7 +155,10 @@ def parse_durations(str):
 
 
 def initDevice(dtype, host, mac):
-    _dtype = int(dtype, 0)
+    dtypeTmp = dtype
+    if dtypeTmp == '0x6539':
+	    dtypeTmp = '0x610F'
+    _dtype = int(dtypeTmp, 0)
     _host = host
     _mac = bytearray.fromhex(mac)
     return broadlink.gendevice(_dtype, (_host, 80), _mac)

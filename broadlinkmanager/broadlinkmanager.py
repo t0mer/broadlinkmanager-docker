@@ -99,6 +99,7 @@ def getDeviceName(deviceType):
         0x60c8: "RGB Smart Bulb",
         0x6539: "RM4c Mini",
 	0x653c: "RM4 Pro",
+	0x649B: "RM4 Pro",
     }
     return name.get(deviceType, "Not Supported")
 

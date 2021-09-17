@@ -98,11 +98,10 @@ def getDeviceName(deviceType):
         0x51E3: "BG Electrical Smart Power Socket",
         0x60c8: "RGB Smart Bulb",
         0x6539: "RM4c Mini",
-
         0x653a: "RM4 Mini",
-	    0x653c: "RM4 Pro",
-	    0x649B: "RM4 Pro",
-
+	0x653c: "RM4 Pro",
+	0x649B: "RM4 Pro",
+        0x6184: "RM4C mini",
     }
     return name.get(deviceType, "Not Supported")
 

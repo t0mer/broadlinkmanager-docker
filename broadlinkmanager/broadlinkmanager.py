@@ -89,7 +89,7 @@ def getDeviceName(deviceType):
         0x51da: "RM4 Mini",
         0x5f36: "RM Mini 3",
         0x6026: "RM4 Pro",
-        0x6070: "RM4c Mini",
+	0x6070: "RM4c Mini",
         0x61a2: "RM4 Pro",
         0x610e: "RM4 Mini",
         0x610f: "RM4c",
@@ -100,7 +100,7 @@ def getDeviceName(deviceType):
         0x6539: "RM4c Mini",
         0x653a: "RM4 Mini",
 	0x653c: "RM4 Pro",
-	0x649B: "RM4 Pro",
+	0x649b: "RM4 Pro",
         0x6184: "RM4C mini",
     }
     return name.get(deviceType, "Not Supported")

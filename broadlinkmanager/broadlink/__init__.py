@@ -90,7 +90,7 @@ def get_devices():
 
         0x51e3: (bg1, "BG800/BG900", "BG Electrical"),
         0x653c: (rm4, "RM4 pro", "Broadlink"),
-        0x649B: (rm4, "RM4 pro", "Broadlink"),
+        0x649b: (rm4, "RM4 pro", "Broadlink"),
         0x653a: (rm4, "RM4 mini", "Broadlink"),
         0x6184: (rm4, "RM4C mini", "Broadlink"),
     }

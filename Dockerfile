@@ -3,7 +3,7 @@ FROM techblog/flask:latest
 LABEL maintainer="tomer.klein@gmail.com"
 
 ENV PYTHONIOENCODING=utf-8
-
+ENV ENABLE_GOOGLE_ANALYTICS=True
 
 #Create working directory
 RUN mkdir /opt/broadlinkmanager

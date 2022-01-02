@@ -7,8 +7,10 @@ from json import dumps
 from broadlink.exceptions import ReadError, StorageError
 from subprocess import call
 from loguru import logger
+from flask import Markup
 
 
+ENABLE_GOOGLE_ANALYTICS = os.getenv("ENABLE_GOOGLE_ANALYTICS")
 # endregion
 
 # region Parsing Default arguments for descovery
@@ -44,6 +46,24 @@ TIMEOUT = 30
 
 # region Broadlink Helper Methods
 
+
+def get_analytics_code():
+    try:
+        if ENABLE_GOOGLE_ANALYTICS=="True":
+            analytics_file_path = os.path.join(app.root_path, 'templates', 'analytics_code.html')
+            f = open(analytics_file_path, "r")
+            content = Markup(f.read())
+            f.close()
+            logger.info('Content: ' + content)
+            return content
+        else:
+            return ''
+    except Exception as e:
+        logger.error(str(e))
+        return ''
+
+
+analytics_code = get_analytics_code()
 
 def getDeviceName(deviceType):
     name = {
@@ -190,37 +210,37 @@ def writeXml(_file):
 
 @app.route('/')
 def devices():
-    return render_template('index.html')
+    return render_template('index.html', analytics=analytics_code)
 
 
 @app.route('/generator')
 def generator():
-    return render_template('generator.html')
+    return render_template('generator.html', analytics=analytics_code)
 
 
 @app.route('/livolo')
 def livolo():
-    return render_template('livolo.html')
+    return render_template('livolo.html', analytics=analytics_code)
 
 
 @app.route('/energenie')
 def energenie():
-    return render_template('energenie.html')
+    return render_template('energenie.html', analytics=analytics_code)
 
 
 @app.route('/repeats')
 def repeats():
-    return render_template('repeats.html')
+    return render_template('repeats.html', analytics=analytics_code)
 
 
 @app.route('/convert')
 def convert():
-    return render_template('convert.html')
+    return render_template('convert.html', analytics=analytics_code)
 
 
 @app.route('/about')
 def about():
-    return render_template('about.html')
+    return render_template('about.html', analytics=analytics_code)
 
 # endregion UI Rendering Methods
 

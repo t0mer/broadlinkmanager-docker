@@ -8,7 +8,7 @@
 
 
 # BroadlinkManager
-
+g
 BroadlinkManager is a [Flask](https://flask.palletsprojects.com/en/1.1.x/) powered, easy to use system that hepls you to work with Broadlink Devices.
 With Broadlink manager you can:
 - Scan your network for devices.
@@ -115,6 +115,8 @@ services:
     restart: unless-stopped
     volumes:
       - ./broadlinkmanager:/opt/broadlinkmanager/data
+    environment:
+      - ENABLE_GOOGLE_ANALYTICS=True #Optional, default is True, Set to False if you want to disable Google Analytics
 
 ```
 Now open your browser and enter your docker container ip with port 7020:

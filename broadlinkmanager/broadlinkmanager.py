@@ -282,10 +282,10 @@ def learnir():
             break
     else:
         logger.error("No IR Data")
-        return jsonify('{"data":"","success":0,"message":"No Data Recived"}')
+        return jsonify('{"data":"","success":0,"message":"No Data Received"}')
     learned = ''.join(format(x, '02x') for x in bytearray(data))
     logger.info("IR Learn success")
-    return jsonify('{"data":"' + learned + '","success":1,"message":"IR Data Recived"}')
+    return jsonify('{"data":"' + learned + '","success":1,"message":"IR Data Received"}')
 
 # Send IR/RF
 

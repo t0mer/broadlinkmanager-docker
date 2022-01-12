@@ -123,6 +123,7 @@ def getDeviceName(deviceType):
 	0x649b: "RM4 Pro",
         0x6184: "RM4C mini",
         0x648d: "RM4 Mini",
+	0x5209: "RM4 TV Mate",
     }
     return name.get(deviceType, "Not Supported")
 

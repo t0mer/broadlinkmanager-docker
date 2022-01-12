@@ -93,6 +93,7 @@ def get_devices():
         0x649b: (rm4, "RM4 pro", "Broadlink"),
         0x653a: (rm4, "RM4 mini", "Broadlink"),
         0x6184: (rm4, "RM4C mini", "Broadlink"),
+        0x5209: (rm4, "RM4 TV Mate", "Broadlink")
     }
 
 

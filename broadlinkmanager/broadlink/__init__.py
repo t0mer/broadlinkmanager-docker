@@ -58,7 +58,17 @@ def get_devices():
         0x27c2: (rm, "RM mini 3", "Broadlink"),
         0x27d1: (rm, "RM mini 3", "Broadlink"),
         0x27de: (rm, "RM mini 3", "Broadlink"),
-
+        0x27c3: (rm, "RM pro+", "Broadlink"),
+        0x27c7: (rm, "RM mini 3", "Broadlink"),
+        0x27cc: (rm, "RM mini 3", "Broadlink"),
+        0x27cd: (rm, "RM mini 3", "Broadlink"),
+        0x27D0: (rm, "RM mini 3", "Broadlink"),
+        0x27d3: (rm, "RM mini 3", "Broadlink"),
+        0x27dc: (rm, "RM mini 3", "Broadlink"),
+        0x6507: (rm, "RM mini 3", "Broadlink"),
+        0x6508: (rm, "RM mini 3", "Broadlink"),
+        
+        0x6539: (rm4, "RM4C mini", "Broadlink"),
         0x51da: (rm4, "RM4 mini", "Broadlink"),
         0x5f36: (rm4, "RM mini 3", "Broadlink"),
         0x6026: (rm4, "RM4 pro", "Broadlink"),
@@ -69,7 +79,6 @@ def get_devices():
         0x62bc: (rm4, "RM4 mini", "Broadlink"),
         0x62be: (rm4, "RM4C mini", "Broadlink"),
         0x648d: (rm4, "RM4 mini", "Broadlink"),
-
         0x2714: (a1, "e-Sensor", "Broadlink"),
 
         0x4eb5: (mp1, "MP1-1K4S", "Broadlink"),

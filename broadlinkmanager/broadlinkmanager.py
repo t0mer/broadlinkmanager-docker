@@ -1,6 +1,6 @@
 # region Importing
 
-import os, json, subprocess, time, broadlink, argparse, datetime, re, shutil, aiofiles, uvicorn
+import os, json, subprocess, time, broadlink, argparse, datetime, re, shutil, aiofiles, uvicorn, socket
 from os import environ, path
 from json import dumps
 from broadlink.exceptions import ReadError, StorageError
@@ -20,6 +20,17 @@ from starlette_exporter import PrometheusMiddleware, handle_metrics
 
 ENABLE_GOOGLE_ANALYTICS = os.getenv("ENABLE_GOOGLE_ANALYTICS")
 # endregion
+
+
+def GetLocalIP():
+    p = subprocess.Popen("hostname -I | awk '{print $1}'", stdout=subprocess.PIPE, shell=True)
+    (output, err) = p.communicate()
+    p_status = p.wait()
+    ip = re.findall(r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b", str(output))[0]
+    logger.debug(ip)
+    return str(ip)
+
+local_ip_address = GetLocalIP()
 
 def GetVersionFromFle():
     with open("VERSION","r") as version:
@@ -52,7 +63,7 @@ tags_metadata = [
 parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
 parser.add_argument("--timeout", type=int, default=5,
                     help="timeout to wait for receiving discovery responses")
-parser.add_argument("--ip", default=None,
+parser.add_argument("--ip", default=local_ip_address,
                     help="ip address to use in the discovery")
 parser.add_argument("--dst-ip", default="255.255.255.255",
                     help="destination ip address to use in the discovery")
@@ -272,37 +283,37 @@ def writeXml(_file):
 
 @app.get('/')
 def devices(request: Request):
-    return templates.TemplateResponse('index.html', context={'request': request,'analytics':analytics_code})
+    return templates.TemplateResponse('index.html', context={'request': request,'analytics':analytics_code, 'version': GetVersionFromFle()})
 
 
 @app.get('/generator')
 def generator(request: Request):
-    return templates.TemplateResponse('generator.html', context={'request': request,'analytics':analytics_code})
+    return templates.TemplateResponse('generator.html', context={'request': request,'analytics':analytics_code, 'version': GetVersionFromFle()})
 
 
 @app.get('/livolo')
 def livolo(request: Request):
-    return templates.TemplateResponse('livolo.html', context={'request': request,'analytics':analytics_code})
+    return templates.TemplateResponse('livolo.html', context={'request': request,'analytics':analytics_code, 'version': GetVersionFromFle()})
 
 
 @app.get('/energenie')
 def energenie(request: Request):
-    return templates.TemplateResponse('energenie.html', context={'request': request,'analytics':analytics_code})
+    return templates.TemplateResponse('energenie.html', context={'request': request,'analytics':analytics_code, 'version': GetVersionFromFle()})
 
 
 @app.get('/repeats')
 def repeats(request: Request):
-    return templates.TemplateResponse('repeats.html', context={'request': request,'analytics':analytics_code})
+    return templates.TemplateResponse('repeats.html', context={'request': request,'analytics':analytics_code, 'version': GetVersionFromFle()})
 
 
 @app.get('/convert')
 def convert(request: Request):
-    return templates.TemplateResponse('convert.html', context={'request': request,'analytics':analytics_code})
+    return templates.TemplateResponse('convert.html', context={'request': request,'analytics':analytics_code, 'version': GetVersionFromFle()})
 
 
 @app.get('/about')
 def about(request: Request):
-    return templates.TemplateResponse('about.html', context={'request': request,'analytics':analytics_code})
+    return templates.TemplateResponse('about.html', context={'request': request,'analytics':analytics_code, 'version': GetVersionFromFle()})
 
 # endregion UI Rendering Methods
 
@@ -421,10 +432,10 @@ def sweep(request: Request, mac: str = "", host: str = "", type: str = "", comma
         return JSONResponse('{"data":"No Data Found"}')
 
     _rf_sweep_message = "Found RF Frequency - 2 of 2!"
-    logger.error("Device:" + host + " Found RF Frequency - 2 of 2!")
+    logger.info("Device:" + host + " Found RF Frequency - 2 of 2!")
     learned = ''.join(format(x, '02x') for x in bytearray(data))
     _rf_sweep_message = "RF Scan Completed Successfully"
-    logger.error("Device:" + host + " RF Scan Completed Successfully")
+    logger.info("Device:" + host + " RF Scan Completed Successfully")
     time.sleep(1)
     return JSONResponse('{"data":"' + learned + '"}')
 
@@ -465,11 +476,11 @@ def setup(request: Request):
 # Save Devices List to json file
 
 
-@app.get('/devices/save')
-def save_devices(request: Request):
+@app.post('/devices/save')
+async def save_devices(request: Request):
+    data = await request.json()
     logger.info("Writing devices to file")
     try:
-        data = list(request.form.keys())[0]
         with open(GetDevicesFilePath(), 'w') as f:
             f.write(str(data).replace("'", "\""))
         logger.info("Finished writing devices to file")
@@ -505,7 +516,7 @@ def autodiscover(request: Request):
     else:
         logger.info("Searcing for devices...")
         _devices = '['
-        devices = broadlink.discover(timeout=5, local_ip_address='192.168.0.238', discover_ip_address="255.255.255.255")
+        devices = broadlink.discover(timeout=5, local_ip_address=local_ip_address, discover_ip_address="255.255.255.255")
         for device in devices:
             if device.auth():
                 logger.info("New device detected: " + getDeviceName(device.devtype) + " (ip: " + device.host[0] +  ", mac: " + ''.join(format(x, '02x') for x in device.mac) +  ")")

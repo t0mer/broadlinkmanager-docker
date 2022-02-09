@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Broadlink Manager | Control Your broadlink Devices</title>
+    <title>Broadlink Manager ({{version}}) | Control Your broadlink Devices</title>
     <link rel="icon" type="image/png" href="./img/broadlink.png">
     <!-- Tell the browser to be responsive to screen width -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -89,6 +89,15 @@
                 -webkit-transform: scaleY(1.0);
             }
         }
+
+
+    .error {
+        color: red;
+    }
+
+    .ok {
+        color: green;
+    }
     </style>
 
 
@@ -208,6 +217,7 @@
                                                 <th class="_th_json" data-json="type">Device Type</th>
                                                 <th class="_th_json" data-json="ip">IP Address</th>
                                                 <th class="_th_json" data-json="mac">MAC Address</th>
+                                                <th>Status</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
@@ -273,7 +283,7 @@
         <!-- /.content-wrapper -->
         <footer class="main-footer">
             <div class="float-right d-none d-sm-block">
-                <b>Version</b> 3.0.5
+                <b>Version</b> {{ version }}
             </div>
             <strong>Copyright &copy; 2014-2019 <a href="http://adminlte.io">AdminLTE.io</a>.</strong> All rights
             reserved.

@@ -34,9 +34,7 @@ local_ip_address = GetLocalIP()
 
 # Get version from version file for dynamic change
 def GetVersionFromFle():
-    with open("VERSION","r") as version:
-        v = version.read()
-        return v
+    return "3.0.0"
 
 # Tags metadata for swagger docs
 tags_metadata = [

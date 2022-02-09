@@ -6,10 +6,10 @@ $(document).ready(function () {
     $("#scan").hide();
     $("#bdevices").html('');
     $("#loading").show();
-    getDevices('/discover');
+    getDevices('/autodiscover');
   });
 
-  $('#load').click(function(){
+  $('#load').click(function () {
     $("#scan").hide();
     $("#bdevices").html('');
     $("#loading").show();
@@ -18,14 +18,14 @@ $(document).ready(function () {
         url: '/devices/load',
         dataType: "json",
         success: function (data) {
-         
+
           showDevices(data);
           localStorage.setItem('devices', data);
 
-   
+
         },
         error: function (e) {
-  
+
         }
       });
 
@@ -37,7 +37,7 @@ $(document).ready(function () {
   });
 
   if (localStorage.getItem('devices') == null)
-    getDevices('/autodiscover');
+    getDevices('/autodiscover?freshscan=0');
   else
     showDevices(localStorage.getItem('devices'));
 
@@ -56,7 +56,7 @@ $(document).ready(function () {
   });
 
   $("#learnrf").click(function () {
-     $("#scaning").show();
+    $("#scaning").show();
     $("#data-wrapper").hide();
     $("#data").val('');
     RfStatus = setInterval(getRfStatus, 1000);
@@ -109,6 +109,8 @@ $(document).ready(function () {
 
   });
 
+AutoPing();
+
 });
 
 function getDevices(url) {
@@ -125,6 +127,7 @@ function getDevices(url) {
 
       }
     });
+    GetDeviceStatus();
 }
 
 function showDevices(data) {
@@ -141,6 +144,7 @@ function showDevices(data) {
       $('<td id="_type_' + i + '">').text(item.type),
       $('<td id="_ip_' + i + '">').text(item.ip),
       $('<td id="_mac_' + i + '">').text(item.mac),
+      $('<td id="_status_' + i + '" class="_no_json">'),
       $('<td id="_' + i + '" class="_no_json">').html('<button type="button" class="btn btn-primary  actions" data-toggle="modal" data-target="#modal-lg" title="Learn and Send IR/RF Codes">Actions</button>')
 
     );
@@ -149,6 +153,7 @@ function showDevices(data) {
   });
   $("#loading").hide();
   $("#scan").show();
+  GetDeviceStatus();
 }
 
 //IR Learn / Send
@@ -268,6 +273,50 @@ function getRfStatus() {
     });
 }
 
+function GetDeviceStatus() {
+  $('td[id^="_ip_"]').each(function () {
+    ip = $(this).text();
+    status_id = '#_status_' + $(this).attr('id').match(/\d+/)[0];
+    ping(ip,status_id);
+  });
+}
+
+function ping(host, status_id) {
+  
+  $.ajax(
+    {
+      url: '/device/ping?host=' + host,
+      success: function (data) {
+        data = $.parseJSON(data);
+        if (data.success == "1" && data.status == "online") {
+          $(status_id).html("<span class='ok'>Online</span>");
+
+        }
+        else if (data.success == "1" && data.status == "offline") {
+          $(status_id).html("<span class='error'>Offline</span>");
+
+        }
+        else {
+          $(status_id).html("<span class='error'>Unknown</span>");
+        }
+
+      },
+      error: function (e) {
+        $(status_id).html("<span class='error'>Unknown</span>");
+      }
+    });
+
+}
+
+function AutoPing() {
+  timer = setInterval(function() {
+    GetDeviceStatus();
+  }, 60000);
+}
+
+
+
+
 function Table2Json() {
   var devices = [];
   var $headers = $("._th_json");
@@ -289,14 +338,15 @@ function Table2Json() {
     url: '/devices/save',
     data: JSON.stringify(devices),
     success: function (data) {
-    
+
     },
     error: function (data) {
-     
+
     },
     dataType: 'json'
   });
 
-
   
+
+
 }

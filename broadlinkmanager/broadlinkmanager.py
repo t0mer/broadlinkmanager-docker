@@ -17,11 +17,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
 from starlette_exporter import PrometheusMiddleware, handle_metrics
 
-
+# Use to disable Google analytics code
 ENABLE_GOOGLE_ANALYTICS = os.getenv("ENABLE_GOOGLE_ANALYTICS")
 # endregion
 
-
+#Get Lan IP
 def GetLocalIP():
     p = subprocess.Popen("hostname -I | awk '{print $1}'", stdout=subprocess.PIPE, shell=True)
     (output, err) = p.communicate()
@@ -32,25 +32,26 @@ def GetLocalIP():
 
 local_ip_address = GetLocalIP()
 
+# Get version from version file for dynamic change
 def GetVersionFromFle():
     with open("VERSION","r") as version:
         v = version.read()
         return v
 
-
+# Tags metadata for swagger docs
 tags_metadata = [
     {
-        "name": "Channels Configuration",
-        "description": "Load, Save and update channels configuration",
+        "name": "Html Pages",
+        "description": "Returns HTML pages",
     },
     {
-        "name": "Send Notifications",
-        "description": "Send notifications to selected group",
+        "name": "Commands",
+        "description": "Learn / Send RF or IR commands",
  
         },
      {
-        "name": "Groups",
-        "description": "Get list of available groups",
+        "name": "Devices",
+        "description": "Scan for devices on the network or load/save from/to file",
  
         },
     
@@ -203,7 +204,6 @@ def getDeviceName(deviceType):
 def auto_int(x):
     return int(x, 0)
 
-
 def to_microseconds(bytes):
     result = []
     #  print bytes[0] # 0x26 = 38for IR
@@ -220,7 +220,6 @@ def to_microseconds(bytes):
             break
     return result
 
-
 def durations_to_broadlink(durations):
     result = bytearray()
     result.append(IR_TOKEN)
@@ -235,7 +234,6 @@ def durations_to_broadlink(durations):
         result.append(num % 256)
     return result
 
-
 def format_durations(data):
     result = ''
     for i in range(0, len(data)):
@@ -244,13 +242,11 @@ def format_durations(data):
         result += ('+' if i % 2 == 0 else '-') + str(data[i])
     return result
 
-
 def parse_durations(str):
     result = []
     for s in str.split():
         result.append(abs(int(s)))
     return result
-
 
 def initDevice(dtype, host, mac):
     dtypeTmp = dtype
@@ -261,10 +257,8 @@ def initDevice(dtype, host, mac):
     _mac = bytearray.fromhex(mac)
     return broadlink.gendevice(_dtype, (_host, 80), _mac)
 
-
 def GetDevicesFilePath():
     return os.path.join(app.root_path, 'data', 'devices.json')
-
 
 def writeXml(_file):
     root = ET.Element("root")
@@ -274,55 +268,43 @@ def writeXml(_file):
     tree = ET.ElementTree(root)
     tree.write(_file)
 
-# endregion
 
-# region UI Rendering Methods
-
-#Homepage (Devices)
-
-
-@app.get('/')
+@app.get('/', tags=["Html Pages"])
 def devices(request: Request):
     return templates.TemplateResponse('index.html', context={'request': request,'analytics':analytics_code, 'version': GetVersionFromFle()})
 
 
-@app.get('/generator')
+@app.get('/generator', tags=["Html Pages"])
 def generator(request: Request):
     return templates.TemplateResponse('generator.html', context={'request': request,'analytics':analytics_code, 'version': GetVersionFromFle()})
 
 
-@app.get('/livolo')
+@app.get('/livolo', tags=["Html Pages"])
 def livolo(request: Request):
     return templates.TemplateResponse('livolo.html', context={'request': request,'analytics':analytics_code, 'version': GetVersionFromFle()})
 
 
-@app.get('/energenie')
+@app.get('/energenie', tags=["Html Pages"])
 def energenie(request: Request):
     return templates.TemplateResponse('energenie.html', context={'request': request,'analytics':analytics_code, 'version': GetVersionFromFle()})
 
 
-@app.get('/repeats')
+@app.get('/repeats', tags=["Html Pages"])
 def repeats(request: Request):
     return templates.TemplateResponse('repeats.html', context={'request': request,'analytics':analytics_code, 'version': GetVersionFromFle()})
 
 
-@app.get('/convert')
+@app.get('/convert', tags=["Html Pages"])
 def convert(request: Request):
     return templates.TemplateResponse('convert.html', context={'request': request,'analytics':analytics_code, 'version': GetVersionFromFle()})
 
 
-@app.get('/about')
+@app.get('/about', tags=["Html Pages"])
 def about(request: Request):
     return templates.TemplateResponse('about.html', context={'request': request,'analytics':analytics_code, 'version': GetVersionFromFle()})
 
-# endregion UI Rendering Methods
 
-# region API Methods
-
-# Learn IR
-
-
-@app.get('/temperature')
+@app.get('/temperature', tags=["Commands"])
 def temperature(request: Request):
     logger.info("Getting temperature for device: " + request.args.get('host'))
     dev = initDevice(request.args.get('type'), request.args.get(
@@ -336,7 +318,7 @@ def temperature(request: Request):
         return JSONResponse('{"data":"Method Not Supported","success":"0"}')
 
 
-@app.get('/ir/learn')
+@app.get('/ir/learn', tags=["Commands"])
 def learnir(request: Request, mac: str = "", host: str = "", type: str = "", command: str =""):
     logger.info("Learning IR Code for device: " + host)
     dev = initDevice(type, host, mac)
@@ -360,9 +342,7 @@ def learnir(request: Request, mac: str = "", host: str = "", type: str = "", com
     return JSONResponse('{"data":"' + learned + '","success":1,"message":"IR Data Received"}')
 
 # Send IR/RF
-
-
-@app.get('/command/send')
+@app.get('/command/send', tags=["Commands"])
 def command(request: Request, mac: str = "", host: str = "", type: str = "", command: str =""):
     logger.info("Sending Command (IR/RF) using device: " + host)
     dev = initDevice(type, host, mac)
@@ -378,7 +358,7 @@ def command(request: Request, mac: str = "", host: str = "", type: str = "", com
 
 
 # Learn RF
-@app.get('/rf/learn')
+@app.get('/rf/learn', tags=["Commands"])
 def sweep(request: Request, mac: str = "", host: str = "", type: str = "", command: str =""):
     global _continu_to_sweep
     global _rf_sweep_message
@@ -441,8 +421,7 @@ def sweep(request: Request, mac: str = "", host: str = "", type: str = "", comma
 
 # Get RF Learning state
 
-
-@app.get('/rf/status')
+@app.get('/rf/status', tags=["Commands"])
 def rfstatus(request: Request):
     global _continu_to_sweep
     global _rf_sweep_message
@@ -450,9 +429,7 @@ def rfstatus(request: Request):
     return JSONResponse('{"_continu_to_sweep":"' + str(_continu_to_sweep) + '","_rf_sweep_message":"' + _rf_sweep_message + '","_rf_sweep_status":"' + str(_rf_sweep_status) + '" }')
 
 # Continue with RF Scan
-
-
-@app.get('/rf/continue')
+@app.get('/rf/continue', tags=["Commands"])
 def rfcontinue(request: Request):
     global _continu_to_sweep
     global _rf_sweep_status
@@ -460,24 +437,11 @@ def rfcontinue(request: Request):
     _continu_to_sweep = True
     return JSONResponse('{"_continu_to_sweep":"' + str(_continu_to_sweep) + '","_rf_sweep_message":"' + _rf_sweep_message + '","_rf_sweep_status":"' + str(_rf_sweep_status) + '" }')
 
-# Join Wifi
-
-
-@app.get('/setup')
-def setup(request: Request):
-    try:
-        essid = request.args.get('essid')
-        wifipass = request.args.get('wifipass')
-        broadlink.setup(essid, wifipass, 4)
-        return "{'data':'1'}"
-    except:
-        return "{'data':'0'}"
 
 # Save Devices List to json file
 
-
-@app.post('/devices/save')
-async def save_devices(request: Request):
+@app.post('/devices/save', tags=["Devices"])
+async def save_devices_to_file(request: Request):
     data = await request.json()
     logger.info("Writing devices to file")
     try:
@@ -493,8 +457,8 @@ async def save_devices(request: Request):
 # Load Devices from json file
 
 
-@app.get('/devices/load')
-def load_devices(request: Request):
+@app.get('/devices/load', tags=["Devices"])
+def load_devices_from_file(request: Request):
     try:
         logger.info("Reading devices from file")
         time.sleep(3)
@@ -508,11 +472,11 @@ def load_devices(request: Request):
 # Search for devices in the network
 
 
-@app.get('/autodiscover')
-def autodiscover(request: Request):
+@app.get('/autodiscover', tags=["Devices"])
+def search_for_devices(request: Request,freshscan: str = "1"):
     _devices = ''
-    if path.exists(GetDevicesFilePath()):
-        return load_devices()
+    if path.exists(GetDevicesFilePath()) and freshscan != "1":
+        return load_devices_from_file(request)
     else:
         logger.info("Searcing for devices...")
         _devices = '['
@@ -537,42 +501,27 @@ def autodiscover(request: Request):
         return JSONResponse(_devices)
 
 
-@app.get('/discover')
-def discover(request: Request):
-    logger.info("Searching for devices...")
-    _devices = '['
-    devices = broadlink.discover(
-        timeout=5, local_ip_address='192.168.0.238', discover_ip_address="255.255.255.255")
-    for device in devices:
-        if device.auth():
-            logger.info("New device detected: " + getDeviceName(device.devtype) + " (ip: " + device.host[0] +  ", mac: " + ''.join(format(x, '02x') for x in device.mac) +  ")")
-            _devices = _devices + '{"name":"' + \
-                getDeviceName(device.devtype) + '",'
-            _devices = _devices + '"type":"' + \
-                format(hex(device.devtype)) + '",'
-            _devices = _devices + '"ip":"' + device.host[0] + '",'
-            _devices = _devices + '"mac":"' + \
-                ''.join(format(x, '02x') for x in device.mac) + '"},'
-    if len(_devices) == 1:
-        logger.error("No devices found")
-        _devices = _devices + ']'
-    else:
-        logger.info("devices Found")
-        _devices = _devices[:-1] + ']'
-    return JSONResponse(_devices)
-
-@app.get('/ping')
-def get_device_status(request: Request):
-    p = subprocess.Popen("fping -C1 -q "+ request.args.get('host') +"  2>&1 | grep -v '-' | wc -l", stdout=subprocess.PIPE, shell=True)
-    (output, err) = p.communicate()
-    p_status = p.wait()
-    status = re.findall('\d+', str(output))[0]
-    if status=="1":
-        return JSONResponse('{"data":"onlien","success":"1"}')
-    else:
-        return JSONResponse('{"data":"offline","success":"0"}')
 
 
+@app.get('/device/ping', tags=["Devices"])
+def get_device_status(request: Request, host: str=""):
+    try:
+        if host =="":
+            logger.error("Host must be a valid ip or hostname")
+            return JSONResponse('{"status":"Host must be a valid ip or hostname","success":"0"}')
+        p = subprocess.Popen("fping -C1 -q "+ host +"  2>&1 | grep -v '-' | wc -l", stdout=subprocess.PIPE, shell=True)
+        logger.debug(host)
+        (output, err) = p.communicate()
+        p_status = p.wait()
+        logger.debug(str(output))
+        status = re.findall('\d+', str(output))[0]
+        if status=="1":
+            return JSONResponse('{"status":"online","success":"1"}')
+        else:
+            return JSONResponse('{"status":"offline","success":"1"}')
+    except Exception as e:
+        logger.error("Error pinging "+ host + " Error: " + str(e))
+        return JSONResponse('{"status":"Error pinging ' + host + '" ,"success":"0"}')
 
 # endregion API Methods
 

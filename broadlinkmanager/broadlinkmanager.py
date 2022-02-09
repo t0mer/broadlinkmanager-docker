@@ -1,6 +1,6 @@
 # region Importing
 
-import os, json, subprocess, time, broadlink, argparse, datetime, re, shutil, aiofiles, uvicorn, socket
+import os, json, subprocess, time, broadlink, argparse, datetime, re, shutil, uvicorn, socket
 from os import environ, path
 from json import dumps
 from broadlink.exceptions import ReadError, StorageError

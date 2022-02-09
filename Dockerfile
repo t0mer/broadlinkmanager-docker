@@ -7,8 +7,6 @@ ENV ENABLE_GOOGLE_ANALYTICS=True
 
 RUN apt install fping -yqq
 
-RUN pip3 install aiofiles --no-cache-dir
-
 #Create working directory
 RUN mkdir /opt/broadlinkmanager
 RUN mkdir /opt/broadlinkmanager/data

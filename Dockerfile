@@ -1,4 +1,4 @@
-FROM techblog/flask:latest
+FROM techblog/fastapi:latest
 
 LABEL maintainer="tomer.klein@gmail.com"
 

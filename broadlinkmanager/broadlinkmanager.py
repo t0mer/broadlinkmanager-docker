@@ -72,7 +72,7 @@ args = parser.parse_args()
 
 # region Declaring Flask app
 
-app = FastAPI(title="Apprise API", description="Send multi channel notification using single endpoint", version=GetVersionFromFle(), openapi_tags=tags_metadata,contact={"name":"Tomer Klein","email":"tomer.klein@gmail.com","url":"https://github.com/t0mer/apprise-api-bridge"})
+app = FastAPI(title="Apprise API", description="Send multi channel notification using single endpoint", version=GetVersionFromFle(), openapi_tags=tags_metadata,contact={"name":"Tomer Klein","email":"tomer.klein@gmail.com","url":"https://github.com/t0mer/broadlinkmanager-docker"})
 logger.info("Configuring app")
 app.mount("/dist", StaticFiles(directory="dist"), name="dist")
 app.mount("/js", StaticFiles(directory="dist/js"), name="js")

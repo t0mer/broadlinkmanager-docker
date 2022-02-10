@@ -13,6 +13,8 @@ RUN mkdir /opt/broadlinkmanager/data
 
 EXPOSE 7020
 
+WORKDIR /opt/broadlinkmanager/
+
 COPY broadlinkmanager /opt/broadlinkmanager
 
-ENTRYPOINT ["/usr/bin/python3", "/opt/broadlinkmanager/broadlinkmanager.py"]
+ENTRYPOINT ["/usr/bin/python3", "broadlinkmanager.py"]

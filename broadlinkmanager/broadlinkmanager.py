@@ -1,6 +1,6 @@
 # region Importing
 
-import os, json, subprocess, time, broadlink, argparse, datetime, re, shutil, uvicorn, socket
+import os, json, subprocess, time, broadlink, argparse, datetime, re, shutil, uvicorn, socket, aiofiles
 from os import environ, path
 from json import dumps
 from broadlink.exceptions import ReadError, StorageError
@@ -34,7 +34,10 @@ local_ip_address = GetLocalIP()
 
 # Get version from version file for dynamic change
 def GetVersionFromFle():
-    return "3.0.0"
+    with open("VERSION","r") as version:
+        v = version.read()
+        return v
+
 
 # Tags metadata for swagger docs
 tags_metadata = [

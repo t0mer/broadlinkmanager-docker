@@ -41,10 +41,7 @@ def GetVersionFromFle():
 
 # Tags metadata for swagger docs
 tags_metadata = [
-    {
-        "name": "Html Pages",
-        "description": "Returns HTML pages",
-    },
+    
     {
         "name": "Commands",
         "description": "Learn / Send RF or IR commands",
@@ -270,56 +267,54 @@ def writeXml(_file):
     tree.write(_file)
 
 
-@app.get('/', tags=["Html Pages"])
+@app.get('/', include_in_schema=False)
 def devices(request: Request):
     return templates.TemplateResponse('index.html', context={'request': request,'analytics':analytics_code, 'version': GetVersionFromFle()})
 
 
-@app.get('/generator', tags=["Html Pages"])
+@app.get('/generator', include_in_schema=False)
 def generator(request: Request):
     return templates.TemplateResponse('generator.html', context={'request': request,'analytics':analytics_code, 'version': GetVersionFromFle()})
 
 
-@app.get('/livolo', tags=["Html Pages"])
+@app.get('/livolo', include_in_schema=False)
 def livolo(request: Request):
     return templates.TemplateResponse('livolo.html', context={'request': request,'analytics':analytics_code, 'version': GetVersionFromFle()})
 
 
-@app.get('/energenie', tags=["Html Pages"])
+@app.get('/energenie', include_in_schema=False)
 def energenie(request: Request):
     return templates.TemplateResponse('energenie.html', context={'request': request,'analytics':analytics_code, 'version': GetVersionFromFle()})
 
 
-@app.get('/repeats', tags=["Html Pages"])
+@app.get('/repeats', include_in_schema=False)
 def repeats(request: Request):
     return templates.TemplateResponse('repeats.html', context={'request': request,'analytics':analytics_code, 'version': GetVersionFromFle()})
 
 
-@app.get('/convert', tags=["Html Pages"])
+@app.get('/convert', include_in_schema=False)
 def convert(request: Request):
     return templates.TemplateResponse('convert.html', context={'request': request,'analytics':analytics_code, 'version': GetVersionFromFle()})
 
 
-@app.get('/about', tags=["Html Pages"])
+@app.get('/about', include_in_schema=False)
 def about(request: Request):
     return templates.TemplateResponse('about.html', context={'request': request,'analytics':analytics_code, 'version': GetVersionFromFle()})
 
 
-@app.get('/temperature', tags=["Commands"])
-def temperature(request: Request):
-    logger.info("Getting temperature for device: " + request.args.get('host'))
-    dev = initDevice(request.args.get('type'), request.args.get(
-        'host'), request.args.get('mac'))
+@app.get('/temperature', tags=["Commands"], summary="Read Temperature")
+def temperature(request: Request, mac: str = "", host: str = "", type: str = ""):
+    logger.info("Getting temperature for device: " + host)
+    dev = initDevice(type, host, mac)
     dev.auth()
     try:
-        logger.info("Success Getting temperature for device: " + request.args.get('host'))
         return JSONResponse('{"data":"'+dev.check_temperature()+'","success":"1"}')
     except:
-        logger.info("Error Getting temperature for device: " + request.args.get('host'))
+        logger.info("Error Getting temperature for device: " + host)
         return JSONResponse('{"data":"Method Not Supported","success":"0"}')
 
 
-@app.get('/ir/learn', tags=["Commands"])
+@app.get('/ir/learn', tags=["Commands"], summary="Learn IR code")
 def learnir(request: Request, mac: str = "", host: str = "", type: str = "", command: str =""):
     logger.info("Learning IR Code for device: " + host)
     dev = initDevice(type, host, mac)
@@ -343,7 +338,7 @@ def learnir(request: Request, mac: str = "", host: str = "", type: str = "", com
     return JSONResponse('{"data":"' + learned + '","success":1,"message":"IR Data Received"}')
 
 # Send IR/RF
-@app.get('/command/send', tags=["Commands"])
+@app.get('/command/send', tags=["Commands"], summary="Send IR/RF Command")
 def command(request: Request, mac: str = "", host: str = "", type: str = "", command: str =""):
     logger.info("Sending Command (IR/RF) using device: " + host)
     dev = initDevice(type, host, mac)
@@ -359,7 +354,7 @@ def command(request: Request, mac: str = "", host: str = "", type: str = "", com
 
 
 # Learn RF
-@app.get('/rf/learn', tags=["Commands"])
+@app.get('/rf/learn', include_in_schema=False)
 def sweep(request: Request, mac: str = "", host: str = "", type: str = "", command: str =""):
     global _continu_to_sweep
     global _rf_sweep_message
@@ -422,7 +417,7 @@ def sweep(request: Request, mac: str = "", host: str = "", type: str = "", comma
 
 # Get RF Learning state
 
-@app.get('/rf/status', tags=["Commands"])
+@app.get('/rf/status', include_in_schema=False)
 def rfstatus(request: Request):
     global _continu_to_sweep
     global _rf_sweep_message
@@ -430,7 +425,7 @@ def rfstatus(request: Request):
     return JSONResponse('{"_continu_to_sweep":"' + str(_continu_to_sweep) + '","_rf_sweep_message":"' + _rf_sweep_message + '","_rf_sweep_status":"' + str(_rf_sweep_status) + '" }')
 
 # Continue with RF Scan
-@app.get('/rf/continue', tags=["Commands"])
+@app.get('/rf/continue', include_in_schema=False)
 def rfcontinue(request: Request):
     global _continu_to_sweep
     global _rf_sweep_status
@@ -441,7 +436,7 @@ def rfcontinue(request: Request):
 
 # Save Devices List to json file
 
-@app.post('/devices/save', tags=["Devices"])
+@app.post('/devices/save', include_in_schema=False)
 async def save_devices_to_file(request: Request):
     data = await request.json()
     logger.info("Writing devices to file")
@@ -458,7 +453,7 @@ async def save_devices_to_file(request: Request):
 # Load Devices from json file
 
 
-@app.get('/devices/load', tags=["Devices"])
+@app.get('/devices/load', include_in_schema=False)
 def load_devices_from_file(request: Request):
     try:
         logger.info("Reading devices from file")

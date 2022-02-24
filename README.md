@@ -1,15 +1,10 @@
 *Please :star: this repo if you find it useful*
 
-![Docker Puuls](https://img.shields.io/docker/pulls/techblog/broadlinkmanager.svg)
-
 <p align="left"><br>
  <a href="https://www.paypal.com/paypalme/techblogil?locale.x=he_IL" target="_blank"><img src="http://khrolenok.ru/support_paypal.png" alt="PayPal" width="250" height="48"></a>
 </p>
 
-
-
-
-# BroadlinkManager
+# BroadlinkManager  ![Docker Puuls](https://img.shields.io/docker/pulls/techblog/broadlinkmanager.svg)
 g
 BroadlinkManager is a [Flask](https://flask.palletsprojects.com/en/1.1.x/) powered, easy to use system that hepls you to work with Broadlink Devices.
 With Broadlink manager you can:

@@ -4,7 +4,7 @@
  <a href="https://www.paypal.com/paypalme/techblogil?locale.x=he_IL" target="_blank"><img src="http://khrolenok.ru/support_paypal.png" alt="PayPal" width="250" height="48"></a>
 </p>
 
-# BroadlinkManager  ![Docker Puuls](https://img.shields.io/docker/pulls/techblog/broadlinkmanager.svg)
+# BroadlinkManager  ![Broadlink Manager](https://img.shields.io/docker/pulls/techblog/broadlinkmanager.svg)
 
 BroadlinkManager is a [FastAPI](https://fastapi.tiangolo.com/) powered, easy to use system that hepls you to work with Broadlink Devices.
 With Broadlink manager you can:

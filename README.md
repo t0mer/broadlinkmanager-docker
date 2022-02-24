@@ -1,10 +1,10 @@
 *Please :star: this repo if you find it useful*
 
 <p align="left"><br>
-<a href="https://www.paypal.com/paypalme/techblogil?locale.x=he_IL" target="_blank"><img src="http://khrolenok.ru/support_paypal.png" alt="PayPal" width="250" height="48"></a>
+[![dockeri.co](https://dockeri.co/image/techblog/broadlinkmanager)](https://hub.docker.com/r/techblog/broadlinkmanager) <a href="https://www.paypal.com/paypalme/techblogil?locale.x=he_IL" target="_blank"><img src="http://khrolenok.ru/support_paypal.png" alt="PayPal" width="250" height="48"></a>
 </p>
 
-[![dockeri.co](https://dockeri.co/image/techblog/broadlinkmanager)](https://hub.docker.com/r/techblog/broadlinkmanager)
+
 
 
 # BroadlinkManager

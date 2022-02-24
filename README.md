@@ -5,8 +5,8 @@
 </p>
 
 # BroadlinkManager  ![Docker Puuls](https://img.shields.io/docker/pulls/techblog/broadlinkmanager.svg)
-g
-BroadlinkManager is a [Flask](https://flask.palletsprojects.com/en/1.1.x/) powered, easy to use system that hepls you to work with Broadlink Devices.
+
+BroadlinkManager is a [FastAPI](https://fastapi.tiangolo.com/) powered, easy to use system that hepls you to work with Broadlink Devices.
 With Broadlink manager you can:
 - Scan your network for devices.
 - Lean and send IR or RF codes

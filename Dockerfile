@@ -7,12 +7,11 @@ ENV ENABLE_GOOGLE_ANALYTICS=True
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Etc/UTC
 
-RUN apt install fping -yqq && \
-    apt install php php-curl php-cli -yqq
+RUN apt install fping -yqq
+    # apt install php php-curl php-cli -yqq
     
 #Create working directory
-RUN mkdir /opt/broadlinkmanager
-RUN mkdir /opt/broadlinkmanager/data
+RUN mkdir -p /opt/broadlinkmanager/data
 
 EXPOSE 7020
 

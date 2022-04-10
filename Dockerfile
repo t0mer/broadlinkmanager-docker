@@ -4,11 +4,10 @@ LABEL maintainer="tomer.klein@gmail.com"
 
 ENV PYTHONIOENCODING=utf-8
 ENV ENABLE_GOOGLE_ANALYTICS=True
-ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ=Etc/UTC
 
-RUN apt install fping -yqq
-    # apt install php php-curl php-cli -yqq
+RUN apt update && \
+    apt install fping -yqq && \
+    apt install php php-curl php-cli -yqq
     
 #Create working directory
 RUN mkdir -p /opt/broadlinkmanager/data

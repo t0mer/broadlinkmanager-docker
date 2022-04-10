@@ -7,7 +7,7 @@ ENV ENABLE_GOOGLE_ANALYTICS=True
 
 RUN apt update && \
     apt install fping -yqq && \
-    apt install php php-curl php-cli -yqq
+    DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt install php php-curl php-cli -yqq
     
 #Create working directory
 RUN mkdir -p /opt/broadlinkmanager/data

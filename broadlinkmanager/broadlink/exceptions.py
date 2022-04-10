@@ -1,19 +1,17 @@
 """Exceptions for Broadlink devices."""
+import collections
 import struct
 
 
 class BroadlinkException(Exception):
-    """Common base class for all Broadlink exceptions."""
+    """Base class common to all Broadlink exceptions."""
 
     def __init__(self, *args, **kwargs):
         """Initialize the exception."""
         super().__init__(*args, **kwargs)
-        if len(args) >= 3:
+        if len(args) >= 2:
             self.errno = args[0]
-            self.strerror = "%s: %s" % (args[1], args[2])
-        elif len(args) == 2:
-            self.errno = args[0]
-            self.strerror = str(args[1])
+            self.strerror = ": ".join(str(arg) for arg in args[1:])
         elif len(args) == 1:
             self.errno = None
             self.strerror = str(args[0])
@@ -22,118 +20,95 @@ class BroadlinkException(Exception):
             self.strerror = ""
 
     def __str__(self):
-        """Return the error message."""
+        """Return str(self)."""
         if self.errno is not None:
             return "[Errno %s] %s" % (self.errno, self.strerror)
         return self.strerror
 
+    def __eq__(self, other):
+        """Return self==value."""
+        # pylint: disable=unidiomatic-typecheck
+        return type(self) == type(other) and self.args == other.args
 
-class FirmwareException(BroadlinkException):
-    """Common base class for all firmware exceptions."""
+    def __hash__(self):
+        """Return hash(self)."""
+        return hash((type(self), self.args))
 
-    pass
+
+class MultipleErrors(BroadlinkException):
+    """Multiple errors."""
+
+    def __init__(self, *args, **kwargs):
+        """Initialize the exception."""
+        errors = args[0][:] if args else []
+        counter = collections.Counter(errors)
+        strerror = "Multiple errors occurred: %s" % counter
+        super().__init__(strerror, **kwargs)
+        self.errors = errors
+
+    def __repr__(self):
+        """Return repr(self)."""
+        return "MultipleErrors(%r)" % self.errors
+
+    def __str__(self):
+        """Return str(self)."""
+        return self.strerror
 
 
-class AuthenticationError(FirmwareException):
+class AuthenticationError(BroadlinkException):
     """Authentication error."""
 
-    pass
 
-
-class AuthorizationError(FirmwareException):
+class AuthorizationError(BroadlinkException):
     """Authorization error."""
 
-    pass
 
-
-class CommandNotSupportedError(FirmwareException):
+class CommandNotSupportedError(BroadlinkException):
     """Command not supported error."""
 
-    pass
 
-
-class ConnectionClosedError(FirmwareException):
+class ConnectionClosedError(BroadlinkException):
     """Connection closed error."""
 
-    pass
+
+class StructureAbnormalError(BroadlinkException):
+    """Structure abnormal error."""
 
 
-class DataValidationError(FirmwareException):
-    """Data validation error."""
-
-    pass
-
-
-class DeviceOfflineError(FirmwareException):
+class DeviceOfflineError(BroadlinkException):
     """Device offline error."""
 
-    pass
 
-
-class ReadError(FirmwareException):
+class ReadError(BroadlinkException):
     """Read error."""
 
-    pass
 
-
-class SendError(FirmwareException):
+class SendError(BroadlinkException):
     """Send error."""
 
-    pass
 
-
-class SSIDNotFoundError(FirmwareException):
+class SSIDNotFoundError(BroadlinkException):
     """SSID not found error."""
 
-    pass
 
-
-class StorageError(FirmwareException):
+class StorageError(BroadlinkException):
     """Storage error."""
 
-    pass
 
-
-class WriteError(FirmwareException):
+class WriteError(BroadlinkException):
     """Write error."""
 
-    pass
 
-
-class SDKException(BroadlinkException):
-    """Common base class for all SDK exceptions."""
-
-    pass
-
-
-class ChecksumError(SDKException):
-    """Received data packet check error."""
-
-    pass
-
-
-class LengthError(SDKException):
-    """Received data packet length error."""
-
-    pass
-
-
-class DNSLookupError(SDKException):
-    """Failed to obtain local IP address."""
-
-    pass
-
-
-class NetworkTimeoutError(SDKException):
+class NetworkTimeoutError(BroadlinkException):
     """Network timeout error."""
 
-    pass
+
+class DataValidationError(BroadlinkException):
+    """Data validation error."""
 
 
 class UnknownError(BroadlinkException):
     """Unknown error."""
-
-    pass
 
 
 BROADLINK_EXCEPTIONS = {
@@ -143,30 +118,34 @@ BROADLINK_EXCEPTIONS = {
     -3: (DeviceOfflineError, "The device is offline"),
     -4: (CommandNotSupportedError, "Command not supported"),
     -5: (StorageError, "The device storage is full"),
-    -6: (DataValidationError, "Structure is abnormal"),
+    -6: (StructureAbnormalError, "Structure is abnormal"),
     -7: (AuthorizationError, "Control key is expired"),
     -8: (SendError, "Send error"),
     -9: (WriteError, "Write error"),
     -10: (ReadError, "Read error"),
     -11: (SSIDNotFoundError, "SSID could not be found in AP configuration"),
-    # DNASDK related errors are generated by this module.
+    # SDK related errors are generated by this module.
+    -2040: (DataValidationError, "Device information is not intact"),
     -4000: (NetworkTimeoutError, "Network timeout"),
-    -4007: (LengthError, "Received data packet length error"),
-    -4008: (ChecksumError, "Received data packet check error"),
-    -4013: (DNSLookupError, "Failed to obtain local IP address"),
+    -4007: (DataValidationError, "Received data packet length error"),
+    -4008: (DataValidationError, "Received data packet check error"),
+    -4009: (DataValidationError, "Received data packet information type error"),
+    -4010: (DataValidationError, "Received encrypted data packet length error"),
+    -4011: (DataValidationError, "Received encrypted data packet check error"),
+    -4012: (AuthorizationError, "Device control ID error"),
 }
 
 
-def exception(error_code):
+def exception(err_code: int) -> BroadlinkException:
     """Return exception corresponding to an error code."""
     try:
-        exc, msg = BROADLINK_EXCEPTIONS[error_code]
-        return exc(error_code, msg)
+        exc, msg = BROADLINK_EXCEPTIONS[err_code]
+        return exc(err_code, msg)
     except KeyError:
-        return UnknownError(error_code, "Unknown error")
+        return UnknownError(err_code, "Unknown error")
 
 
-def check_error(error):
+def check_error(error: bytes) -> None:
     """Raise exception if an error occurred."""
     error_code = struct.unpack("h", error)[0]
     if error_code:

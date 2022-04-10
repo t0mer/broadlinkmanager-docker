@@ -1,9 +1,30 @@
 # region Importing
 
-import os, json, subprocess, time, broadlink, argparse, datetime, re, shutil, uvicorn, socket, aiofiles
+import os
+import json
+import subprocess
+import time
+import broadlink
+import argparse
+import datetime
+import re
+import shutil
+import uvicorn
+import socket
+import aiofiles
 from os import environ, path
 from json import dumps
 from broadlink.exceptions import ReadError, StorageError
+from broadlink import exceptions as e
+from broadlink.const import DEFAULT_BCAST_ADDR, DEFAULT_PORT, DEFAULT_TIMEOUT
+from broadlink.alarm import S1C
+from broadlink.climate import hysen
+from broadlink.cover import dooya
+from broadlink.device import Device, ping, scan
+from broadlink.light import lb1, lb2
+from broadlink.remote import rm, rm4, rm4mini, rm4pro, rmmini, rmminib, rmpro
+from broadlink.sensor import a1
+from broadlink.switch import bg1, mp1, sp1, sp2, sp2s, sp3, sp3s, sp4, sp4b
 from subprocess import call
 from loguru import logger
 from fastapi import FastAPI, Request, File, Form, UploadFile
@@ -21,40 +42,45 @@ from starlette_exporter import PrometheusMiddleware, handle_metrics
 ENABLE_GOOGLE_ANALYTICS = os.getenv("ENABLE_GOOGLE_ANALYTICS")
 # endregion
 
-#Get Lan IP
+# Get Lan IP
+
+
 def GetLocalIP():
-    p = subprocess.Popen("hostname -I | awk '{print $1}'", stdout=subprocess.PIPE, shell=True)
+    p = subprocess.Popen(
+        "hostname -I | awk '{print $1}'", stdout=subprocess.PIPE, shell=True)
     (output, err) = p.communicate()
     p_status = p.wait()
     ip = re.findall(r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b", str(output))[0]
     logger.debug(ip)
     return str(ip)
 
+
 local_ip_address = GetLocalIP()
 
 # Get version from version file for dynamic change
+
+
 def GetVersionFromFle():
-    with open("VERSION","r") as version:
+    with open("VERSION", "r") as version:
         v = version.read()
         return v
 
 
 # Tags metadata for swagger docs
 tags_metadata = [
-    
+
     {
         "name": "Commands",
         "description": "Learn / Send RF or IR commands",
- 
-        },
-     {
+
+    },
+    {
         "name": "Devices",
         "description": "Scan for devices on the network or load/save from/to file",
- 
-        },
-    
-]
 
+    },
+
+]
 
 
 # region Parsing Default arguments for descovery
@@ -72,7 +98,8 @@ args = parser.parse_args()
 
 # region Declaring Flask app
 
-app = FastAPI(title="Apprise API", description="Send multi channel notification using single endpoint", version=GetVersionFromFle(), openapi_tags=tags_metadata,contact={"name":"Tomer Klein","email":"tomer.klein@gmail.com","url":"https://github.com/t0mer/broadlinkmanager-docker"})
+app = FastAPI(title="Apprise API", description="Send multi channel notification using single endpoint", version=GetVersionFromFle(
+), openapi_tags=tags_metadata, contact={"name": "Tomer Klein", "email": "tomer.klein@gmail.com", "url": "https://github.com/t0mer/broadlinkmanager-docker"})
 logger.info("Configuring app")
 app.mount("/dist", StaticFiles(directory="dist"), name="dist")
 app.mount("/js", StaticFiles(directory="dist/js"), name="js")
@@ -111,8 +138,9 @@ TIMEOUT = 30
 
 def get_analytics_code():
     try:
-        if ENABLE_GOOGLE_ANALYTICS=="True":
-            analytics_file_path = os.path.join(app.root_path, 'templates', 'analytics_code.html')
+        if ENABLE_GOOGLE_ANALYTICS == "True":
+            analytics_file_path = os.path.join(
+                app.root_path, 'templates', 'analytics_code.html')
             f = open(analytics_file_path, "r")
             content = f.read()
             f.close()
@@ -127,73 +155,110 @@ def get_analytics_code():
 
 analytics_code = get_analytics_code()
 
+
 def getDeviceName(deviceType):
     name = {
-        0x2711: "SP2",
-        0x2719: "Honeywell SP2",
-        0x7919: "Honeywell SP2",
-        0x271a: "Honeywell SP2",
-        0x791a: "Honeywell SP2",
-        0x2720: "SPMini",
-        0x753e: "SP3",
-        0x7D00: "OEM branded SP3",
-        0x947a: "SP3S",
-        0x9479: "SP3S",
-        0x2728: "SPMini2",
-        0x2733: "OEM branded SPMini",
-        0x273e: "OEM branded SPMini",
-        0x7530: "OEM branded SPMini2",
-        0x7546: "OEM branded SPMini2",
-        0x7918: "OEM branded SPMini2",
-        0x7D0D: "TMall OEM SPMini3",
-        0x2736: "SPMiniPlus",
-        0x2712: "RM2",
-        0x2737: "RM Mini",
-        0x273d: "RM Pro Phicomm",
-        0x2783: "RM2 Home Plus",
-        0x277c: "RM2 Home Plus GDT",
-        0x272a: "RM2 Pro Plus",
-        0x2787: "RM2 Pro Plus2",
-        0x279d: "RM2 Pro Plus3",
-        0x27a9: "RM2 Pro Plus_300",
-        0x278b: "RM2 Pro Plus BL",
-        0x2797: "RM2 Pro Plus HYC",
-        0x27a1: "RM2 Pro Plus R1",
-        0x27a6: "RM2 Pro PP",
-        0x278f: "RM Mini Shate",
-        0x27c2: "RM Mini 3",
-        0x2714: "A1",
-        0x4EB5: "MP1",
-        0x4EF7: "Honyar oem mp1",
-        0x4EAD: "Hysen controller",
-        0x2722: "S1 (SmartOne Alarm Kit)",
-        0x4E4D: "Dooya DT360E (DOOYA_CURTAIN_V2)",
-        0x51da: "RM4 Mini",
-        0x5f36: "RM Mini 3",
-        0x6026: "RM4 Pro",
-	0x6070: "RM4c Mini",
-        0x61a2: "RM4 Pro",
-        0x610e: "RM4 Mini",
-        0x610f: "RM4c",
-        0x62bc: "RM4 Mini",
-        0x62be: "RM4c Mini",
-        0x51E3: "BG Electrical Smart Power Socket",
-        0x60c8: "RGB Smart Bulb",
-        0x6539: "RM4c Mini",
-        0x653a: "RM4 Mini",
-	0x653c: "RM4 Pro",
-	0x649b: "RM4 Pro",
-        0x6184: "RM4C mini",
-        0x648d: "RM4 Mini",
-	0x5209: "RM4 TV Mate",
-    0x27C3: "RM pro+",
-    0x27C7: "RM mini 3",
-    0x27CC: "RM mini 3",
-    0x27D0: "RM mini 3",
-    0x27D3: "RM mini 3",
-    0x27DC: "RM mini 3",
-    0x6507: "RM mini 3",
-    0x6508: "RM mini 3",
+        0x0000: "SP1 ( Broadlink)",
+        0x2717: "NEO ( Ankuoo)",
+        0x2719: "SP2-compatible ( Honeywell)",
+        0x271A: "SP2-compatible ( Honeywell)",
+        0x2720: "SPmini ( Broadlink)",
+        0x2728: "SP2-compatible ( URANT)",
+        0x273E: "SPmini ( Broadlink)",
+        0x7530: "SP2 ( Broadlink(OEM)",
+        0x7539: "SP2-IL ( Broadlink(OEM)",
+        0x753E: "SPmini3 ( Broadlink)",
+        0x7540: "MP2 ( Broadlink)",
+        0x7544: "SP2-CL ( Broadlink)",
+        0x7546: "SP2-UK/BR/IN ( Broadlink(OEM)",
+        0x7547: "SC1 ( Broadlink)",
+        0x7918: "SP2 ( Broadlink(OEM)",
+        0x7919: "SP2-compatible ( Honeywell)",
+        0x791A: "SP2-compatible ( Honeywell)",
+        0x7D0D: "SPmini3 ( Broadlink(OEM)",
+        0x2711: "SP2 ( Broadlink)",
+        0x2716: "NEOPRO ( Ankuoo)",
+        0x271D: "Ego ( Efergy)",
+        0x2736: "SPmini+ ( Broadlink)",
+        0x2733: "SP3 ( Broadlink)",
+        0x7D00: "SP3-EU ( Broadlink(OEM)",
+        0x9479: "SP3S-US ( Broadlink)",
+        0x947A: "SP3S-EU ( Broadlink)",
+        0x7568: "SP4L-CN ( Broadlink)",
+        0x756C: "SP4M ( Broadlink)",
+        0x756F: "MCB1 ( Broadlink)",
+        0x7579: "SP4L-EU ( Broadlink)",
+        0x757B: "SP4L-AU ( Broadlink)",
+        0x7583: "SPmini3 ( Broadlink)",
+        0x7587: "SP4L-UK ( Broadlink)",
+        0x7D11: "SPmini3 ( Broadlink)",
+        0xA56A: "MCB1 ( Broadlink)",
+        0xA56B: "SCB1E ( Broadlink)",
+        0xA56C: "SP4L-EU ( Broadlink)",
+        0xA589: "SP4L-UK ( Broadlink)",
+        0xA5D3: "SP4L-EU ( Broadlink)",
+        0x5115: "SCB1E ( Broadlink)",
+        0x51E2: "AHC/U-01 ( BGElectrical)",
+        0x6111: "MCB1 ( Broadlink)",
+        0x6113: "SCB1E ( Broadlink)",
+        0x618B: "SP4L-EU ( Broadlink)",
+        0x6489: "SP4L-AU ( Broadlink)",
+        0x648B: "SP4M-US ( Broadlink)",
+        0x6494: "SCB2 ( Broadlink)",
+        0x2737: "RMmini3 ( Broadlink)",
+        0x278F: "RMmini ( Broadlink)",
+        0x27C2: "RMmini3 ( Broadlink)",
+        0x27C7: "RMmini3 ( Broadlink)",
+        0x27CC: "RMmini3 ( Broadlink)",
+        0x27CD: "RMmini3 ( Broadlink)",
+        0x27D0: "RMmini3 ( Broadlink)",
+        0x27D1: "RMmini3 ( Broadlink)",
+        0x27D3: "RMmini3 ( Broadlink)",
+        0x27DC: "RMmini3 ( Broadlink)",
+        0x27DE: "RMmini3 ( Broadlink)",
+        0x2712: "RMpro/pro+ ( Broadlink)",
+        0x272A: "RMpro ( Broadlink)",
+        0x273D: "RMpro ( Broadlink)",
+        0x277C: "RMhome ( Broadlink)",
+        0x2783: "RMhome ( Broadlink)",
+        0x2787: "RMpro ( Broadlink)",
+        0x278B: "RMplus ( Broadlink)",
+        0x2797: "RMpro+ ( Broadlink)",
+        0x279D: "RMpro+ ( Broadlink)",
+        0x27A1: "RMplus ( Broadlink)",
+        0x27A6: "RMplus ( Broadlink)",
+        0x27A9: "RMpro+ ( Broadlink)",
+        0x27C3: "RMpro+ ( Broadlink)",
+        0x5F36: "RMmini3 ( Broadlink)",
+        0x6507: "RMmini3 ( Broadlink)",
+        0x6508: "RMmini3 ( Broadlink)",
+        0x51DA: "RM4mini ( Broadlink)",
+        0x6070: "RM4Cmini ( Broadlink)",
+        0x610E: "RM4mini ( Broadlink)",
+        0x610F: "RM4Cmini ( Broadlink)",
+        0x62BC: "RM4mini ( Broadlink)",
+        0x62BE: "RM4Cmini ( Broadlink)",
+        0x6364: "RM4S ( Broadlink)",
+        0x648D: "RM4mini ( Broadlink)",
+        0x6539: "RM4Cmini ( Broadlink)",
+        0x653A: "RM4mini ( Broadlink)",
+        0x6026: "RM4pro ( Broadlink)",
+        0x6184: "RM4Cpro ( Broadlink)",
+        0x61A2: "RM4pro ( Broadlink)",
+        0x649B: "RM4pro ( Broadlink)",
+        0x653C: "RM4pro ( Broadlink)",
+        0x2714: "e-Sensor ( Broadlink)",
+        0x5043: "SB800TD ( Broadlink(OEM)",
+        0x504E: "LB1 ( Broadlink)",
+        0x606E: "SB500TD ( Broadlink(OEM)",
+        0x60C7: "LB1 ( Broadlink)",
+        0x60C8: "LB1 ( Broadlink)",
+        0x6112: "LB1 ( Broadlink)",
+        0xA4F4: "LB27R1 ( Broadlink)",
+        0x2722: "S2KIT ( Broadlink)",
+        0x4EAD: "HY02/HY03 ( Hysen)",
+        0x4E4D: "DT360E-45/20 ( Dooya)",
+        0x51E3: "BG800/BG900 ( BGElectrical)",
 
     }
     return name.get(deviceType, "Not Supported")
@@ -201,6 +266,7 @@ def getDeviceName(deviceType):
 
 def auto_int(x):
     return int(x, 0)
+
 
 def to_microseconds(bytes):
     result = []
@@ -218,6 +284,7 @@ def to_microseconds(bytes):
             break
     return result
 
+
 def durations_to_broadlink(durations):
     result = bytearray()
     result.append(IR_TOKEN)
@@ -232,6 +299,7 @@ def durations_to_broadlink(durations):
         result.append(num % 256)
     return result
 
+
 def format_durations(data):
     result = ''
     for i in range(0, len(data)):
@@ -240,23 +308,27 @@ def format_durations(data):
         result += ('+' if i % 2 == 0 else '-') + str(data[i])
     return result
 
+
 def parse_durations(str):
     result = []
     for s in str.split():
         result.append(abs(int(s)))
     return result
 
+
 def initDevice(dtype, host, mac):
     dtypeTmp = dtype
     if dtypeTmp == '0x6539':
-	    dtypeTmp = '0x610F'
+        dtypeTmp = '0x610F'
     _dtype = int(dtypeTmp, 0)
     _host = host
     _mac = bytearray.fromhex(mac)
     return broadlink.gendevice(_dtype, (_host, 80), _mac)
 
+
 def GetDevicesFilePath():
     return os.path.join(app.root_path, 'data', 'devices.json')
+
 
 def writeXml(_file):
     root = ET.Element("root")
@@ -269,37 +341,37 @@ def writeXml(_file):
 
 @app.get('/', include_in_schema=False)
 def devices(request: Request):
-    return templates.TemplateResponse('index.html', context={'request': request,'analytics':analytics_code, 'version': GetVersionFromFle()})
+    return templates.TemplateResponse('index.html', context={'request': request, 'analytics': analytics_code, 'version': GetVersionFromFle()})
 
 
 @app.get('/generator', include_in_schema=False)
 def generator(request: Request):
-    return templates.TemplateResponse('generator.html', context={'request': request,'analytics':analytics_code, 'version': GetVersionFromFle()})
+    return templates.TemplateResponse('generator.html', context={'request': request, 'analytics': analytics_code, 'version': GetVersionFromFle()})
 
 
 @app.get('/livolo', include_in_schema=False)
 def livolo(request: Request):
-    return templates.TemplateResponse('livolo.html', context={'request': request,'analytics':analytics_code, 'version': GetVersionFromFle()})
+    return templates.TemplateResponse('livolo.html', context={'request': request, 'analytics': analytics_code, 'version': GetVersionFromFle()})
 
 
 @app.get('/energenie', include_in_schema=False)
 def energenie(request: Request):
-    return templates.TemplateResponse('energenie.html', context={'request': request,'analytics':analytics_code, 'version': GetVersionFromFle()})
+    return templates.TemplateResponse('energenie.html', context={'request': request, 'analytics': analytics_code, 'version': GetVersionFromFle()})
 
 
 @app.get('/repeats', include_in_schema=False)
 def repeats(request: Request):
-    return templates.TemplateResponse('repeats.html', context={'request': request,'analytics':analytics_code, 'version': GetVersionFromFle()})
+    return templates.TemplateResponse('repeats.html', context={'request': request, 'analytics': analytics_code, 'version': GetVersionFromFle()})
 
 
 @app.get('/convert', include_in_schema=False)
 def convert(request: Request):
-    return templates.TemplateResponse('convert.html', context={'request': request,'analytics':analytics_code, 'version': GetVersionFromFle()})
+    return templates.TemplateResponse('convert.html', context={'request': request, 'analytics': analytics_code, 'version': GetVersionFromFle()})
 
 
 @app.get('/about', include_in_schema=False)
 def about(request: Request):
-    return templates.TemplateResponse('about.html', context={'request': request,'analytics':analytics_code, 'version': GetVersionFromFle()})
+    return templates.TemplateResponse('about.html', context={'request': request, 'analytics': analytics_code, 'version': GetVersionFromFle()})
 
 
 @app.get('/temperature', tags=["Commands"], summary="Read Temperature")
@@ -315,7 +387,7 @@ def temperature(request: Request, mac: str = "", host: str = "", type: str = "")
 
 
 @app.get('/ir/learn', tags=["Commands"], summary="Learn IR code")
-def learnir(request: Request, mac: str = "", host: str = "", type: str = "", command: str =""):
+def learnir(request: Request, mac: str = "", host: str = "", type: str = "", command: str = ""):
     logger.info("Learning IR Code for device: " + host)
     dev = initDevice(type, host, mac)
     dev.auth()
@@ -338,8 +410,10 @@ def learnir(request: Request, mac: str = "", host: str = "", type: str = "", com
     return JSONResponse('{"data":"' + learned + '","success":1,"message":"IR Data Received"}')
 
 # Send IR/RF
+
+
 @app.get('/command/send', tags=["Commands"], summary="Send IR/RF Command")
-def command(request: Request, mac: str = "", host: str = "", type: str = "", command: str =""):
+def command(request: Request, mac: str = "", host: str = "", type: str = "", command: str = ""):
     logger.info("Sending Command (IR/RF) using device: " + host)
     dev = initDevice(type, host, mac)
     logger.info("Sending command: " + command)
@@ -355,15 +429,15 @@ def command(request: Request, mac: str = "", host: str = "", type: str = "", com
 
 # Learn RF
 @app.get('/rf/learn', include_in_schema=False)
-def sweep(request: Request, mac: str = "", host: str = "", type: str = "", command: str =""):
+def sweep(request: Request, mac: str = "", host: str = "", type: str = "", command: str = ""):
     global _continu_to_sweep
     global _rf_sweep_message
     global _rf_sweep_status
     _continu_to_sweep = False
     _rf_sweep_message = ''
     _rf_sweep_status = False
-    logger.info("Device:" + host + " entering RF learning mode" )
-    dev = initDevice(type, host,mac)
+    logger.info("Device:" + host + " entering RF learning mode")
+    dev = initDevice(type, host, mac)
     dev.auth()
     logger.info("Device:" + host + " is sweeping for frequency")
     dev.sweep_frequency()
@@ -389,9 +463,10 @@ def sweep(request: Request, mac: str = "", host: str = "", type: str = "", comma
         _rf_sweep_message = "Click The Continue button"
 
     _rf_sweep_message = "To complete learning, single press the button you want to learn"
-    logger.info("To complete learning, single press the button you want to learn")
+    logger.info(
+        "To complete learning, single press the button you want to learn")
     _rf_sweep_status = False
-    logger.error("Device:" +host + " is searching for RF packets!")
+    logger.error("Device:" + host + " is searching for RF packets!")
     dev.find_rf_packet()
     start = time.time()
     while time.time() - start < TIMEOUT:
@@ -417,6 +492,7 @@ def sweep(request: Request, mac: str = "", host: str = "", type: str = "", comma
 
 # Get RF Learning state
 
+
 @app.get('/rf/status', include_in_schema=False)
 def rfstatus(request: Request):
     global _continu_to_sweep
@@ -425,6 +501,8 @@ def rfstatus(request: Request):
     return JSONResponse('{"_continu_to_sweep":"' + str(_continu_to_sweep) + '","_rf_sweep_message":"' + _rf_sweep_message + '","_rf_sweep_status":"' + str(_rf_sweep_status) + '" }')
 
 # Continue with RF Scan
+
+
 @app.get('/rf/continue', include_in_schema=False)
 def rfcontinue(request: Request):
     global _continu_to_sweep
@@ -469,17 +547,19 @@ def load_devices_from_file(request: Request):
 
 
 @app.get('/autodiscover', tags=["Devices"])
-def search_for_devices(request: Request,freshscan: str = "1"):
+def search_for_devices(request: Request, freshscan: str = "1"):
     _devices = ''
     if path.exists(GetDevicesFilePath()) and freshscan != "1":
         return load_devices_from_file(request)
     else:
         logger.info("Searcing for devices...")
         _devices = '['
-        devices = broadlink.discover(timeout=5, local_ip_address=local_ip_address, discover_ip_address="255.255.255.255")
+        devices = broadlink.discover(
+            timeout=5, local_ip_address=local_ip_address, discover_ip_address="255.255.255.255")
         for device in devices:
             if device.auth():
-                logger.info("New device detected: " + getDeviceName(device.devtype) + " (ip: " + device.host[0] +  ", mac: " + ''.join(format(x, '02x') for x in device.mac) +  ")")
+                logger.info("New device detected: " + getDeviceName(device.devtype) + " (ip: " +
+                            device.host[0] + ", mac: " + ''.join(format(x, '02x') for x in device.mac) + ")")
                 _devices = _devices + '{"name":"' + \
                     getDeviceName(device.devtype) + '",'
                 _devices = _devices + '"type":"' + \
@@ -488,7 +568,7 @@ def search_for_devices(request: Request,freshscan: str = "1"):
                 _devices = _devices + '"mac":"' + \
                     ''.join(format(x, '02x') for x in device.mac) + '"},'
 
-        if len(_devices)==1:
+        if len(_devices) == 1:
             _devices = _devices + ']'
             logger.debug("No Devices Found " + str(_devices))
         else:
@@ -497,30 +577,28 @@ def search_for_devices(request: Request,freshscan: str = "1"):
         return JSONResponse(_devices)
 
 
-
-
 @app.get('/device/ping', tags=["Devices"])
-def get_device_status(request: Request, host: str=""):
+def get_device_status(request: Request, host: str = ""):
     try:
-        if host =="":
+        if host == "":
             logger.error("Host must be a valid ip or hostname")
             return JSONResponse('{"status":"Host must be a valid ip or hostname","success":"0"}')
-        p = subprocess.Popen("fping -C1 -q "+ host +"  2>&1 | grep -v '-' | wc -l", stdout=subprocess.PIPE, shell=True)
+        p = subprocess.Popen(
+            "fping -C1 -q " + host + "  2>&1 | grep -v '-' | wc -l", stdout=subprocess.PIPE, shell=True)
         logger.debug(host)
         (output, err) = p.communicate()
         p_status = p.wait()
         logger.debug(str(output))
         status = re.findall('\d+', str(output))[0]
-        if status=="1":
+        if status == "1":
             return JSONResponse('{"status":"online","success":"1"}')
         else:
             return JSONResponse('{"status":"offline","success":"1"}')
     except Exception as e:
-        logger.error("Error pinging "+ host + " Error: " + str(e))
+        logger.error("Error pinging " + host + " Error: " + str(e))
         return JSONResponse('{"status":"Error pinging ' + host + '" ,"success":"0"}')
 
 # endregion API Methods
-
 
 
 # Start Application

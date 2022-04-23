@@ -42,20 +42,33 @@ from starlette_exporter import PrometheusMiddleware, handle_metrics
 ENABLE_GOOGLE_ANALYTICS = os.getenv("ENABLE_GOOGLE_ANALYTICS")
 # endregion
 
-# Get Lan IP
+ip_format_regex = r"\b(((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]))\b"
 
 
-def GetLocalIP():
-    p = subprocess.Popen(
-        "hostname -I | awk '{print $1}'", stdout=subprocess.PIPE, shell=True)
+def validate_ip(ip):
+    return True if re.search(ip_format_regex, ip) else False
+
+
+def parse_ip_list(iplist):
+    parsed_ip_list = re.findall(ip_format_regex, iplist)
+    return [item[0] for item in parsed_ip_list]
+
+
+def get_local_ip_list():
+    p = subprocess.Popen("hostname -I", stdout=subprocess.PIPE, shell=True)
     (output, err) = p.communicate()
     p_status = p.wait()
-    ip = re.findall(r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b", str(output))[0]
-    logger.debug(ip)
-    return str(ip)
+    result = parse_ip_list(str(output))
+    logger.debug(f"Locally discovered IP List {result}")
+    return result
 
 
-local_ip_address = GetLocalIP()
+def get_env_ip_list():
+    env_ip_list = os.getenv("DISCOVERY_IP_LIST", "")
+    result = parse_ip_list(str(env_ip_list))
+    logger.debug(f"Environement discovered IP List {result}")
+    return result
+
 
 # Get version from version file for dynamic change
 
@@ -88,15 +101,32 @@ tags_metadata = [
 parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
 parser.add_argument("--timeout", type=int, default=5,
                     help="timeout to wait for receiving discovery responses")
-parser.add_argument("--ip", default=local_ip_address,
-                    help="ip address to use in the discovery")
+parser.add_argument("--ip", action='append', default=[],
+                    help="ip address(es) to use in the discovery. Use as --ip <IP_A> --ip <IP_B>")
 parser.add_argument("--dst-ip", default="255.255.255.255",
                     help="destination ip address to use in the discovery")
 args = parser.parse_args()
 
+# Assign proper ip adresses to perform discovery
+discovery_ip_address_list = []
+env_ip_address_list = get_env_ip_list()
+if args.ip:
+    invalid_ip_list = [ip for ip in args.ip if not validate_ip(ip)]
+    if len(invalid_ip_list) > 0:
+        logger.error(f"Given IP(s) ({str(invalid_ip_list)}) are invalid")
+        exit(-1)
+    discovery_ip_address_list = args.ip
+elif env_ip_address_list:
+    discovery_ip_address_list = env_ip_address_list
+else:
+    discovery_ip_address_list = get_local_ip_list()
+
+logger.info(f"Broadlink will try to discover devices on the following IP interfaces: {discovery_ip_address_list}")
+
+
 # endregion
 
-# region Declaring Flask app
+# region Declaring FastAPI app
 
 app = FastAPI(title="Apprise API", description="Send multi channel notification using single endpoint", version=GetVersionFromFle(
 ), openapi_tags=tags_metadata, contact={"name": "Tomer Klein", "email": "tomer.klein@gmail.com", "url": "https://github.com/t0mer/broadlinkmanager-docker"})
@@ -548,33 +578,31 @@ def load_devices_from_file(request: Request):
 
 @app.get('/autodiscover', tags=["Devices"])
 def search_for_devices(request: Request, freshscan: str = "1"):
-    _devices = ''
+    result = []
     if path.exists(GetDevicesFilePath()) and freshscan != "1":
         return load_devices_from_file(request)
     else:
         logger.info("Searcing for devices...")
-        _devices = '['
-        devices = broadlink.discover(
-            timeout=5, local_ip_address=local_ip_address, discover_ip_address="255.255.255.255")
-        for device in devices:
-            if device.auth():
-                logger.info("New device detected: " + getDeviceName(device.devtype) + " (ip: " +
-                            device.host[0] + ", mac: " + ''.join(format(x, '02x') for x in device.mac) + ")")
-                _devices = _devices + '{"name":"' + \
-                    getDeviceName(device.devtype) + '",'
-                _devices = _devices + '"type":"' + \
-                    format(hex(device.devtype)) + '",'
-                _devices = _devices + '"ip":"' + device.host[0] + '",'
-                _devices = _devices + '"mac":"' + \
-                    ''.join(format(x, '02x') for x in device.mac) + '"},'
+        for interface in discovery_ip_address_list:
+            logger.info(f"Checking devices on interface assigned with IP: {interface}")
+            try:
+                devices = broadlink.discover(
+                    timeout=5, local_ip_address=interface, discover_ip_address="255.255.255.255")
+                for device in devices:
+                    if device.auth():
+                        mac_address = ''.join(format(x, '02x') for x in device.mac)
+                        logger.info(f"New device detected: {getDeviceName(device.devtype)} (ip: {device.host[0]}  mac: {mac_address})")
+                        deviceinfo = {}
+                        deviceinfo["name"] = getDeviceName(device.devtype)
+                        deviceinfo["type"] = format(hex(device.devtype))
+                        deviceinfo["ip"] = device.host[0]
+                        deviceinfo["mac"] = mac_address
+                        result.append(deviceinfo)
+            except OSError as error:
+                logger.error(f"Error while trying to discover addresses from ip ({interface}). Error says: {error}")
 
-        if len(_devices) == 1:
-            _devices = _devices + ']'
-            logger.debug("No Devices Found " + str(_devices))
-        else:
-            _devices = _devices[:-1] + ']'
-            logger.debug("Devices Found " + str(_devices))
-        return JSONResponse(_devices)
+        logger.debug(f"Devices Found: {str(result)}")
+        return JSONResponse(result)
 
 
 @app.get('/device/ping', tags=["Devices"])

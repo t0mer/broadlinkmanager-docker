@@ -1,0 +1,37 @@
+name: "Create Release"
+
+on:
+  workflow_dispatch:
+  # workflow_run:
+  #   workflows: [SonarCloud Scan]
+  #   types:
+  #     - completed  
+
+jobs:
+  on-success:
+    name: "Release"
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        
+      - name: Get semantic version from file
+        id: getSemver
+        run: echo "::set-output name=semver::$(cat broadlinkmanager/VERSION | tr -d ' \t\n\r' )"
+     
+
+      - name: Create Tag
+        uses: negz/create-tag@v1
+        with:
+          version: "${{ steps.getSemver.outputs.semver }}"
+          message: "${{ steps.getSemver.outputs.semver }}"
+          token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: "Create Release"
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "${{ steps.getSemver.outputs.semver }}"
+          prerelease: false
+          title: "Development Build - ${{ steps.getSemver.outputs.semver }}"

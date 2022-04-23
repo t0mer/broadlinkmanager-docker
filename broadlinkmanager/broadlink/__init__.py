@@ -15,7 +15,7 @@ from .sensor import a1
 from .switch import bg1, mp1, sp1, sp2, sp2s, sp3, sp3s, sp4, sp4b
 
 broadlink_oem="Broadlink (OEM)"
-broadlink = "Broadlink--"
+broadlink = "Broadlink"
 
 SUPPORTED_TYPES = {
     sp1: {

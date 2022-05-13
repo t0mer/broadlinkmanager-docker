@@ -4,7 +4,7 @@
  <a href="https://www.paypal.com/paypalme/techblogil?locale.x=he_IL" target="_blank"><img src="http://khrolenok.ru/support_paypal.png" alt="PayPal" width="250" height="48"></a>
 </p>
 
-# BroadlinkManager  ![Broadlink Manager](https://img.shields.io/docker/pulls/techblog/broadlinkmanager.svg)
+# BroadlinkManager  ![Broadlink Manager](https://img.shields.io/docker/pulls/techblog/broadlinkmanager.svg) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=broadlinkmanager&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=broadlinkmanager) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=broadlinkmanager&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=broadlinkmanager)
 
 BroadlinkManager is a [FastAPI](https://fastapi.tiangolo.com/) powered, easy to use system that hepls you to work with Broadlink Devices.
 With Broadlink manager you can:

@@ -1,5 +1,5 @@
 name: "Broadlink Manager"
-description: "Broadlink Manager add-on!"
+description: "Easely learn and send IR/RF Command"
 version: "5.6.1"
 slug: "broadlink_manager"
 arch:

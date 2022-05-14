@@ -1,6 +1,6 @@
 name: "Broadlink Manager"
 description: "Easely learn and send IR/RF Command"
-version: "5.6.4"
+version: "5.6.5"
 slug: "broadlink_manager"
 arch:
   - aarch64

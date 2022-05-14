@@ -20,7 +20,15 @@
         integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ"
         crossorigin="anonymous"></script>
     
-    {{ analytics }}
+   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-131664523-2"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'UA-131664523-2');
+    </script>
+
     <style>
         td {
             word-break: break-all;

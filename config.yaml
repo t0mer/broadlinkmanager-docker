@@ -8,5 +8,11 @@ arch:
   - armhf
   - armv7
 startup: before
+host_network: true
 ports:
   7020/tcp: 7020
+options:
+  envvars: [
+    { "ENABLE_GOOGLE_ANALYTICS": "False" }
+  ]
+webui: http://[HOST]:[PORT:7020]

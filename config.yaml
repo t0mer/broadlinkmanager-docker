@@ -1,6 +1,6 @@
 name: "Broadlink Manager"
 description: "Broadlink Manager add-on!"
-version: "5.6.0"
+version: "5.6.1"
 slug: "broadlink_manager"
 arch:
   - aarch64

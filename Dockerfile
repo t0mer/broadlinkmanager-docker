@@ -3,7 +3,7 @@ FROM techblog/fastapi:latest
 LABEL maintainer="tomer.klein@gmail.com"
 
 ENV PYTHONIOENCODING=utf-8
-ENV ENABLE_GOOGLE_ANALYTICS=True
+ENV ENABLE_GOOGLE_ANALYTICS=False
 
 RUN apt update && \
     apt install fping -yqq && \

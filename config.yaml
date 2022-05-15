@@ -1,6 +1,7 @@
 name: "Broadlink Manager"
 description: "Easely learn and send IR/RF Command"
-version: "5.6.5"
+image: ghcr.io/hassio-addons/aircast/{arch}
+version: "5.6.6"
 slug: "broadlink_manager"
 arch:
   - aarch64
@@ -12,7 +13,6 @@ host_network: true
 ports:
   7020/tcp: 7020
 options:
-  envvars: [
-    { "ENABLE_GOOGLE_ANALYTICS": "False" }
-  ]
+  environment:
+    - ENABLE_GOOGLE_ANALYTICS: False
 webui: http://[HOST]:[PORT:7020]

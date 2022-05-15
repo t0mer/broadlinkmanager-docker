@@ -11,7 +11,7 @@ startup: before
 host_network: true
 ports:
   7020/tcp: 7020
-environment:
-  - ENABLE_GOOGLE_ANALYTICS: "False" 
+# environment:
+#   - ENABLE_GOOGLE_ANALYTICS: "False" 
 webui: http://[HOST]:[PORT:7020]
 url: https://github.com/t0mer/broadlinkmanager-docker

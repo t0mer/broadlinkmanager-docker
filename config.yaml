@@ -1,6 +1,5 @@
 name: "Broadlink Manager"
 description: "Easely learn and send IR/RF Command"
-image: hub.docker.com/techblog/broadlinkmanager
 version: "5.7.0"
 slug: "broadlink_manager"
 arch:

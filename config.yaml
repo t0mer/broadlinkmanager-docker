@@ -1,13 +1,13 @@
 name: "Broadlink Manager"
 description: "Easely learn and send IR/RF Command"
-version: "5.7.5"
+version: "5.7.6"
 slug: "broadlink_manager"
 panel_icon: mdi:remote
 hassio_api: true
 hassio_role: manager
-ingress: true
-ingress_port: 7020
-ingress_stream: false
+# ingress: true
+# ingress_port: 7020
+# ingress_stream: false
 arch:
   - aarch64
   - amd64

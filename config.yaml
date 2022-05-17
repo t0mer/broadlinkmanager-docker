@@ -3,9 +3,11 @@ description: "Easely learn and send IR/RF Command"
 version: "5.7.4"
 slug: "broadlink_manager"
 panel_icon: mdi:remote
-# ingress: true
-# ingress_port: 7020
-# ingress_stream: true
+hassio_api: true
+hassio_role: manager
+ingress: true
+ingress_port: 7020
+ingress_stream: true
 arch:
   - aarch64
   - amd64

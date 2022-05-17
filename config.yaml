@@ -1,5 +1,6 @@
 name: "Broadlink Manager"
 description: "Easely learn and send IR/RF Command"
+codenotary: tomer.klein@gmail.com
 version: "5.7.15"
 slug: "broadlink_manager"
 panel_icon: mdi:remote
@@ -22,5 +23,13 @@ ports_description:
   7020/tcp: Web interface
 webui: http://[HOST]:[PORT:7020]
 url: https://github.com/t0mer/broadlinkmanager-docker
+options:
+  certfile: fullchain.pem
+  keyfile: privkey.pem
+  ssl: false
 schema:
+  certfile: str
+  keyfile: str
+  ssl: bool
   log_level: list(trace|debug|info|notice|warning|error|fatal)?
+

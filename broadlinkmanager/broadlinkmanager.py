@@ -374,6 +374,11 @@ def devices(request: Request):
     return templates.TemplateResponse('index.html', context={'request': request, 'analytics': analytics_code, 'version': GetVersionFromFle()})
 
 
+@app.get('/index', include_in_schema=False)
+def home(request: Request):
+    return devices(request)
+
+
 @app.get('/generator', include_in_schema=False)
 def generator(request: Request):
     return templates.TemplateResponse('generator.html', context={'request': request, 'analytics': analytics_code, 'version': GetVersionFromFle()})

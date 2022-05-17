@@ -1,7 +1,7 @@
 name: "Broadlink Manager"
 description: "Easely learn and send IR/RF Command"
 codenotary: tomer.klein@gmail.com
-version: "5.7.20"
+version: "5.8.0"
 slug: "broadlink_manager"
 panel_icon: mdi:remote
 panel_admin: false
@@ -18,7 +18,7 @@ arch:
 startup: before
 host_network: true
 ports:
-  7020/tcp: null
+  7020/tcp: 7020
 ports_description:
   7020/tcp: Web interface
 webui: http://[HOST]:[PORT:7020]

@@ -1,13 +1,13 @@
 name: "Broadlink Manager"
 description: "Easely learn and send IR/RF Command"
-version: "5.7.9"
+version: "5.7.10"
 slug: "broadlink_manager"
 panel_icon: mdi:remote
 panel_admin: false
 hassio_api: true
 hassio_role: manager
 ingress: true
-ingress_port: 7021
+ingress_port: 7020
 ingress_stream: true
 arch:
   - aarch64
@@ -17,9 +17,9 @@ arch:
 startup: before
 host_network: true
 ports:
-  7020/tcp: 7020
+  7020/tcp: null
 ports_description:
-  7020/tcp: Web interface (Not required for Ingress)
+  7020/tcp: Web interface
 webui: http://[HOST]:[PORT:7020]
 url: https://github.com/t0mer/broadlinkmanager-docker
 schema:

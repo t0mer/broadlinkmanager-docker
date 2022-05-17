@@ -6,7 +6,7 @@ $(document).ready(function () {
     $("#scan").hide();
     $("#bdevices").html('');
     $("#loading").show();
-    getDevices('/autodiscover');
+    getDevices('autodiscover');
   });
 
   $('#load').click(function () {
@@ -15,7 +15,7 @@ $(document).ready(function () {
     $("#loading").show();
     $.ajax(
       {
-        url: '/devices/load',
+        url: 'devices/load',
         dataType: "json",
         success: function (data) {
 
@@ -37,7 +37,7 @@ $(document).ready(function () {
   });
 
   if (localStorage.getItem('devices') == null)
-    getDevices('/autodiscover?freshscan=0');
+    getDevices('autodiscover?freshscan=0');
   else
     showDevices(localStorage.getItem('devices'));
 
@@ -97,7 +97,7 @@ $(document).ready(function () {
 
     $.ajax(
       {
-        url: '/rf/continue',
+        url: 'rf/continue',
         dataType: "json",
         success: function (data) {
           $(this).hide();
@@ -285,7 +285,7 @@ function ping(host, status_id) {
   
   $.ajax(
     {
-      url: '/device/ping?host=' + host,
+      url: 'device/ping?host=' + host,
       success: function (data) {
         data = $.parseJSON(data);
         if (data.success == "1" && data.status == "online") {

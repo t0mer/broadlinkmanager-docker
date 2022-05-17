@@ -1,6 +1,6 @@
 name: "Broadlink Manager"
 description: "Easely learn and send IR/RF Command"
-version: "5.7.12"
+version: "5.7.15"
 slug: "broadlink_manager"
 panel_icon: mdi:remote
 panel_admin: false

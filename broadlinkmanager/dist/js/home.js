@@ -255,7 +255,7 @@ function learnrf(_type, _host, _mac) {
 function getRfStatus() {
   $.ajax(
     {
-      url: '/rf/status',
+      url: 'rf/status',
       dataType: "json",
       success: function (data) {
         data = $.parseJSON(data);

@@ -1,12 +1,12 @@
 name: "Broadlink Manager"
 description: "Easely learn and send IR/RF Command"
 codenotary: tomer.klein@gmail.com
-version: "5.8.1"
+version: "5.8.2"
 slug: "broadlink_manager"
 panel_icon: mdi:remote
-panel_admin: false
-hassio_api: true
-hassio_role: manager
+# panel_admin: false
+# hassio_api: true
+# hassio_role: manager
 ingress: true
 ingress_port: 7020
 ingress_stream: true

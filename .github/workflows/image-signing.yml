@@ -4,32 +4,24 @@ name: "Image Signing"
 on:
   workflow_dispatch:
 
+
 jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
-      - name: Login to DockerHub
+      -  name: Login to DockerHub
         uses: docker/login-action@v1 
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      
-      - name: cosign-installer
-        uses: sigstore/cosign-installer@v2.0.0
-        
-      - name: Write signing key to disk
-        run: 'echo "$KEY" > cosign.key'
-        shell: bash
-        env:
-          KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
-      
-      - name: Sign the published Docker image
-        env:
-          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
-        run: cosign sign --key cosign.key techblog/broadlinkmanager:latest
 
-      - name: Sign the published Docker image
-        env:
-          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
-        run: cosign sign --key cosign.key techblog/broadlinkmanager:8.5.2
-        
+      - name: Sign and push docker image
+        uses: sudo-bot/action-docker-sign@latest
+        with:
+          image-ref: "techblog/broadlinkmanager:latest"
+          # Example: 51f9a39f3db4ddaaf9174fca69f41fb01a04a4dfb5125ef115feecb93d19efa6
+          private-key-id: "${{ secrets.DOCKER_PRIVATE_KEY_ID }}"
+          # The contents from: ~/.docker/trust/private/51f9a39f3db4ddaaf9174fca69f41fb01a04a4dfb5125ef115feecb93d19efa6.key)
+          private-key: ${{ secrets.DOCKER_PRIVATE_KEY }}
+          # Example: myPassw0rdChangeMeReplaceMe
+          private-key-passphrase: ${{ secrets.DOCKER_PRIVATE_KEY_PASSPHRASE }}     

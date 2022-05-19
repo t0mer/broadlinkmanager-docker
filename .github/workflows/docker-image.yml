@@ -37,8 +37,7 @@ jobs:
         run: echo "::set-output name=semver::$(cat broadlinkmanager/VERSION | tr -d ' \t\n\r' )"
 
       
-      -
-        name: Build and push
+      - name: Build and push
         uses: docker/build-push-action@v2
         with:
           context: .
@@ -47,3 +46,23 @@ jobs:
           tags: |
             techblog/broadlinkmanager:latest
             techblog/broadlinkmanager:${{ steps.getSemver.outputs.semver }}       
+
+      - name: cosign-installer
+        uses: sigstore/cosign-installer@v2.0.0
+        
+      - name: Write signing key to disk
+        run: 'echo "$KEY" > cosign.key'
+        shell: bash
+        env:
+          KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+      
+      - name: Sign the latest published version
+        env:
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: cosign sign --key cosign.key techblog/broadlinkmanager:latest
+
+      - name: Sign the semver published version
+        env:
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: cosign sign --key cosign.key techblog/broadlinkmanager:${{ steps.getSemver.outputs.semver }} 
+        

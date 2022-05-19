@@ -47,22 +47,14 @@ jobs:
             techblog/broadlinkmanager:latest
             techblog/broadlinkmanager:${{ steps.getSemver.outputs.semver }}       
 
-      - id: docker_meta
-        uses: docker/metadata-action@v3.6.0
+      
+      - name: Sign and push docker image
+        uses: sudo-bot/action-docker-sign@latest
         with:
-          images: techblog/broadlinkmanager
-          tags: type=sha,format=long
-
-      - name: Install Cosign
-        uses: sigstore/cosign-installer@main
-        
-      - name: Sign image with a key
-        run: |
-          echo ${COSIGN_KEY} > /tmp/my_cosign.key && \
-          cosign sign --key /tmp/my_cosign.key ${TAGS}
-        env:
-          TAGS: ${{ steps.docker_meta.outputs.tags }}
-          COSIGN_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}
-          COSIGN_PASSWORD: ${{secrets.COSIGN_PASSWORD}}
-
-        
+          image-ref: "techblog/broadlinkmanager:latest"
+          # Example: 51f9a39f3db4ddaaf9174fca69f41fb01a04a4dfb5125ef115feecb93d19efa6
+          private-key-id: "${{ secrets.DOCKER_PRIVATE_KEY_ID }}"
+          # The contents from: ~/.docker/trust/private/51f9a39f3db4ddaaf9174fca69f41fb01a04a4dfb5125ef115feecb93d19efa6.key)
+          private-key: ${{ secrets.DOCKER_PRIVATE_KEY }}
+          # Example: myPassw0rdChangeMeReplaceMe
+          private-key-passphrase: ${{ secrets.DOCKER_PRIVATE_KEY_PASSPHRASE }}     

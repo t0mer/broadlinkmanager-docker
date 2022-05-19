@@ -45,6 +45,8 @@ ENABLE_GOOGLE_ANALYTICS = os.getenv("ENABLE_GOOGLE_ANALYTICS")
 ip_format_regex = r"\b(((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]))\b"
 
 
+logger.info("OS: " + os.name)
+
 def validate_ip(ip):
     return True if re.search(ip_format_regex, ip) else False
 

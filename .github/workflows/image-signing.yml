@@ -10,12 +10,16 @@ jobs:
     steps:
       - name: cosign-installer
         uses: sigstore/cosign-installer@v2.0.0
+
       - name: Write signing key to disk
         run: 'echo "$KEY" > cosign.key'
         shell: bash
         env:
           KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
 
+      - name: cat key file
+        run: 'cat cosign.key'
+ 
       - name: Sign the published Docker image
         env:
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}

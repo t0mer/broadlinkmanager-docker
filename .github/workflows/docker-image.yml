@@ -47,22 +47,22 @@ jobs:
             techblog/broadlinkmanager:latest
             techblog/broadlinkmanager:${{ steps.getSemver.outputs.semver }}       
 
-      - name: cosign-installer
-        uses: sigstore/cosign-installer@v2.0.0
-        
-      - name: Write signing key to disk
-        run: 'echo "$KEY" > cosign.key'
-        shell: bash
-        env:
-          KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
-      
-      - name: Sign the latest published version
-        env:
-          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
-        run: cosign sign --key cosign.key techblog/broadlinkmanager:latest
+      - id: docker_meta
+        uses: docker/metadata-action@v3.6.0
+        with:
+          images: techblog/broadlinkmanager
+          tags: type=sha,format=long
 
-      - name: Sign the semver published version
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@main
+        
+      - name: Sign image with a key
+        run: |
+          echo ${COSIGN_KEY} > /tmp/my_cosign.key && \
+          cosign sign --key /tmp/my_cosign.key ${TAGS}
         env:
-          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
-        run: cosign sign --key cosign.key techblog/broadlinkmanager:${{ steps.getSemver.outputs.semver }} 
+          TAGS: ${{ steps.docker_meta.outputs.tags }}
+          COSIGN_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}
+          COSIGN_PASSWORD: ${{secrets.COSIGN_PASSWORD}}
+
         

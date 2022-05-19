@@ -8,6 +8,8 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
+      - name: cosign-installer
+        uses: sigstore/cosign-installer@v2.0.0
       - name: Write signing key to disk
         run: 'echo "$KEY" > cosign.key'
         shell: bash

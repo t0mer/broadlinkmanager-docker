@@ -291,6 +291,17 @@ def getDeviceName(deviceType):
         0x4EAD: "HY02/HY03 ( Hysen)",
         0x4E4D: "DT360E-45/20 ( Dooya)",
         0x51E3: "BG800/BG900 ( BGElectrical)",
+        0xA569: "SP4L-UK ( Broadlink)",
+        0x520C: "RM4 mini ( Broadlink)",
+        0x5212: "RM4 TV (mate Broadlink)",
+        0x5216: "RM4 mini (Broadlink)",
+        0x520B: "RM4 pro (Broadlink)",
+        0x5218: "RM4C pro (Broadlink)",
+        0x5209: "RM4 TV mate (Broadlink)",
+        0x5213: "RM4 pro (Broadlink)",
+        0x644C: "LB27 R1 (Broadlink)",        
+        0x644E: "LB26 R1 (Broadlink)",
+        0xA5F7: "LB27 R1 (Broadlink)",
 
     }
     return name.get(deviceType, "Not Supported")

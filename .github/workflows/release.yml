@@ -24,14 +24,14 @@ jobs:
       - name: Create Tag
         uses: negz/create-tag@v1
         with:
-          version: "${{ steps.getSemver.outputs.semver }}"
-          message: "${{ steps.getSemver.outputs.semver }}"
+          version: "${{ steps.getSemver.outputs.semver }}-dev"
+          message: "${{ steps.getSemver.outputs.semver }}-dev"
           token: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: "Create Release"
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "${{ steps.getSemver.outputs.semver }}"
+          automatic_release_tag: "${{ steps.getSemver.outputs.semver }}-dev"
           prerelease: false
-          title: "Development Build - ${{ steps.getSemver.outputs.semver }}"
+          title: "Development Build - ${{ steps.getSemver.outputs.semver }}-dev"

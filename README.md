@@ -30,72 +30,171 @@ With Broadlink manager you can:
 
 
 ## Supported Devices and Models
- #### sp2:  
-    0x2711,  # SP2
-    0x2719,  0x7919, 0x271a, 0x791a,  # Honeywell SP2
-    0x2720,  # SPMini
-    0x753e,  # SP3
-    0x7D00,  # OEM branded SP3
-    0x947a,  0x9479,  # SP3S
-    0x2728,  # SPMini2
-    0x2733,  0x273e,  # OEM branded SPMini
-    0x7530,  0x7546, 0x7918,  # OEM branded SPMini2
-    0x7D0D,  # TMall OEM SPMini3
-    0x2736,  # SPMiniPlus
-   
-### rm:
-    0x2712,  # RM2
-    0x2737,  # RM Mini
-    0x273d,  # RM Pro Phicomm
-    0x2783,  # RM2 Home Plus
-    0x277c,  # RM2 Home Plus GDT
-    0x272a,  # RM2 Pro Plus
-    0x2787,  # RM2 Pro Plus2
-    0x279d,  # RM2 Pro Plus3
-    0x27a9,  # RM2 Pro Plus_300
-    0x278b,  # RM2 Pro Plus BL
-    0x2797,  # RM2 Pro Plus HYC
-    0x27a1,  # RM2 Pro Plus R1
-    0x27a6,  # RM2 Pro PP
-    0x278f,  # RM Mini Shate
-    0x27c2,  # RM Mini 3
-    0x27d1,  # new RM Mini3
-    0x27de,  # RM Mini 3 (C)
+###    sp1: 
+        0x0000: #"SP1", "Broadlink"
     
-### rm4:
-    0x51da,  # RM4 Mini
-    0x5f36,  # RM Mini 3
-    0x6026,  # RM4 Pro
-    0x6070,  # RM4c Mini
-    0x61a2,  # RM4 Pro
-    0x610e,  # RM4 Mini
-    0x610f,  # RM4c
-    0x62bc,  # RM4 Mini
-    0x62be,  # RM4c Mini
-    0x6539,  # RM4c Mini
-    0x653c,  # RM4 Pro
-
-### a1:
-    0x2714,  # A1
-        
-### mp1:
-    0x4EB5,  # MP1
-    0x4EF7,  # Honyar oem mp1
-            
-### hysen:
-    0x4EAD,  # Hysen controller
-
-### S1C:
-    0x2722,  # S1 (SmartOne Alarm Kit)
-
-### dooya:
-    0x4E4D,  # Dooya DT360E (DOOYA_CURTAIN_V2)
-        
-### bg1:
-    0x51E3,  # BG Electrical Smart Power Socket
-        
-### lb1:
-    0x60c8,  # RGB Smart Bulb
+###    sp2: 
+        0x2717: #"NEO", "Ankuoo"
+        0x2719: #"SP2-compatible", "Honeywell"
+        0x271A: #"SP2-compatible", "Honeywell"
+        0x2720: #"SP mini", "Broadlink"
+        0x2728: #"SP2-compatible", "URANT"
+        0x273E: #"SP mini", "Broadlink"
+        0x7530: #"SP2", "Broadlink #OEM)"
+        0x7539: #"SP2-IL", "Broadlink #OEM)"
+        0x753E: #"SP mini 3", "Broadlink"
+        0x7540: #"MP2", "Broadlink"
+        0x7544: #"SP2-CL", "Broadlink"
+        0x7546: #"SP2-UK/BR/IN", "Broadlink #OEM)"
+        0x7547: #"SC1", "Broadlink"
+        0x7918: #"SP2", "Broadlink #OEM)"
+        0x7919: #"SP2-compatible", "Honeywell"
+        0x791A: #"SP2-compatible", "Honeywell"
+        0x7D0D: #"SP mini 3", "Broadlink #OEM)"
+    
+ ###   sp2s: 
+        0x2711: #"SP2", "Broadlink"
+        0x2716: #"NEO PRO", "Ankuoo"
+        0x271D: #"Ego", "Efergy"
+        0x2736: #"SP mini+", "Broadlink"
+    
+###    sp3: 
+        0x2733: #"SP3", "Broadlink"
+        0x7D00: #"SP3-EU", "Broadlink #OEM)"
+    
+###    sp3s: 
+        0x9479: #"SP3S-US", "Broadlink"
+        0x947A: #"SP3S-EU", "Broadlink"
+    
+###    sp4: 
+        0x7568: #"SP4L-CN", "Broadlink"
+        0x756C: #"SP4M", "Broadlink"
+        0x756F: #"MCB1", "Broadlink"
+        0x7579: #"SP4L-EU", "Broadlink"
+        0x757B: #"SP4L-AU", "Broadlink"
+        0x7583: #"SP mini 3", "Broadlink"
+        0x7587: #"SP4L-UK", "Broadlink"
+        0x7D11: #"SP mini 3", "Broadlink"
+        0xA569: #"SP4L-UK", "Broadlink"
+        0xA56A: #"MCB1", "Broadlink"
+        0xA56B: #"SCB1E", "Broadlink"
+        0xA56C: #"SP4L-EU", "Broadlink"
+        0xA589: #"SP4L-UK", "Broadlink"
+        0xA5D3: #"SP4L-EU", "Broadlink"
+    
+###    sp4b: 
+        0x5115: #"SCB1E", "Broadlink"
+        0x51E2: #"AHC/U-01", "BG Electrical"
+        0x6111: #"MCB1", "Broadlink"
+        0x6113: #"SCB1E", "Broadlink"
+        0x618B: #"SP4L-EU", "Broadlink"
+        0x6489: #"SP4L-AU", "Broadlink"
+        0x648B: #"SP4M-US", "Broadlink"
+        0x648C: #"SP4L-US", "Broadlink"
+        0x6494: #"SCB2", "Broadlink"
+    
+###    rmmini: 
+        0x2737: #"RM mini 3", "Broadlink"
+        0x278F: #"RM mini", "Broadlink"
+        0x27C2: #"RM mini 3", "Broadlink"
+        0x27C7: #"RM mini 3", "Broadlink"
+        0x27CC: #"RM mini 3", "Broadlink"
+        0x27CD: #"RM mini 3", "Broadlink"
+        0x27D0: #"RM mini 3", "Broadlink"
+        0x27D1: #"RM mini 3", "Broadlink"
+        0x27D3: #"RM mini 3", "Broadlink"
+        0x27DC: #"RM mini 3", "Broadlink"
+        0x27DE: #"RM mini 3", "Broadlink"
+    
+###    rmpro: 
+        0x2712: #"RM pro/pro+", "Broadlink"
+        0x272A: #"RM pro", "Broadlink"
+        0x273D: #"RM pro", "Broadlink"
+        0x277C: #"RM home", "Broadlink"
+        0x2783: #"RM home", "Broadlink"
+        0x2787: #"RM pro", "Broadlink"
+        0x278B: #"RM plus", "Broadlink"
+        0x2797: #"RM pro+", "Broadlink"
+        0x279D: #"RM pro+", "Broadlink"
+        0x27A1: #"RM plus", "Broadlink"
+        0x27A6: #"RM plus", "Broadlink"
+        0x27A9: #"RM pro+", "Broadlink"
+        0x27C3: #"RM pro+", "Broadlink"
+    
+###    rmminib: 
+        0x5F36: #"RM mini 3", "Broadlink"
+        0x6507: #"RM mini 3", "Broadlink"
+        0x6508: #"RM mini 3", "Broadlink"
+    
+###    rm4mini: 
+        0x51DA: #"RM4 mini", "Broadlink"
+        0x5209: #"RM4 TV mate", "Broadlink"
+        0x520C: #"RM4 mini", "Broadlink"
+        0x520D: #"RM4C mini", "Broadlink"
+        0x5211: #"RM4C mate", "Broadlink"
+        0x5212: #"RM4 TV mate", "Broadlink"
+        0x5216: #"RM4 mini", "Broadlink"
+        0x521C: #"RM4 mini", "Broadlink"
+        0x6070: #"RM4C mini", "Broadlink"
+        0x610E: #"RM4 mini", "Broadlink"
+        0x610F: #"RM4C mini", "Broadlink"
+        0x62BC: #"RM4 mini", "Broadlink"
+        0x62BE: #"RM4C mini", "Broadlink"
+        0x6364: #"RM4S", "Broadlink"
+        0x648D: #"RM4 mini", "Broadlink"
+        0x6539: #"RM4C mini", "Broadlink"
+        0x653A: #"RM4 mini", "Broadlink"
+    
+###    rm4pro: 
+        0x520B: #"RM4 pro", "Broadlink"
+        0x5213: #"RM4 pro", "Broadlink"
+        0x5218: #"RM4C pro", "Broadlink"
+        0x6026: #"RM4 pro", "Broadlink"
+        0x6184: #"RM4C pro", "Broadlink"
+        0x61A2: #"RM4 pro", "Broadlink"
+        0x649B: #"RM4 pro", "Broadlink"
+        0x653C: #"RM4 pro", "Broadlink"
+    
+###    a1: 
+        0x2714: #"e-Sensor", "Broadlink"
+    
+###    mp1: 
+        0x4EB5: #"MP1-1K4S", "Broadlink"
+        0x4EF7: #"MP1-1K4S", "Broadlink #OEM)"
+        0x4F1B: #"MP1-1K3S2U", "Broadlink #OEM)"
+        0x4F65: #"MP1-1K3S2U", "Broadlink"
+    
+###    lb1: 
+        0x5043: #"SB800TD", "Broadlink #OEM)"
+        0x504E: #"LB1", "Broadlink"
+        0x606E: #"SB500TD", "Broadlink #OEM)"
+        0x60C7: #"LB1", "Broadlink"
+        0x60C8: #"LB1", "Broadlink"
+        0x6112: #"LB1", "Broadlink"
+        0x644B: #"LB1", "Broadlink"
+        0x644C: #"LB27 R1", "Broadlink"        
+        0x644E: #"LB26 R1", "Broadlink"
+    
+###    lb2: 
+        0xA4F4: #"LB27 R1", "Broadlink"
+        0xA5F7: #"LB27 R1", "Broadlink"
+    
+###    S1C: 
+        0x2722: #"S2KIT", "Broadlink"
+    
+###    s3:  
+        0xA59C:#"S3", "Broadlink"
+        0xA64D:#"S3", "Broadlink"
+    
+###    hysen: 
+        0x4EAD: #"HY02/HY03", "Hysen"
+    
+###    dooya: 
+        0x4E4D: #"DT360E-45/20", "Dooya"
+    
+###    bg1: 
+        0x51E3: #"BG800/BG900", "BG Electrical"
+    
 
 ## Usage
 ### Run from hub

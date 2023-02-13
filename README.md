@@ -229,3 +229,8 @@ http://docker-ip:7020
 [![Base64 and Hex Conversation](https://github.com/t0mer/broadlinkmanager-docker/blob/master/screenshots/Hex-Base64-Hex%20converting.PNG?raw=true "Base64 and Hex Conversation")](https://github.com/t0mer/broadlinkmanager-docker/blob/master/screenshots/Hex-Base64-Hex%20converting.PNG?raw=true "Base64 and Hex Conversation")
 # Donation
 <br>
+
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=t0mer/ims-custom-component,t0mer/broadlinkmanager-docker&type=Date)](https://star-history.com/#t0mer/ims-custom-component&t0mer/broadlinkmanager-docker&Date)

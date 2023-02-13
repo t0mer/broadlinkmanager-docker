@@ -231,6 +231,4 @@ http://docker-ip:7020
 <br>
 
 
-## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=t0mer/ims-custom-component,t0mer/broadlinkmanager-docker&type=Date)](https://star-history.com/#t0mer/ims-custom-component&t0mer/broadlinkmanager-docker&Date)

@@ -207,7 +207,6 @@ services:
     image: techblog/broadlinkmanager
     network_mode: host
     container_name: broadlinkmanager
-    restart: always
     restart: unless-stopped
     volumes:
       - ./broadlinkmanager:/opt/broadlinkmanager/data

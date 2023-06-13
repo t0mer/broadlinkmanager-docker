@@ -126,7 +126,7 @@ class hysen(Device):
     # Sensor mode (SEN) sensor = 0 for internal sensor, 1 for external sensor,
     # 2 for internal control temperature, external limit temperature. Factory default: 0.
     # Set temperature range for external sensor (OSV) osv = 5..99. Factory default: 42C
-    # Deadzone for floor temprature (dIF) dif = 1..9. Factory default: 2C
+    # Deadzone for floor temperature (dIF) dif = 1..9. Factory default: 2C
     # Upper temperature limit for internal sensor (SVH) svh = 5..99. Factory default: 35C
     # Lower temperature limit for internal sensor (SVL) svl = 5..99. Factory default: 5C
     # Actual temperature calibration (AdJ) adj = -0.5. Precision 0.1C

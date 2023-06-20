@@ -289,6 +289,8 @@ def getDeviceName(deviceType):
         0x6112: "LB1 ( Broadlink)",
         0xA4F4: "LB27R1 ( Broadlink)",
         0x2722: "S2KIT ( Broadlink)",
+        0xA59C: "S3 (Broadlink)",
+        0xA64D: "S3 (Broadlink)",
         0x4EAD: "HY02/HY03 ( Hysen)",
         0x4E4D: "DT360E-45/20 ( Dooya)",
         0x51E3: "BG800/BG900 ( BGElectrical)",

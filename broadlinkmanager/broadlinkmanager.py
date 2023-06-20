@@ -68,7 +68,7 @@ def get_local_ip_list():
 def get_env_ip_list():
     env_ip_list = os.getenv("DISCOVERY_IP_LIST", "")
     result = parse_ip_list(str(env_ip_list))
-    logger.debug(f"Environement discovered IP List {result}")
+    logger.debug(f"Environment discovered IP List {result}")
     return result
 
 
@@ -98,7 +98,7 @@ tags_metadata = [
 ]
 
 
-# region Parsing Default arguments for descovery
+# region Parsing Default arguments for discovery
 
 parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
 parser.add_argument("--timeout", type=int, default=5,
@@ -109,7 +109,7 @@ parser.add_argument("--dst-ip", default="255.255.255.255",
                     help="destination ip address to use in the discovery")
 args = parser.parse_args()
 
-# Assign proper ip adresses to perform discovery
+# Assign proper ip addresses to perform discovery
 discovery_ip_address_list = []
 env_ip_address_list = get_env_ip_list()
 if args.ip:
@@ -579,7 +579,7 @@ async def save_devices_to_file(request: Request):
         return JSONResponse('{"success":1}')
     except Exception as ex:
         logger.error(
-            "Writing devices to file faild has faild with the following exception: " + str(ex))
+            "Writing devices to file failed with the following exception: " + str(ex))
         return JSONResponse('{"success":0}')
 
 # Load Devices from json file
@@ -594,7 +594,7 @@ def load_devices_from_file(request: Request):
         return JSONResponse(f.read().replace("'", "\""))
     except Exception as ex:
         logger.error(
-            "Loading devices from file has faild with the following exception: " + str(ex))
+            "Loading devices from file has failed with the following exception: " + str(ex))
         return JSONResponse('{"success":0}')
 
 # Search for devices in the network
@@ -606,7 +606,7 @@ def search_for_devices(request: Request, freshscan: str = "1"):
     if path.exists(GetDevicesFilePath()) and freshscan != "1":
         return load_devices_from_file(request)
     else:
-        logger.info("Searcing for devices...")
+        logger.info("Searching for devices...")
         for interface in discovery_ip_address_list:
             logger.info(f"Checking devices on interface assigned with IP: {interface}")
             try:
@@ -655,5 +655,5 @@ def get_device_status(request: Request, host: str = ""):
 
 # Start Application
 if __name__ == '__main__':
-    logger.info("Broadllink Manager is up and running")
+    logger.info("Broadlink Manager is up and running")
     uvicorn.run(app, host="0.0.0.0", port=7020)

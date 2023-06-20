@@ -9,7 +9,7 @@
 BroadlinkManager is a [FastAPI](https://fastapi.tiangolo.com/) powered, easy to use system that hepls you to work with Broadlink Devices.
 With Broadlink manager you can:
 - Scan your network for devices.
-- Lean and send IR or RF codes
+- Learn and send IR or RF codes
 - Random generate RF codes
 - Change repeats for exisiting codes (IR/EF)
 

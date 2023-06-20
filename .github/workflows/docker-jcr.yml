@@ -1,0 +1,42 @@
+name: "JCR Docker Build"
+
+on:
+  workflow_dispatch:
+
+
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      
+      - name: Get current date
+        id: getDate
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+
+      - name: Get semantic version from file
+        id: getSemver
+        run: echo "::set-output name=semver::$(cat broadlinkmanager/VERSION | tr -d ' \t\n\r' )"
+
+
+      - name: Login to JFrog JCR
+        run: |
+          echo ${{ secrets.JCR_USERNAME }} | docker login ${{ secrets.JCR_URL }} --username ${{ secrets.JCR_USERNAME }} --password ${{ secrets.JCR_TOKEN }}
+
+
+      - name: Build and push Docker image
+        run: |
+          IMAGE_NAME=${{ secrets.JCR_URL }}/docker/broadlinkmanager
+
+          # Build and push latest
+          docker buildx create --use
+          docker buildx build --platform linux/amd64,linux/arm64 --push -t $IMAGE_NAME:latest -t $IMAGE_NAME:${{ steps.getSemver.outputs.semver }} .

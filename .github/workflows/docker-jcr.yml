@@ -29,21 +29,7 @@ jobs:
 
       - name: Login to JFrog JCR
         run: |
-          echo ${{ secrets.JCR_URL }} >> /tmp/test.txt
-
-        
-      - name: Login to JFrog JCR
-        run: |
-          cat /tmp/test.txt
-
-        
-
-
-
-      - name: Login to JFrog JCR
-        run: |
           echo ${{ secrets.JCR_USERNAME }} | docker login ${{ secrets.JCR_URL }} --username ${{ secrets.JCR_USERNAME }} --password ${{ secrets.JCR_TOKEN }}
-
 
       - name: Build and push Docker image
         run: |

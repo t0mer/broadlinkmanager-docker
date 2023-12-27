@@ -27,6 +27,11 @@ jobs:
         id: getSemver
         run: echo "::set-output name=semver::$(cat broadlinkmanager/VERSION | tr -d ' \t\n\r' )"
 
+      - name: Login to JFrog JCR
+        run: |
+          echo ${{ secrets.JCR_URL }}
+
+
 
       - name: Login to JFrog JCR
         run: |

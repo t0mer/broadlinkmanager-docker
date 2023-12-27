@@ -29,7 +29,14 @@ jobs:
 
       - name: Login to JFrog JCR
         run: |
-          echo ${{ secrets.JCR_URL }}
+          echo ${{ secrets.JCR_URL }} >> /tmp/test.txt
+
+        
+      - name: Login to JFrog JCR
+        run: |
+          cat /tmp/test.txt
+
+        
 
 
 

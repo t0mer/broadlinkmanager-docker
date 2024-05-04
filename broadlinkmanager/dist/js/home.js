@@ -20,7 +20,7 @@ $(document).ready(function () {
         success: function (data) {
 
           showDevices(data);
-          localStorage.setItem('devices', data);
+          localStorage.setItem('devices',JSON.stringify(data));
 
 
         },
@@ -119,7 +119,7 @@ function getDevices(url) {
       url: url,
       dataType: "json",
       success: function (data) {
-        localStorage.setItem('devices', data);
+        localStorage.setItem('devices', JSON.stringify(data));
         showDevices(data);
 
       },

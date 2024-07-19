@@ -102,7 +102,7 @@ class SqliteConnector:
             return {"message": f"Failed to delete the code. {str(e)}","success":0}
     # Selects
 
-    def select_code(self,code_id, api_call=False):
+    def select_code(self,code_id, api_call=True):
         try:
             logger.warning(code_id)
             self.open_connection()
@@ -122,7 +122,7 @@ class SqliteConnector:
         finally:
             self.close_connection()
 
-    def select_all_codes(self, api_call=False):
+    def select_all_codes(self, api_call=True):
         try:
             self.open_connection()
             cursor = self.conn.cursor()

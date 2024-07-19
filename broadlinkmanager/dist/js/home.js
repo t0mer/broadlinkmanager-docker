@@ -177,6 +177,8 @@ function learnIr(_type, _host, _mac) {
           $("#message").text(data.message);
           $("#message").css('color', 'green');
           $('#data').val(hexToBase64(data.data));
+          $('#extend').show();
+          console.log(data.type);
         }
         $("#scaning").hide();
         $("#data-wrapper").show();
@@ -234,6 +236,8 @@ function learnrf(_type, _host, _mac) {
         else {
           $('#data').val(hexToBase64(data.data));
           $('#message').text("RF Scan Completed Successfully");
+          console.log(data.type);
+          $('#extend').show();
         }
 
         clearInterval(RfStatus);

@@ -654,23 +654,23 @@ def get_device_status(request: Request, host: str = ""):
 # endregion API Methods
 
 
-@app.post("/code")
+@app.post("/api/code")
 def create_code(code: Code):
     return db.insert_code(code.CodeType, code.CodeName, code.Code)
 
-@app.put("/code/{code_id}")
+@app.put("/api/code/{code_id}")
 def update_code(code_id: int, code: Code):
     return db.update_code(code_id, code.CodeType, code.CodeName, code.Code)
 
-@app.delete("/code/{code_id}")
+@app.delete("/api/code/{code_id}")
 def delete_code(code_id: int):
     return db.delete_code(code_id)
 
-@app.get("/code/{code_id}")
+@app.get("/api/code/{code_id}")
 def read_code(code_id: int):
     return db.select_code(code_id)
 
-@app.get("/codes")
+@app.get("/api/codes")
 def read_all_codes():
     return db.select_all_codes(api_call=True)
 

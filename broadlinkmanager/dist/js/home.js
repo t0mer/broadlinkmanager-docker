@@ -78,7 +78,7 @@ $(document).ready(function(){
 
     // $('#extend').hide();
     // button.prop("disabled", false);
-    button.prop("disabled", true);
+    button.prop("disabled", false);
   });
 
   $("#rescan").click(function () {

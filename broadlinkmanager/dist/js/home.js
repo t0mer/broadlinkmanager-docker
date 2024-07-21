@@ -1,6 +1,85 @@
 var con = 1;
 var RfStatus;
-$(document).ready(function () {
+$(document).ready(function(){
+
+
+  $("#savecode").click(function() {
+    var button = $(this);
+    button.prop("disabled", true);
+    var codeType = $('#code_type').val().trim();
+    var codeName = $('#codename').val().trim();
+    var code = $('#data').val().trim();
+
+    if (!codeType || !codeName || !code) {
+        Swal.fire({
+            toast: true,
+            position: 'bottom-end',
+            icon: 'error',
+            title: 'Code Type, Code Name, and Code cannot be empty',
+            showConfirmButton: false,
+            timer: 3000
+        });
+        return;
+    }
+
+
+
+    var codeData = {
+      CodeType: codeType,
+      CodeName: codeName,
+      Code: code
+    };
+
+    $.ajax({
+      url: '/api/code',
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify(codeData),
+      success: function (response) {
+        console.log(response.success);
+        if(response.success==1){
+          Swal.fire({
+            toast: true,
+            position: 'bottom-end',
+            icon: 'success',
+            title: response.message,
+            showConfirmButton: false,
+            timer: 3000
+        });
+        $('#data').val('');
+        $('#codename').val('');
+        $('#message').text('');
+        $('#extend').hide();
+        }
+        else{
+          Swal.fire({
+            toast: true,
+            position: 'bottom-end',
+            icon: 'error',
+            title: 'Error creating code: ' + response.message,
+            showConfirmButton: false,
+            timer: 3000
+        });
+        }
+        
+      },
+      error: function (xhr, status, error) {
+        console.log(error);
+      }
+      
+    });
+    // // Disable the button
+    // button.prop("disabled", true);
+
+    // // Your click event logic here
+    // console.log("This will be displayed only once.");
+
+    // // Re-enable the button after 2-3 seconds (e.g., 2500 milliseconds)
+
+    // $('#extend').hide();
+    // button.prop("disabled", false);
+    button.prop("disabled", false);
+  });
 
   $("#rescan").click(function () {
     $("#scan").hide();
@@ -20,7 +99,7 @@ $(document).ready(function () {
         success: function (data) {
 
           showDevices(data);
-          localStorage.setItem('devices',JSON.stringify(data));
+          localStorage.setItem('devices', JSON.stringify(data));
 
 
         },
@@ -109,7 +188,7 @@ $(document).ready(function () {
 
   });
 
-AutoPing();
+  AutoPing();
 
 });
 
@@ -127,7 +206,7 @@ function getDevices(url) {
 
       }
     });
-    GetDeviceStatus();
+  GetDeviceStatus();
 }
 
 function showDevices(data) {
@@ -177,6 +256,8 @@ function learnIr(_type, _host, _mac) {
           $("#message").text(data.message);
           $("#message").css('color', 'green');
           $('#data').val(hexToBase64(data.data));
+          $('#extend').show();
+          $('#code_type').val(data.type);
         }
         $("#scaning").hide();
         $("#data-wrapper").show();
@@ -234,6 +315,8 @@ function learnrf(_type, _host, _mac) {
         else {
           $('#data').val(hexToBase64(data.data));
           $('#message').text("RF Scan Completed Successfully");
+          $('#code_type').val(data.type);
+          $('#extend').show();
         }
 
         clearInterval(RfStatus);
@@ -277,12 +360,12 @@ function GetDeviceStatus() {
   $('td[id^="_ip_"]').each(function () {
     ip = $(this).text();
     status_id = '#_status_' + $(this).attr('id').match(/\d+/)[0];
-    ping(ip,status_id);
+    ping(ip, status_id);
   });
 }
 
 function ping(host, status_id) {
-  
+
   $.ajax(
     {
       url: 'device/ping?host=' + host,
@@ -309,7 +392,7 @@ function ping(host, status_id) {
 }
 
 function AutoPing() {
-  timer = setInterval(function() {
+  timer = setInterval(function () {
     GetDeviceStatus();
   }, 60000);
 }
@@ -346,7 +429,7 @@ function Table2Json() {
     dataType: 'json'
   });
 
-  
+
 
 
 }

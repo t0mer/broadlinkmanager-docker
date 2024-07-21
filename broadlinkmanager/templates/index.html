@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="./css/adminlte.min.css">
     <!-- Google Font: Source Sans Pro -->
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/themes@5.0.10/bootstrap-4/bootstrap-4.css">
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script src="./js/hex.js"></script>
 
@@ -99,6 +100,18 @@
     .ok {
         color: green;
     }
+
+
+    .swal2-container {
+        z-index: 9999; /* Ensure toast appears above other content */
+    }
+    .swal2-toast-top {
+        position: fixed;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        margin-top: 10px;
+    }
     </style>
 
 
@@ -128,6 +141,12 @@
                             <a href="index" class="nav-link active">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p>Devices</p>
+                            </a>
+                        </li>
+                        <li class="nav-item" title="Manage saved codes">
+                            <a href="saved" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Saved codes</p>
                             </a>
                         </li>
                         <li class="nav-item" title="Generate Random RF Codes (433/315)">
@@ -306,8 +325,9 @@
     <!-- AdminLTE App -->
     <script src="./js/adminlte.min.js"></script>
     <!-- AdminLTE for demo purposes -->
-    <script src="./js/home.js?V=4"></script>
+    <script src="./js/home.js?V=5"></script>
     <script src="./js/clipboard.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <div class="modal fade" id="modal-lg" style="z-index: 99999;">
         <div class="modal-dialog modal-lg">
@@ -378,6 +398,12 @@
                     <input type="hidden" id="device_name" />
                     <input type="hidden" id="device_mac" />
                     <input type="hidden" id="device_ip" />
+                </div>
+                <div class="modal-footer justify-content-between" id="extend" style="display:none">
+                    <span>Save as: </span><input type="text" id="codename"  style="width:78%;"/>
+                    <button type="button" class="btn btn-info" id="savecode" title="Save the code for later">Save
+                    </button>
+                    <input type="hidden" id="code_type" />
                 </div>
             </div>
             <!-- /.modal-content -->

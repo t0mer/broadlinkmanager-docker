@@ -1,19 +1,16 @@
 # region Importing
 
 import os
-import json
 import subprocess
 import time
 import broadlink
 import argparse
-import datetime
 import re
-import shutil
 import uvicorn
-import socket
-import aiofiles
+from code import Code
 from os import environ, path
 from json import dumps
+from sqliteconnector import SqliteConnector
 from broadlink.exceptions import ReadError, StorageError
 from broadlink import exceptions as e
 from broadlink.const import DEFAULT_BCAST_ADDR, DEFAULT_PORT, DEFAULT_TIMEOUT
@@ -38,13 +35,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
 from starlette_exporter import PrometheusMiddleware, handle_metrics
 
+
 # Use to disable Google analytics code
 ENABLE_GOOGLE_ANALYTICS = os.getenv("ENABLE_GOOGLE_ANALYTICS")
 # endregion
 
 ip_format_regex = r"\b(((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]))\b"
 
-
+db = SqliteConnector()
+db.create_tables()
 logger.info("OS: " + os.name)
 
 def validate_ip(ip):
@@ -430,6 +429,11 @@ def about(request: Request):
     return templates.TemplateResponse('about.html', context={'request': request, 'analytics': analytics_code, 'version': GetVersionFromFle()})
 
 
+@app.get('/saved', include_in_schema=False)
+def about(request: Request):
+    return templates.TemplateResponse('saved.html', context={'request': request, 'analytics': analytics_code, 'version': GetVersionFromFle()})
+
+
 @app.get('/temperature', tags=["Commands"], summary="Read Temperature")
 def temperature(request: Request, mac: str = "", host: str = "", type: str = ""):
     logger.info("Getting temperature for device: " + host)
@@ -460,10 +464,10 @@ def learnir(request: Request, mac: str = "", host: str = "", type: str = "", com
             break
     else:
         logger.error("No IR Data")
-        return JSONResponse('{"data":"","success":0,"message":"No Data Received"}')
+        return JSONResponse('{"data":"","success":0,"message":"No Data Received","type":"ir"}')
     learned = ''.join(format(x, '02x') for x in bytearray(data))
     logger.info("IR Learn success")
-    return JSONResponse('{"data":"' + learned + '","success":1,"message":"IR Data Received"}')
+    return JSONResponse('{"data":"' + learned + '","success":1,"message":"IR Data Received","type":"ir"}')
 
 # Send IR/RF
 
@@ -507,7 +511,7 @@ def sweep(request: Request, mac: str = "", host: str = "", type: str = "", comma
         logger.error("Device:" + host + " RF Frequency not found!")
         _rf_sweep_message = "RF Frequency not found!"
         dev.cancel_sweep_frequency()
-        return JSONResponse('{"data":"RF Frequency not found!","success":0}')
+        return JSONResponse('{"data":"RF Frequency not found!","success":0,"type":"rf"}')
 
     _rf_sweep_message = "Found RF Frequency - 1 of 2!"
     logger.info("Device:" + host + " Found RF Frequency - 1 of 2!")
@@ -536,7 +540,7 @@ def sweep(request: Request, mac: str = "", host: str = "", type: str = "", comma
     else:
         logger.error("Device:" + host + " No Data Found!")
         _rf_sweep_message = "No Data Found"
-        return JSONResponse('{"data":"No Data Found"}')
+        return JSONResponse('{"data":"No Data Found","type":"rf","type":"rf"}')
 
     _rf_sweep_message = "Found RF Frequency - 2 of 2!"
     logger.info("Device:" + host + " Found RF Frequency - 2 of 2!")
@@ -544,7 +548,7 @@ def sweep(request: Request, mac: str = "", host: str = "", type: str = "", comma
     _rf_sweep_message = "RF Scan Completed Successfully"
     logger.info("Device:" + host + " RF Scan Completed Successfully")
     time.sleep(1)
-    return JSONResponse('{"data":"' + learned + '"}')
+    return JSONResponse('{"data":"' + learned + '","type":"rf"}')
 
 # Get RF Learning state
 
@@ -653,6 +657,28 @@ def get_device_status(request: Request, host: str = ""):
         return JSONResponse('{"status":"Error pinging ' + host + '" ,"success":"0"}')
 
 # endregion API Methods
+
+
+@app.post("/api/code")
+def create_code(code: Code):
+    return db.insert_code(code.CodeType, code.CodeName, code.Code)
+
+@app.put("/api/code/{code_id}")
+def update_code(code_id: int, code: Code):
+    return db.update_code(code_id, code.CodeType, code.CodeName, code.Code)
+
+@app.delete("/api/code/{code_id}")
+def delete_code(code_id: int):
+    return db.delete_code(code_id)
+
+@app.get("/api/code/{code_id}")
+def read_code(code_id: int):
+    return db.select_code(code_id)
+
+@app.get("/api/codes")
+def read_all_codes():
+    return db.select_all_codes(api_call=True)
+
 
 
 # Start Application

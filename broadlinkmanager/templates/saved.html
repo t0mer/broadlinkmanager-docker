@@ -1,0 +1,352 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Broadlink Manager ({{ version }})| Controll Your broadlink Devices</title>
+    <link rel="icon" type="image/png" href="./img/broadlink.png">
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="./css/all.min.css">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="./css/adminlte.min.css">
+    <!-- Google Font: Source Sans Pro -->
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+    <!-- DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/themes@5.0.10/bootstrap-4/bootstrap-4.css">
+    <style>
+        .swal2-container {
+            z-index: 9999;
+        }
+
+        .swal2-toast-top {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body class="hold-transition sidebar-mini layout-boxed">
+    <!-- Site wrapper -->
+    <div class="wrapper">
+
+        <!-- Main Sidebar Container -->
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+            <!-- Brand Logo -->
+            <a href="index" class="brand-link">
+                <img src="./img/broadlink.png" alt="Broadlink Manager" class="brand-image img-circle elevation-3"
+                    style="opacity: .8">
+                <span class="brand-text font-weight-light">Broadlink Manager</span>
+            </a>
+            <!-- Sidebar -->
+            <div class="sidebar">
+
+                <nav class="mt-2">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+                        data-accordion="false">
+
+                        <li class="nav-item" title="List Existing Devices, send and learn codes etc.">
+                            <a href="index" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Devices</p>
+                            </a>
+                        </li>
+                        <li class="nav-item" title="Manage saved codes">
+                            <a href="saved" class="nav-link active">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Saved codes</p>
+                            </a>
+                        </li>
+                        <li class="nav-item" title="Generate Random RF Codes (433/315)">
+                            <a href="generator" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Code Generator</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="livolo" class="nav-link" title="Generate Random Livolo Code">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Livolo Code Generator</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="energenie" class="nav-link" title="Generate Random Energenie Socket Set">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Energenie Code Generator</p>
+                            </a>
+                        </li>
+                        <li class="nav-item" title="Change number of repeats in existing code (also works for IR codes)">
+                            <a href="repeats" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Change Repeats</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="convert" class="nav-link" title="Hex and Base64 Conversation">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Convert Hex-Base64</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="about" class="nav-link" title="About Broadlink Manager">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>About Broadlink Manager</p>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <!-- /.sidebar-menu -->
+            </div>
+            <!-- /.sidebar -->
+        </aside>
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <!-- Content Header (Page header) -->
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <h1>Saved Codes</h1>
+                        </div>
+
+                    </div>
+                </div><!-- /.container-fluid -->
+            </section>
+            <!-- Main content -->
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-12">
+                            <!-- Default box -->
+                            <div class="card">
+                                <div class="card-body">
+                                    <div id="random-code-section">
+                                        <div class="card-body">
+                                            <div class="card-body col-12">
+                                                <h3>Manage saved codes</h3>
+                                            </div>
+                                            <div class="table-responsive mt-4">
+                                                <table id="codesTable" class="table table-striped table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Name</th>
+                                                            <th>Type</th>
+                                                            <th>Code</th>
+                                                            <th>Actions</th>
+                                                            <th style="display: none;">CodeId</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="restable"></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    You are welcome to contribute: <a
+                                        href="https://github.com/t0mer/broadlinkmanager-docker">https://github.com/t0mer/broadlinkmanager-docker</a>
+                                </div>
+                            </div>
+                            <!-- /.card-body -->
+                            <!-- /.card-footer-->
+                            <!-- /.card -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- /.content -->
+        </div>
+        <!-- /.content-wrapper -->
+        <footer class="main-footer">
+            <div class="float-right d-none d-sm-block">
+                <b>Version</b> ({{ version }})
+            </div>
+            <strong>Copyright &copy; 2014-2019 <a href="http://adminlte.io">AdminLTE.io</a>.</strong> All rights
+            reserved.
+        </footer>
+        <!-- Control Sidebar -->
+        <aside class="control-sidebar control-sidebar-dark">
+            <!-- Control sidebar content goes here -->
+        </aside>
+        <!-- /.control-sidebar -->
+    </div>
+    <!-- ./wrapper -->
+    <!-- jQuery -->
+    <script src="./js/jquery.min.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="./js/bootstrap.bundle.min.js"></script>
+    <!-- AdminLTE App -->
+    <script src="./js/adminlte.min.js"></script>
+    <!-- AdminLTE for demo purposes -->
+    <script src="./js/demo.js"></script>
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Custom Script -->
+    <script>
+        $(document).ready(function () {
+            var table = $('#codesTable').DataTable();
+
+            // Load data into the table
+            $.ajax({
+                url: '/api/codes/', // Change this to your API endpoint
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    data.forEach(function (item) {
+                        table.row.add([
+                            item.CodeName,
+                            item.CodeType,
+                            item.Code,
+                            '<button class="edit"><i class="fas fa-edit"></i></button><button class="save" style="display:none;"><i class="fas fa-save"></i></button><button class="delete"><i class="fas fa-trash-alt"></i></button>',
+                            '<span style="display:none;">' + item.CodeId + '</span>'
+                        ]).draw(false);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top',
+                        customClass: {
+                            toast: 'swal2-toast-top'
+                        },
+                        icon: 'error',
+                        title: 'Error loading data: ' + xhr.responseText,
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                }
+            });
+
+            // Handle edit button
+            $('#codesTable').on('click', '.edit', function () {
+                var row = $(this).closest('tr');
+                row.find('td:not(:last-child)').each(function (index) {
+                    var cell = $(this);
+                    if (index < 3) { // Skip the last cell (actions)
+                        var content = cell.text();
+                        cell.html('<input type="text" value="' + content + '">');
+                    }
+                });
+                row.find('.edit').hide();
+                row.find('.save').show();
+            });
+
+            // Handle save button
+            $('#codesTable').on('click', '.save', function () {
+                var row = $(this).closest('tr');
+                var data = {
+                    CodeId: row.find('td:eq(4) span').text(),
+                    CodeName: row.find('td:eq(0) input').val(),
+                    CodeType: row.find('td:eq(1) input').val(),
+                    Code: row.find('td:eq(2) input').val()
+                };
+
+                $.ajax({
+                    url: '/api/code/' + data.CodeId, // Change this to your API endpoint
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    success: function (response) {
+                        row.find('td:not(:last-child)').each(function (index) {
+                            var cell = $(this);
+                            if (index < 3) { // Skip the last cell (actions)
+                                var input = cell.find('input');
+                                cell.text(input.val());
+                            }
+                        });
+                        row.find('.edit').show();
+                        row.find('.save').hide();
+                        Swal.fire({
+                            toast: true,
+                            position: 'top',
+                            customClass: {
+                                toast: 'swal2-toast-top'
+                            },
+                            icon: 'success',
+                            title: 'Code updated successfully',
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top',
+                            customClass: {
+                                toast: 'swal2-toast-top'
+                            },
+                            icon: 'error',
+                            title: 'Error updating code: ' + xhr.responseText,
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                    }
+                });
+            });
+
+            // Handle delete button
+            $('#codesTable').on('click', '.delete', function () {
+                var row = $(this).closest('tr');
+                var codeId = row.find('td:eq(4) span').text();
+
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'You won\'t be able to revert this!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/api/code/' + codeId, // Change this to your API endpoint
+                            type: 'DELETE',
+                            success: function (response) {
+                                table.row(row).remove().draw(false);
+                                Swal.fire({
+                                    toast: true,
+                                    position: 'top',
+                                    customClass: {
+                                        toast: 'swal2-toast-top'
+                                    },
+                                    icon: 'success',
+                                    title: 'Code deleted successfully',
+                                    showConfirmButton: false,
+                                    timer: 3000
+                                });
+                            },
+                            error: function (xhr, status, error) {
+                                Swal.fire({
+                                    toast: true,
+                                    position: 'top',
+                                    customClass: {
+                                        toast: 'swal2-toast-top'
+                                    },
+                                    icon: 'error',
+                                    title: 'Error deleting code: ' + xhr.responseText,
+                                    showConfirmButton: false,
+                                    timer: 3000
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

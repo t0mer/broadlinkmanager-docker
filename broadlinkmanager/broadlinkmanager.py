@@ -429,6 +429,11 @@ def about(request: Request):
     return templates.TemplateResponse('about.html', context={'request': request, 'analytics': analytics_code, 'version': GetVersionFromFle()})
 
 
+@app.get('/saved', include_in_schema=False)
+def about(request: Request):
+    return templates.TemplateResponse('saved.html', context={'request': request, 'analytics': analytics_code, 'version': GetVersionFromFle()})
+
+
 @app.get('/temperature', tags=["Commands"], summary="Read Temperature")
 def temperature(request: Request, mac: str = "", host: str = "", type: str = ""):
     logger.info("Getting temperature for device: " + host)

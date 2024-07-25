@@ -71,6 +71,12 @@ def get_env_ip_list():
     return result
 
 
+def get_static_ip_list():
+    static_ip_list = os.getenv("STATIC_IP_LIST", "")
+    result = parse_ip_list(str(static_ip_list))
+    logger.debug(f"Environment static IP List {result}")
+    return result
+
 # Get version from version file for dynamic change
 
 
@@ -123,6 +129,10 @@ else:
     discovery_ip_address_list = get_local_ip_list()
 
 logger.info(f"Broadlink will try to discover devices on the following IP interfaces: {discovery_ip_address_list}")
+
+# Assign static ips to check without discovery.
+static_ip_adress_list = get_static_ip_list()
+logger.info(f"Broadlink will try to access following devices directly: {static_ip_adress_list}")
 
 
 # endregion
@@ -613,23 +623,32 @@ def search_for_devices(request: Request, freshscan: str = "1"):
         return load_devices_from_file(request)
     else:
         logger.info("Searching for devices...")
+        devices = []
         for interface in discovery_ip_address_list:
             logger.info(f"Checking devices on interface assigned with IP: {interface}")
             try:
-                devices = broadlink.discover(
-                    timeout=5, local_ip_address=interface, discover_ip_address="255.255.255.255")
-                for device in devices:
-                    if device.auth():
-                        mac_address = ''.join(format(x, '02x') for x in device.mac)
-                        logger.info(f"New device detected: {getDeviceName(device.devtype)} (ip: {device.host[0]}  mac: {mac_address})")
-                        deviceinfo = {}
-                        deviceinfo["name"] = getDeviceName(device.devtype)
-                        deviceinfo["type"] = format(hex(device.devtype))
-                        deviceinfo["ip"] = device.host[0]
-                        deviceinfo["mac"] = mac_address
-                        result.append(deviceinfo)
+                devices.extend(broadlink.discover(timeout=5, local_ip_address=interface, discover_ip_address="255.255.255.255"))
             except OSError as error:
                 logger.error(f"Error while trying to discover addresses from ip ({interface}). Error says: {error}")
+
+        for static_ip in static_ip_adress_list:
+            logger.info(f"Checking device with static IP: {static_ip}")
+            try:
+                device = broadlink.hello(static_ip, timeout=5)
+                devices.append(device)
+            except Exception as e:
+                logger.error(f"Error while trying to connect to static ip ({static_ip}). Error says: {e}")
+
+        for device in devices:
+            if device.auth():
+                mac_address = ''.join(format(x, '02x') for x in device.mac)
+                logger.info(f"New device detected: {getDeviceName(device.devtype)} (ip: {device.host[0]}  mac: {mac_address})")
+                deviceinfo = {}
+                deviceinfo["name"] = getDeviceName(device.devtype)
+                deviceinfo["type"] = format(hex(device.devtype))
+                deviceinfo["ip"] = device.host[0]
+                deviceinfo["mac"] = mac_address
+                result.append(deviceinfo)
 
         logger.debug(f"Devices Found: {str(result)}")
         return JSONResponse(result)

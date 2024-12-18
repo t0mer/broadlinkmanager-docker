@@ -205,13 +205,14 @@ version: "3.6"
 services:
   broadlinkmanager:
     image: techblog/broadlinkmanager
-    network_mode: host
+    network_mode: host  # Necessary to use discovery mode.
     container_name: broadlinkmanager
     restart: unless-stopped
     volumes:
       - ./broadlinkmanager:/opt/broadlinkmanager/data
     environment:
       - ENABLE_GOOGLE_ANALYTICS=True #Optional, default is True, Set to False if you want to disable Google Analytics
+      - STATIC_IP_LIST=192.168.1.100,192.168.1.101 # Optional. Direct ip reference to controllers in another subnet or when host networking can not be used.
 
 ```
 Now open your browser and enter your docker container ip with port 7020:

@@ -115,6 +115,28 @@ $(document).ready(function(){
     Table2Json();
   });
 
+  $('#add_device_btn').click(function () {
+    var ip = $('#add_device_ip').val().trim();
+    if (!ip) {
+      Swal.fire({
+        toast: true,
+        position: 'bottom-end',
+        icon: 'error',
+        title: 'Please enter an IP address',
+        showConfirmButton: false,
+        timer: 3000
+      });
+      return;
+    }
+    addDeviceByIp(ip);
+  });
+
+  $('#add_device_ip').keypress(function (e) {
+    if (e.which == 13) {
+      $('#add_device_btn').click();
+    }
+  });
+
   if (localStorage.getItem('devices') == null)
     getDevices('autodiscover?freshscan=0');
   else
@@ -139,7 +161,7 @@ $(document).ready(function(){
     $("#data-wrapper").hide();
     $("#data").val('');
     RfStatus = setInterval(getRfStatus, 1000);
-    learnrf($("#device_type").val(), $("#device_ip").val(), $("#device_mac").val())
+    learnrf($("#device_type").val(), $("#device_ip").val(), $("#device_mac").val(), $("#rf_frequency").val())
 
   });
 
@@ -169,6 +191,12 @@ $(document).ready(function(){
 
   });
 
+  // Clear RF status polling when modal is closed
+  $('#modal-lg').on('hidden.bs.modal', function () {
+    clearInterval(RfStatus);
+    $("#scaning").hide();
+    $("#con").hide();
+  });
 
   new ClipboardJS('#copydata');
 
@@ -303,10 +331,14 @@ function sendcommand(_type, _host, _mac, _command) {
 
 }
 
-function learnrf(_type, _host, _mac) {
+function learnrf(_type, _host, _mac, _frequency) {
+  var url = 'rf/learn?type=' + _type + '&host=' + _host + '&mac=' + _mac;
+  if (_frequency && _frequency.trim() !== '') {
+    url += '&frequency=' + encodeURIComponent(_frequency.trim());
+  }
   $.ajax(
     {
-      url: 'rf/learn?type=' + _type + '&host=' + _host + '&mac=' + _mac,
+      url: url,
       dataType: "json",
       success: function (data) {
         data = $.parseJSON(data);
@@ -361,6 +393,83 @@ function GetDeviceStatus() {
     ip = $(this).text();
     status_id = '#_status_' + $(this).attr('id').match(/\d+/)[0];
     ping(ip, status_id);
+  });
+}
+
+function addDeviceByIp(ip) {
+  $('#add_device_btn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>&nbsp;&nbsp;Adding...');
+
+  $.ajax({
+    url: 'device/add?ip=' + encodeURIComponent(ip),
+    dataType: "json",
+    timeout: 15000,
+    success: function (data) {
+      $('#add_device_btn').prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;&nbsp;Add Device');
+
+      if (data.success == 1) {
+        // Add device to the table
+        var devices = localStorage.getItem('devices');
+        devices = devices ? JSON.parse(devices) : [];
+
+        // Check if device already exists
+        var exists = devices.some(function(d) { return d.mac === data.mac; });
+        if (exists) {
+          Swal.fire({
+            toast: true,
+            position: 'bottom-end',
+            icon: 'warning',
+            title: 'Device already in list',
+            showConfirmButton: false,
+            timer: 3000
+          });
+          return;
+        }
+
+        devices.push({
+          name: data.name,
+          type: data.type,
+          ip: data.ip,
+          mac: data.mac
+        });
+
+        localStorage.setItem('devices', JSON.stringify(devices));
+
+        // Refresh the display
+        $('#bdevices').html('');
+        showDevices(JSON.stringify(devices));
+
+        $('#add_device_ip').val('');
+
+        Swal.fire({
+          toast: true,
+          position: 'bottom-end',
+          icon: 'success',
+          title: 'Device added: ' + data.name,
+          showConfirmButton: false,
+          timer: 3000
+        });
+      } else {
+        Swal.fire({
+          toast: true,
+          position: 'bottom-end',
+          icon: 'error',
+          title: data.message || 'Failed to add device',
+          showConfirmButton: false,
+          timer: 3000
+        });
+      }
+    },
+    error: function (xhr, status, error) {
+      $('#add_device_btn').prop('disabled', false).html('<i class="fas fa-plus"></i>&nbsp;&nbsp;Add Device');
+      Swal.fire({
+        toast: true,
+        position: 'bottom-end',
+        icon: 'error',
+        title: 'Error connecting to device: ' + (error || 'timeout'),
+        showConfirmButton: false,
+        timer: 3000
+      });
+    }
   });
 }
 

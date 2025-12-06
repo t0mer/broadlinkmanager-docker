@@ -1,2 +1,5 @@
 Dockerfile
 screenshots
+__pycache__/
+*.pyc
+broadlinkmanager/data/

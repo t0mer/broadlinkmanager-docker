@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+loguru
+cryptography
+jinja2
+python-multipart
+ujson
+starlette-exporter
+pydantic

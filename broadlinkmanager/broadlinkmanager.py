@@ -489,7 +489,7 @@ def command(request: Request, mac: str = "", host: str = "", type: str = "", com
 
 # Learn RF
 @app.get('/rf/learn', include_in_schema=False)
-def sweep(request: Request, mac: str = "", host: str = "", type: str = "", command: str = ""):
+def sweep(request: Request, mac: str = "", host: str = "", type: str = "", command: str = "", frequency: str = ""):
     global _continu_to_sweep
     global _rf_sweep_message
     global _rf_sweep_status
@@ -499,35 +499,55 @@ def sweep(request: Request, mac: str = "", host: str = "", type: str = "", comma
     logger.info("Device:" + host + " entering RF learning mode")
     dev = initDevice(type, host, mac)
     dev.auth()
-    logger.info("Device:" + host + " is sweeping for frequency")
-    dev.sweep_frequency()
-    _rf_sweep_message = "Learning RF Frequency, press and hold the button to learn..."
-    start = time.time()
-    while time.time() - start < TIMEOUT:
-        time.sleep(1)
-        if dev.check_frequency():
-            break
+
+    # Parse frequency if provided (in MHz, e.g., "433.92")
+    freq_mhz = None
+    if frequency and frequency.strip():
+        try:
+            freq_mhz = float(frequency)
+            logger.info(f"Device:{host} using specified frequency: {freq_mhz} MHz")
+        except ValueError:
+            logger.warning(f"Invalid frequency value: {frequency}, falling back to sweep mode")
+
+    # If frequency is specified, skip the sweep phase entirely
+    if freq_mhz:
+        _rf_sweep_message = f"Using frequency {freq_mhz} MHz - press the button to learn..."
+        logger.info(f"Device:{host} skipping sweep, using frequency {freq_mhz} MHz")
+        dev.find_rf_packet(frequency=freq_mhz)
     else:
-        logger.error("Device:" + host + " RF Frequency not found!")
-        _rf_sweep_message = "RF Frequency not found!"
-        dev.cancel_sweep_frequency()
-        return JSONResponse('{"data":"RF Frequency not found!","success":0,"type":"rf"}')
+        # Original sweep mode
+        logger.info("Device:" + host + " is sweeping for frequency")
+        dev.sweep_frequency()
+        _rf_sweep_message = "Learning RF Frequency, press and hold the button to learn..."
+        start = time.time()
+        while time.time() - start < TIMEOUT:
+            time.sleep(1)
+            found, detected_freq = dev.check_frequency()
+            if found:
+                logger.info(f"Device:{host} detected frequency: {detected_freq} MHz")
+                break
+        else:
+            logger.error("Device:" + host + " RF Frequency not found!")
+            _rf_sweep_message = "RF Frequency not found!"
+            dev.cancel_sweep_frequency()
+            return JSONResponse('{"data":"RF Frequency not found!","success":0,"type":"rf"}')
 
-    _rf_sweep_message = "Found RF Frequency - 1 of 2!"
-    logger.info("Device:" + host + " Found RF Frequency - 1 of 2!")
-    time.sleep(1)
-    _rf_sweep_message = "You can now let go of the button"
-    logger.info("You can now let go of the button")
-    _rf_sweep_status = True
-    while _continu_to_sweep == False:
-        _rf_sweep_message = "Click The Continue button"
+        _rf_sweep_message = "Found RF Frequency - 1 of 2!"
+        logger.info("Device:" + host + " Found RF Frequency - 1 of 2!")
+        time.sleep(1)
+        _rf_sweep_message = "You can now let go of the button"
+        logger.info("You can now let go of the button")
+        _rf_sweep_status = True
+        while _continu_to_sweep == False:
+            _rf_sweep_message = "Click The Continue button"
 
-    _rf_sweep_message = "To complete learning, single press the button you want to learn"
-    logger.info(
-        "To complete learning, single press the button you want to learn")
-    _rf_sweep_status = False
-    logger.error("Device:" + host + " is searching for RF packets!")
-    dev.find_rf_packet()
+        _rf_sweep_message = "To complete learning, single press the button you want to learn"
+        logger.info(
+            "To complete learning, single press the button you want to learn")
+        _rf_sweep_status = False
+        logger.info("Device:" + host + " is searching for RF packets!")
+        dev.find_rf_packet()
+
     start = time.time()
     while time.time() - start < TIMEOUT:
         time.sleep(1)
@@ -540,7 +560,7 @@ def sweep(request: Request, mac: str = "", host: str = "", type: str = "", comma
     else:
         logger.error("Device:" + host + " No Data Found!")
         _rf_sweep_message = "No Data Found"
-        return JSONResponse('{"data":"No Data Found","type":"rf","type":"rf"}')
+        return JSONResponse('{"data":"No Data Found","success":0,"type":"rf"}')
 
     _rf_sweep_message = "Found RF Frequency - 2 of 2!"
     logger.info("Device:" + host + " Found RF Frequency - 2 of 2!")
@@ -548,7 +568,7 @@ def sweep(request: Request, mac: str = "", host: str = "", type: str = "", comma
     _rf_sweep_message = "RF Scan Completed Successfully"
     logger.info("Device:" + host + " RF Scan Completed Successfully")
     time.sleep(1)
-    return JSONResponse('{"data":"' + learned + '","type":"rf"}')
+    return JSONResponse('{"data":"' + learned + '","success":1,"type":"rf"}')
 
 # Get RF Learning state
 
@@ -635,6 +655,35 @@ def search_for_devices(request: Request, freshscan: str = "1"):
         return JSONResponse(result)
 
 
+@app.get('/device/add', tags=["Devices"], summary="Add device by IP address")
+def add_device_by_ip(request: Request, ip: str = ""):
+    """Discover and add a device by its IP address directly."""
+    if not ip or not validate_ip(ip):
+        logger.error(f"Invalid IP address: {ip}")
+        return JSONResponse({"success": 0, "message": "Invalid IP address"})
+
+    logger.info(f"Attempting to add device at IP: {ip}")
+    try:
+        device = broadlink.hello(ip, timeout=10)
+        if device.auth():
+            mac_address = ''.join(format(x, '02x') for x in device.mac)
+            logger.info(f"Device found: {getDeviceName(device.devtype)} (ip: {device.host[0]}  mac: {mac_address})")
+            deviceinfo = {
+                "name": getDeviceName(device.devtype),
+                "type": format(hex(device.devtype)),
+                "ip": device.host[0],
+                "mac": mac_address,
+                "success": 1
+            }
+            return JSONResponse(deviceinfo)
+        else:
+            logger.error(f"Failed to authenticate with device at {ip}")
+            return JSONResponse({"success": 0, "message": "Failed to authenticate with device"})
+    except Exception as ex:
+        logger.error(f"Error adding device at {ip}: {str(ex)}")
+        return JSONResponse({"success": 0, "message": f"Device not found or not responding: {str(ex)}"})
+
+
 @app.get('/device/ping', tags=["Devices"])
 def get_device_status(request: Request, host: str = ""):
     try:
@@ -683,5 +732,6 @@ def read_all_codes():
 
 # Start Application
 if __name__ == '__main__':
-    logger.info("Broadlink Manager is up and running")
-    uvicorn.run(app, host="0.0.0.0", port=7020)
+    port = int(os.getenv("PORT", 7020))
+    logger.info(f"Broadlink Manager is up and running on port {port}")
+    uvicorn.run(app, host="0.0.0.0", port=port)

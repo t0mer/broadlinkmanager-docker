@@ -17,5 +17,8 @@ EXPOSE 7020
 WORKDIR /opt/broadlinkmanager/
 
 COPY broadlinkmanager /opt/broadlinkmanager
+COPY requirements.txt /opt/broadlinkmanager
+
+RUN python3 -m pip install -r requirements.txt
 
 ENTRYPOINT ["/usr/bin/python3", "broadlinkmanager.py"]

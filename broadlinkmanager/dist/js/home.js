@@ -226,6 +226,18 @@ function getDevices(url) {
       url: url,
       dataType: "json",
       success: function (data) {
+        // Merge with existing devices to preserve manually added ones
+        var existingDevices = localStorage.getItem('devices');
+        if (existingDevices) {
+          existingDevices = JSON.parse(existingDevices);
+          // Add existing devices that weren't found in the scan (by MAC address)
+          existingDevices.forEach(function(existing) {
+            var found = data.some(function(d) { return d.mac === existing.mac; });
+            if (!found) {
+              data.push(existing);
+            }
+          });
+        }
         localStorage.setItem('devices', JSON.stringify(data));
         showDevices(data);
 

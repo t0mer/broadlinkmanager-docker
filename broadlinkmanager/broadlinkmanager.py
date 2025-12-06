@@ -640,7 +640,7 @@ def search_for_devices(request: Request, freshscan: str = "1"):
                     timeout=5, local_ip_address=interface, discover_ip_address="255.255.255.255")
                 for device in devices:
                     if device.auth():
-                        mac_address = ''.join(format(x, '02x') for x in device.mac)
+                        mac_address = ':'.join(format(x, '02x') for x in device.mac)
                         logger.info(f"New device detected: {getDeviceName(device.devtype)} (ip: {device.host[0]}  mac: {mac_address})")
                         deviceinfo = {}
                         deviceinfo["name"] = getDeviceName(device.devtype)
@@ -666,7 +666,7 @@ def add_device_by_ip(request: Request, ip: str = ""):
     try:
         device = broadlink.hello(ip, timeout=10)
         if device.auth():
-            mac_address = ''.join(format(x, '02x') for x in device.mac)
+            mac_address = ':'.join(format(x, '02x') for x in device.mac)
             logger.info(f"Device found: {getDeviceName(device.devtype)} (ip: {device.host[0]}  mac: {mac_address})")
             deviceinfo = {
                 "name": getDeviceName(device.devtype),

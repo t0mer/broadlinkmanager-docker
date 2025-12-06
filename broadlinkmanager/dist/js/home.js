@@ -137,6 +137,35 @@ $(document).ready(function(){
     }
   });
 
+  $(document).on('click', '.delete-device', function () {
+    var mac = $(this).data('mac');
+    var row = $(this).closest('tr');
+
+    Swal.fire({
+      title: 'Remove device?',
+      text: 'This will remove the device from the list.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      confirmButtonText: 'Remove'
+    }).then(function (result) {
+      if (result.isConfirmed) {
+        var devices = JSON.parse(localStorage.getItem('devices') || '[]');
+        devices = devices.filter(function (d) { return d.mac !== mac; });
+        localStorage.setItem('devices', JSON.stringify(devices));
+        row.remove();
+        Swal.fire({
+          toast: true,
+          position: 'bottom-end',
+          icon: 'success',
+          title: 'Device removed',
+          showConfirmButton: false,
+          timer: 2000
+        });
+      }
+    });
+  });
+
   if (localStorage.getItem('devices') == null)
     getDevices('autodiscover?freshscan=0');
   else
@@ -264,7 +293,10 @@ function showDevices(data) {
       $('<td id="_ip_' + i + '">').text(item.ip),
       $('<td id="_mac_' + i + '">').text(item.mac),
       $('<td id="_status_' + i + '" class="_no_json">'),
-      $('<td id="_' + i + '" class="_no_json">').html('<button type="button" class="btn btn-primary  actions" data-toggle="modal" data-target="#modal-lg" title="Learn and Send IR/RF Codes">Actions</button>')
+      $('<td id="_' + i + '" class="_no_json">').html(
+        '<button type="button" class="btn btn-primary actions" data-toggle="modal" data-target="#modal-lg" title="Learn and Send IR/RF Codes">Actions</button> ' +
+        '<button type="button" class="btn btn-danger delete-device" data-mac="' + item.mac + '" title="Remove device"><i class="fas fa-trash"></i></button>'
+      )
 
     );
     i++;

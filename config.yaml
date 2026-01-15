@@ -15,7 +15,7 @@ arch:
   - amd64
   - armhf
   - armv7
-startup: before
+#startup: before
 host_network: true
 ports:
   7020/tcp: 7020

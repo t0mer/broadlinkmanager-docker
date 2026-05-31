@@ -1,21 +1,42 @@
-FROM techblog/fastapi:latest
+# Stage 1 — Build React frontend
+FROM node:20-alpine AS frontend
+WORKDIR /app/web
+COPY broadlinkmanager/web/package*.json ./
+RUN npm ci --silent
+COPY broadlinkmanager/web/ ./
+RUN npm run build
+# Vite outDir is '../dist' so output lands at /app/dist
+
+# Stage 2 — Python runtime
+FROM python:3.12-slim
 
 LABEL maintainer="tomer.klein@gmail.com"
 
-ENV PYTHONIOENCODING=utf-8
-ENV ENABLE_GOOGLE_ANALYTICS=True
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1
 
-RUN apt update && \
-    apt install fping -yqq
-    # DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt install php php-curl php-cli -yqq
-    
-#Create working directory
-RUN mkdir -p /opt/broadlinkmanager/data
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      iputils-ping \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY broadlinkmanager/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application source
+COPY broadlinkmanager/ /app/
+
+# Copy built frontend from stage 1 (overwrites dist/.gitkeep)
+COPY --from=frontend /app/dist /app/dist
+
+# Runtime data directory
+RUN mkdir -p /app/data
 
 EXPOSE 7020
 
-WORKDIR /opt/broadlinkmanager/
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:7020/api/version',timeout=3).status==200 else 1)"
 
-COPY broadlinkmanager /opt/broadlinkmanager
-
-ENTRYPOINT ["/usr/bin/python3", "broadlinkmanager.py"]
+CMD ["python", "broadlinkmanager.py"]

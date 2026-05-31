@@ -29,12 +29,15 @@ def create_app() -> FastAPI:
 
     app.add_middleware(PrometheusMiddleware)
     app.add_route("/metrics", handle_metrics)
+    # SPA is same-origin in production (served by this app), so credentials are
+    # not needed. allow_origins=["*"] without credentials is valid and allows
+    # local integrations (e.g. Home Assistant) to call the API.
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_credentials=False,
+        allow_methods=["GET", "POST", "PUT", "DELETE"],
+        allow_headers=["Content-Type", "Authorization"],
     )
 
     app.include_router(devices.router)

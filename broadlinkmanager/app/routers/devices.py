@@ -1,6 +1,9 @@
 import json
+import re
 import subprocess
 from os import path
+
+_HOST_RE = re.compile(r"^[a-zA-Z0-9._-]{1,253}$")
 
 import broadlink
 from fastapi import APIRouter, Request
@@ -102,8 +105,13 @@ def autodiscover(freshscan: str = "1"):
 def ping_device(host: str = ""):
     if not host:
         return JSONResponse({"status": "Host parameter is required", "success": False})
+    if not _HOST_RE.match(host):
+        logger.warning(f"Rejected invalid host value: {host!r}")
+        return JSONResponse({"status": "invalid host", "success": False})
     try:
-        result = subprocess.run(["ping", "-c", "1", "-W", "3", host], capture_output=True, timeout=5)
+        # "--" terminates option parsing so a host that starts with "-" is never
+        # interpreted as a ping flag (defence-in-depth; regex above already rejects it)
+        result = subprocess.run(["ping", "-c", "1", "-W", "3", "--", host], capture_output=True, timeout=5)
         status = "online" if result.returncode == 0 else "offline"
         return JSONResponse({"status": status, "success": True})
     except subprocess.TimeoutExpired:

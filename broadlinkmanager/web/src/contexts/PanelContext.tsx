@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useRef, useState, type ReactNode } from 'react';
+import { addToast } from '@/components/ui/Toast';
 import type { Device } from '@/types';
 
 type PanelTab = 'ir' | 'rf' | 'send';
@@ -34,8 +35,25 @@ export function PanelProvider({ children }: { children: ReactNode }) {
     prefilledCode: '',
   });
 
+  // Persists across renders without triggering re-renders
+  const lastDeviceRef = useRef<Device | null>(null);
+
   const openPanel = (device: Device, tab: PanelTab = 'ir', code = '') => {
-    setState({ isOpen: true, device, activeTab: tab, prefilledCode: code });
+    const isReal = Boolean(device.ip);
+
+    if (isReal) {
+      // Real device selected — remember it for future "Send from Saved Codes"
+      lastDeviceRef.current = device;
+      setState({ isOpen: true, device, activeTab: tab, prefilledCode: code });
+    } else {
+      // Called from Saved Codes — fall back to last used device
+      const fallback = lastDeviceRef.current;
+      if (!fallback) {
+        addToast('error', 'Select a device first from the Devices page');
+        return;
+      }
+      setState({ isOpen: true, device: fallback, activeTab: tab, prefilledCode: code });
+    }
   };
 
   const closePanel = () => setState(s => ({ ...s, isOpen: false, prefilledCode: '' }));

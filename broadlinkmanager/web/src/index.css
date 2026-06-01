@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+html { color-scheme: dark; }
+html.light { color-scheme: light; }
+* { box-sizing: border-box; }
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }

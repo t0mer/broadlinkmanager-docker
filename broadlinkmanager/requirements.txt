@@ -1,0 +1,6 @@
+fastapi==0.112.0
+uvicorn[standard]==0.30.3
+loguru==0.7.3
+pydantic==2.8.2
+starlette_exporter==0.23.0
+python-multipart==0.0.20

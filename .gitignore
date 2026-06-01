@@ -1,2 +1,27 @@
-Dockerfile
 screenshots
+docs
+/docs
+docs/*
+.superpowers/
+
+# Python
+broadlinkmanager/__pycache__/
+broadlinkmanager/**/__pycache__/
+broadlinkmanager/**/*.pyc
+
+# Frontend build output (placeholder only, not the build)
+broadlinkmanager/dist/*
+!broadlinkmanager/dist/.gitkeep
+
+# Runtime data — generated at startup, never commit
+broadlinkmanager/data/*.db
+broadlinkmanager/data/*.db-journal
+broadlinkmanager/data/devices.json
+
+# Node
+broadlinkmanager/web/node_modules/
+
+# Temp scripts
+modernize-templates.sh
+update-all-templates.sh
+update-ui.sh

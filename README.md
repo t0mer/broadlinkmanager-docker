@@ -118,3 +118,41 @@ command: ["python", "broadlinkmanager.py", "--ip", "192.168.1.50"]
 | **Climate** | HY02/HY03 (Hysen) |
 | **Cover** | DT360E-45/20 (Dooya) |
 | **BG Electrical** | BG800/BG900, AHC/U-01 |
+
+## REST API
+
+Interactive API documentation is available at `http://<host>:7020/docs` (Swagger UI).
+
+Key endpoints:
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/autodiscover` | Scan network for Broadlink devices |
+| GET | `/device/ping?host=<ip>` | Check if a device is online |
+| POST | `/devices/save` | Save discovered device list to file |
+| GET | `/devices/load` | Load device list from file |
+| GET | `/ir/learn` | Start IR learning on a device |
+| GET | `/rf/learn` | Start RF sweep on a device |
+| GET | `/rf/status` | Poll RF learning status |
+| GET | `/rf/continue` | Continue RF sweep after frequency lock |
+| GET | `/command/send` | Send IR/RF code to a device |
+| GET | `/temperature` | Read temperature from a sensor device |
+| GET | `/api/codes` | List all saved codes |
+| POST | `/api/code` | Save a new code |
+| PUT | `/api/code/{id}` | Update a saved code |
+| DELETE | `/api/code/{id}` | Delete a saved code |
+| GET | `/api/version` | Get application version |
+| GET | `/metrics` | Prometheus metrics |
+
+## Credits
+
+- [Matthew Garrett](https://github.com/mjg59) — [python-broadlink](https://github.com/mjg59/python-broadlink)
+- [Dima Goltsman](https://github.com/dimagoltsman) — [Random-Broadlink-RM-Code-Generator](https://github.com/dimagoltsman/Random-Broadlink-RM-Code-Generator)
+
+## Donation
+
+If you find this project useful, consider buying me a coffee ☕
+
+<p align="left">
+ <a href="https://www.paypal.com/paypalme/techblogil?locale.x=he_IL" target="_blank"><img src="http://khrolenok.ru/support_paypal.png" alt="PayPal" width="250" height="48"></a>
+</p>

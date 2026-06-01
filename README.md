@@ -23,3 +23,47 @@ BroadlinkManager is a [FastAPI](https://fastapi.tiangolo.com/) powered web appli
 - **Mobile Friendly** — responsive layout with collapsible sidebar navigation
 - **REST API + Swagger UI** — full OpenAPI documentation at `/docs`
 - **Prometheus Metrics** — built-in metrics endpoint at `/metrics`
+
+## Installation
+
+### Docker Compose (recommended)
+
+```yaml
+services:
+  broadlinkmanager:
+    image: techblog/broadlinkmanager
+    container_name: broadlinkmanager
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - ./data:/app/data
+```
+
+> **Why `network_mode: host`?**  Broadlink device discovery uses UDP broadcast packets on the local network. Host networking allows the container to send and receive those broadcasts. Without it, auto-discovery will not find any devices.
+
+Once the container is running, open your browser at:
+```
+http://<docker-host-ip>:7020
+```
+
+### Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `DISCOVERY_IP_LIST` | *(auto-detected)* | Comma-separated list of local IP addresses to use for device discovery. Useful when the container has multiple network interfaces. Example: `192.168.1.10,192.168.2.10` |
+| `DB_PATH` | `/app/data/codes.db` | Path to the SQLite database file for saved codes |
+
+### CLI Flags
+
+You can pass arguments directly to the container to override discovery behaviour:
+
+| Flag | Default | Description |
+|---|---|---|
+| `--ip <IP>` | *(auto)* | Specify a local interface IP for discovery (repeatable) |
+| `--dst-ip <IP>` | `255.255.255.255` | Broadcast destination IP for discovery |
+| `--timeout <s>` | `5` | Discovery timeout in seconds |
+
+Example:
+```yaml
+command: ["python", "broadlinkmanager.py", "--ip", "192.168.1.50"]
+```

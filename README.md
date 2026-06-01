@@ -67,3 +67,32 @@ Example:
 ```yaml
 command: ["python", "broadlinkmanager.py", "--ip", "192.168.1.50"]
 ```
+
+## Screenshots
+
+### Devices — Dark Mode
+[![Devices Dark](screenshots/new/devices-dark.png)](screenshots/new/devices-dark.png)
+
+### Devices — Light Mode
+[![Devices Light](screenshots/new/devices-light.png)](screenshots/new/devices-light.png)
+
+### Saved Codes
+[![Saved Codes](screenshots/new/saved-codes.png)](screenshots/new/saved-codes.png)
+
+### RF Code Generator
+[![RF Code Generator](screenshots/new/rf-generator.png)](screenshots/new/rf-generator.png)
+
+### Livolo Code Generator
+[![Livolo](screenshots/new/livolo.png)](screenshots/new/livolo.png)
+
+### Energenie Code Generator
+[![Energenie](screenshots/new/energenie.png)](screenshots/new/energenie.png)
+
+### Change Repeats
+[![Change Repeats](screenshots/new/repeats.png)](screenshots/new/repeats.png)
+
+### Hex ↔ Base64 Converter
+[![Convert](screenshots/new/convert.png)](screenshots/new/convert.png)
+
+### About
+[![About](screenshots/new/about.png)](screenshots/new/about.png)

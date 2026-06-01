@@ -1,4 +1,5 @@
-screenshots
+screenshots/*
+!screenshots/new/
 docs
 /docs
 docs/*

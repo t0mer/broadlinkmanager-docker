@@ -13,6 +13,11 @@ broadlinkmanager/**/*.pyc
 broadlinkmanager/dist/*
 !broadlinkmanager/dist/.gitkeep
 
+# Runtime data — generated at startup, never commit
+broadlinkmanager/data/*.db
+broadlinkmanager/data/*.db-journal
+broadlinkmanager/data/devices.json
+
 # Node
 broadlinkmanager/web/node_modules/
 

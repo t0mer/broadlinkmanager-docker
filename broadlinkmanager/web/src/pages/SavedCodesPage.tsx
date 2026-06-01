@@ -1,16 +1,108 @@
 import { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2, Edit2, Send, Download } from 'lucide-react';
+import { Plus, Trash2, Edit2, Send, Download, X, Wifi } from 'lucide-react';
 import { fetchAllCodes, createCode, updateCode, deleteCode } from '@/api/codes';
+import { fetchDevices } from '@/api/devices';
+import { sendCommand } from '@/api/commands';
 import { Topbar } from '@/components/layout/Topbar';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { addToast } from '@/components/ui/Toast';
-import { usePanel } from '@/contexts/PanelContext';
-import type { Code, CodeInput } from '@/types';
+import type { Code, CodeInput, Device } from '@/types';
 
 const PAGE_SIZE = 10;
+
+interface DevicePickerModalProps {
+  code: Code;
+  onClose: () => void;
+}
+
+function DevicePickerModal({ code, onClose }: DevicePickerModalProps) {
+  const { data: devices = [], isLoading } = useQuery({
+    queryKey: ['devices'],
+    queryFn: () => fetchDevices(false), // use cached scan, no fresh scan
+    staleTime: Infinity,
+  });
+
+  const sendMut = useMutation({
+    mutationFn: (device: Device) =>
+      sendCommand(device.ip, device.mac, device.type, code.Code),
+    onSuccess: (_, device) => {
+      addToast('success', `Sent "${code.CodeName}" to ${device.name}`);
+      onClose();
+    },
+    onError: (_, device) => {
+      addToast('error', `Failed to send to ${device.name}`);
+    },
+  });
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div className="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm" onClick={onClose} />
+
+      {/* Modal */}
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50
+        w-full max-w-sm bg-slate-900 dark:bg-white border border-slate-800 dark:border-slate-200
+        rounded-2xl shadow-2xl overflow-hidden">
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3.5 border-b border-slate-800 dark:border-slate-200">
+          <div>
+            <div className="text-sm font-semibold text-slate-100 dark:text-slate-900">
+              Send "{code.CodeName}"
+            </div>
+            <div className="text-xs text-slate-500 mt-0.5">Select a device to send to</div>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-300 dark:hover:text-slate-700 hover:bg-slate-800 dark:hover:bg-slate-100"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Device list */}
+        <div className="p-3 flex flex-col gap-2 max-h-72 overflow-y-auto">
+          {isLoading && (
+            <div className="text-center text-slate-500 text-sm py-6">Loading devices…</div>
+          )}
+          {!isLoading && (devices as Device[]).length === 0 && (
+            <div className="text-center text-slate-500 text-sm py-6">
+              No devices found. Go to the Devices page and run a scan first.
+            </div>
+          )}
+          {(devices as Device[]).map((device: Device) => (
+            <button
+              key={device.mac}
+              disabled={sendMut.isPending}
+              onClick={() => sendMut.mutate(device)}
+              className="flex items-center gap-3 px-3 py-3 rounded-xl text-left
+                bg-slate-800/60 dark:bg-slate-50 border border-slate-700 dark:border-slate-200
+                hover:bg-slate-700 dark:hover:bg-slate-100 hover:border-sky-500/40
+                disabled:opacity-40 disabled:cursor-not-allowed transition-all group"
+            >
+              <div className="w-9 h-9 rounded-lg bg-sky-500/10 border border-sky-500/20
+                flex items-center justify-center text-sky-400 flex-shrink-0">
+                <Wifi size={16} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-semibold text-slate-100 dark:text-slate-900 truncate">
+                  {device.name}
+                </div>
+                <div className="text-xs font-mono text-slate-500 truncate">{device.ip}</div>
+              </div>
+              <span className="text-xs font-medium text-sky-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                {sendMut.isPending && sendMut.variables?.ip === device.ip ? 'Sending…' : 'Send →'}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
 
 interface CodeFormProps {
   initial?: Code;
@@ -76,13 +168,13 @@ function CodeForm({ initial, onSave, onCancel, saving }: CodeFormProps) {
 export function SavedCodesPage() {
   const ctx = useOutletContext<{ onMenuClick: () => void }>();
   const qc = useQueryClient();
-  const { openPanel } = usePanel();
 
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'IR' | 'RF'>('all');
   const [page, setPage] = useState(0);
   const [showAdd, setShowAdd] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
+  const [pendingSend, setPendingSend] = useState<Code | null>(null);
 
   const { data: codes = [] } = useQuery({
     queryKey: ['codes'],
@@ -237,11 +329,8 @@ export function SavedCodesPage() {
                         <Button
                           size="sm"
                           variant="ir"
-                          onClick={() => openPanel(
-                            { name: '', type: '', ip: '', mac: '' },
-                            'send',
-                            c.Code
-                          )}
+                          title="Send this code to a device"
+                          onClick={() => setPendingSend(c)}
                         >
                           <Send size={11} />
                         </Button>
@@ -289,6 +378,13 @@ export function SavedCodesPage() {
           )}
         </div>
       </div>
+
+      {pendingSend && (
+        <DevicePickerModal
+          code={pendingSend}
+          onClose={() => setPendingSend(null)}
+        />
+      )}
     </div>
   );
 }

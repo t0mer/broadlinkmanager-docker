@@ -28,15 +28,3 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application source
 COPY broadlinkmanager/ /app/
 
-# Copy built frontend from stage 1 (overwrites dist/.gitkeep)
-COPY --from=frontend /app/dist /app/dist
-
-# Runtime data directory
-RUN mkdir -p /app/data
-
-EXPOSE 7020
-
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-    CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:7020/api/version',timeout=3).status==200 else 1)"
-
-CMD ["python", "broadlinkmanager.py"]

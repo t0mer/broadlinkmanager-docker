@@ -49,22 +49,30 @@ def get_devices_file_path() -> str:
 
 def init_config() -> None:
     """Parse CLI args and resolve discovery IP list. Call once from app startup."""
-    global args, discovery_ip_address_list
-
+    # Mutate in-place so modules that did `from app.config import X` see the
+    # updated values — reassigning would create new objects and leave those
+    # imported names pointing at the old empty defaults.
     parser = argparse.ArgumentParser(fromfile_prefix_chars="@")
     parser.add_argument("--timeout", type=int, default=5)
     parser.add_argument("--ip", action="append", default=[])
     parser.add_argument("--dst-ip", default="255.255.255.255")
-    args = parser.parse_args()
+    parsed = parser.parse_args()
+
+    # Mutate args in-place rather than rebinding
+    vars(args).update(vars(parsed))
 
     if args.ip:
         invalid = [ip for ip in args.ip if not validate_ip(ip)]
         if invalid:
             logger.error(f"Invalid IPs: {invalid}")
             sys.exit(-1)
-        discovery_ip_address_list = args.ip
+        resolved = args.ip
     else:
         env_list = get_env_ip_list()
-        discovery_ip_address_list = env_list if env_list else get_local_ip_list()
+        resolved = env_list if env_list else get_local_ip_list()
+
+    # Mutate the list in-place rather than rebinding
+    discovery_ip_address_list.clear()
+    discovery_ip_address_list.extend(resolved)
 
     logger.info(f"Discovery interfaces: {discovery_ip_address_list}")

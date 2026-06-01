@@ -82,7 +82,7 @@ def autodiscover(freshscan: str = "1"):
     if path.exists(devices_path) and freshscan != "1":
         try:
             with open(devices_path, "r") as f:
-                return JSONResponse(json.loads(f.read().replace("'", '"')))
+                return JSONResponse(json.load(f))
         except Exception as e:
             logger.error(f"Failed to load devices file: {e}")
 
@@ -121,13 +121,34 @@ def ping_device(host: str = ""):
         return JSONResponse({"status": "error", "success": False})
 
 
+_DEVICE_KEYS = {"name", "type", "ip", "mac"}
+
+
+def _validate_device_list(data: object) -> list[dict]:
+    """Validate that data is a list of device dicts with expected string fields."""
+    if not isinstance(data, list):
+        raise ValueError("Expected a list of devices")
+    result = []
+    for item in data:
+        if not isinstance(item, dict):
+            raise ValueError("Each device must be an object")
+        if not _DEVICE_KEYS.issubset(item.keys()):
+            raise ValueError(f"Device missing required keys: {_DEVICE_KEYS - item.keys()}")
+        result.append({k: str(item[k]) for k in _DEVICE_KEYS})
+    return result
+
+
 @router.post("/devices/save", include_in_schema=False)
 async def save_devices(request: Request):
-    data = await request.json()
     try:
+        data = await request.json()
+        devices = _validate_device_list(data)
         with open(get_devices_file_path(), "w") as f:
-            f.write(str(data).replace("'", '"'))
+            f.write(json.dumps(devices))
         return JSONResponse({"success": 1})
+    except (ValueError, TypeError) as e:
+        logger.warning(f"Save devices rejected invalid payload: {e}")
+        return JSONResponse({"success": 0, "message": str(e)})
     except Exception as e:
         logger.error(f"Save devices failed: {e}")
         return JSONResponse({"success": 0})
@@ -137,7 +158,7 @@ async def save_devices(request: Request):
 def load_devices():
     try:
         with open(get_devices_file_path(), "r") as f:
-            return JSONResponse(json.loads(f.read().replace("'", '"')))
+            return JSONResponse(json.load(f))
     except Exception as e:
         logger.error(f"Load devices failed: {e}")
         return JSONResponse({"success": 0})

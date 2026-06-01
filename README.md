@@ -96,3 +96,25 @@ command: ["python", "broadlinkmanager.py", "--ip", "192.168.1.50"]
 
 ### About
 [![About](screenshots/new/about.png)](screenshots/new/about.png)
+
+## Supported Devices
+
+| Family | Models |
+|---|---|
+| **SP1** | SP1 |
+| **SP2** | SP2, SP mini, SP2-compatible (Honeywell, URANT), NEO (Ankuoo), SP mini 3, MP2, SP2-CL, SC1 |
+| **SP2S** | SP2, NEO PRO (Ankuoo), Ego (Efergy), SP mini+ |
+| **SP3** | SP3, SP3-EU |
+| **SP3S** | SP3S-US, SP3S-EU |
+| **SP4** | SP4L-CN/EU/AU/UK/US, SP4M, MCB1, SCB1E, SCB2, SP mini 3 |
+| **RM mini** | RM mini, RM mini 3 (all variants) |
+| **RM pro** | RM pro/pro+, RM home, RM plus |
+| **RM mini B** | RM mini 3 (0x5F36, 0x6507, 0x6508) |
+| **RM4 mini** | RM4 mini, RM4C mini, RM4S, RM4 TV mate, RM4C mate |
+| **RM4 pro** | RM4 pro, RM4C pro |
+| **Sensors** | e-Sensor (A1) |
+| **Lights** | LB1, LB26 R1, LB27 R1, SB500TD, SB800TD |
+| **Alarm** | S2KIT, S3 |
+| **Climate** | HY02/HY03 (Hysen) |
+| **Cover** | DT360E-45/20 (Dooya) |
+| **BG Electrical** | BG800/BG900, AHC/U-01 |

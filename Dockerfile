@@ -14,7 +14,8 @@ LABEL maintainer="tomer.klein@gmail.com"
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=1
+    UV_NO_CACHE=1 \
+    UV_SYSTEM_PYTHON=1
 
 WORKDIR /app
 
@@ -22,8 +23,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       iputils-ping \
     && rm -rf /var/lib/apt/lists/*
 
-COPY broadlinkmanager/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+COPY pyproject.toml .
+RUN uv pip install .
 
 # Copy application source
 COPY broadlinkmanager/ /app/

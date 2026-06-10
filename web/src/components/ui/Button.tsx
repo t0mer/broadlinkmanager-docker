@@ -2,7 +2,7 @@ import { type ButtonHTMLAttributes } from 'react';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'ir' | 'rf';
-  size?: 'sm' | 'md';
+  size?: 'sm' | 'md' | 'lg';
 }
 
 const variants: Record<NonNullable<ButtonProps['variant']>, string> = {
@@ -17,6 +17,7 @@ const variants: Record<NonNullable<ButtonProps['variant']>, string> = {
 const sizes: Record<NonNullable<ButtonProps['size']>, string> = {
   sm: 'px-2.5 py-1 text-xs rounded-md',
   md: 'px-3.5 py-1.5 text-sm rounded-lg',
+  lg: 'px-6 py-3 text-base rounded-xl',
 };
 
 export function Button({ variant = 'secondary', size = 'md', className = '', children, ...props }: ButtonProps) {

@@ -25,12 +25,6 @@ export function RfLearnTab({ device }: { device: Device }) {
     refetchInterval: 1000,
   });
 
-  useEffect(() => {
-    if (rfQuery.data?._rf_sweep_status === 'True' && step === 1) {
-      setStep(2);
-    }
-  }, [rfQuery.data, step]);
-
   const learnMut = useMutation({
     mutationFn: () => learnRf(device.ip, device.mac, device.type),
     onMutate: () => { setIsLearning(true); setStep(1); },
@@ -53,8 +47,17 @@ export function RfLearnTab({ device }: { device: Device }) {
 
   const continueMut = useMutation({
     mutationFn: continueRf,
-    onSuccess: () => setStep(2),
   });
+
+  useEffect(() => {
+    if (rfQuery.data?._rf_sweep_status === 'True' && step === 1) {
+      setStep(2);
+      // Frequency locked — tell the backend to arm code capture right away,
+      // so the user only has to release the button and press it once.
+      continueMut.mutate();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rfQuery.data, step]);
 
   const saveMut = useMutation({
     mutationFn: () => createCode({ CodeType: 'RF', CodeName: codeName, Code: code }),
@@ -76,14 +79,14 @@ export function RfLearnTab({ device }: { device: Device }) {
 
   const RF_STEPS = [
     { label: 'Hold button', desc: 'Hold the RF button until device sweeps frequencies.' },
-    { label: 'Press button once', desc: 'Press the same button once to capture the exact code.' },
+    { label: 'Press button once', desc: 'Release the button, then press it once to capture the exact code.' },
     { label: 'Save code', desc: 'Name and save the captured RF code.' },
   ];
 
   const statusMsg =
     step === 0 ? 'Click "Learn RF" to start.' :
     step === 1 ? 'Hold the RF button until frequency is found…' :
-    step === 2 ? 'Press the button once to capture.' :
+    step === 2 ? 'Release the button, then press it once to capture.' :
                  'RF code captured.';
 
   return (
@@ -143,13 +146,9 @@ export function RfLearnTab({ device }: { device: Device }) {
 
       <div className="flex gap-2 flex-wrap">
         {step === 0 && (
-          <Button size="sm" variant="rf" onClick={() => learnMut.mutate()} disabled={learnMut.isPending}>
+          <Button size="lg" variant="rf" className="w-full justify-center font-bold"
+            onClick={() => learnMut.mutate()} disabled={learnMut.isPending}>
             Learn RF
-          </Button>
-        )}
-        {step === 2 && (
-          <Button size="sm" variant="rf" onClick={() => continueMut.mutate()} disabled={continueMut.isPending}>
-            Continue Sweep
           </Button>
         )}
         {step > 0 && (

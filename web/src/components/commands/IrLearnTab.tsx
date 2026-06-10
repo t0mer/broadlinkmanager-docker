@@ -99,7 +99,8 @@ export function IrLearnTab({ device }: { device: Device }) {
       )}
 
       <div className="flex gap-2 flex-wrap">
-        <Button size="sm" variant="ir" onClick={() => learnMut.mutate()} disabled={learnMut.isPending}>
+        <Button size="lg" variant="ir" className="w-full justify-center font-bold"
+          onClick={() => learnMut.mutate()} disabled={learnMut.isPending}>
           {learnMut.isPending ? 'Listening…' : code ? 'Learn Again' : 'Learn IR'}
         </Button>
         {code && (

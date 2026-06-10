@@ -90,9 +90,14 @@ def learn_rf(mac: str = "", host: str = "", type: str = "", command: str = ""):
     state.set_rf_message("You can now let go of the button")
     state.set_rf_status(True)
 
+    start = time.time()
     while not state._continue_to_sweep:
         state.set_rf_message("Click the Continue button")
         time.sleep(0.1)
+        if time.time() - start > TIMEOUT * 2:
+            state.set_rf_message("Timed out waiting to continue")
+            dev.cancel_sweep_frequency()
+            return JSONResponse({"data": "Timed out waiting to continue", "success": 0, "type": "rf"})
 
     state.set_rf_message("Single press the button to capture the code")
     state.set_rf_status(False)

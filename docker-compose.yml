@@ -7,9 +7,16 @@ services:
       - "7020:7020"
     volumes:
       - ./data:/app/data
+    # On Linux hosts, host networking is the simplest way to make UDP broadcast
+    # discovery work. Uncomment the line below and remove the "ports:" section:
+    # network_mode: host
     environment:
       - DB_PATH=/app/data/codes.db
       - DISCOVERY_IP_LIST=
+      # On Docker Desktop (Windows/Mac) the bridge/NAT network blocks UDP broadcast,
+      # so the scan finds nothing. Set DISCOVERY_DST_IP to your subnet broadcast
+      # address and/or specific device IPs, e.g. 192.168.1.255,192.168.1.199
+      - DISCOVERY_DST_IP=192.168.1.255,192.168.1.199
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:7020/api/version"]
       interval: 30s

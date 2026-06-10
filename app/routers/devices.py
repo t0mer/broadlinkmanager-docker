@@ -88,15 +88,18 @@ def autodiscover(freshscan: str = "1"):
 
     logger.info("Scanning for devices...")
     found: list[dict] = []
+    seen_macs: set[str] = set()
     for iface in discovery_ip_address_list:
-        try:
-            devices = broadlink.discover(timeout=5, local_ip_address=iface, discover_ip_address=args.dst_ip)
-            for d in devices:
-                info = _process_device(d)
-                if info:
-                    found.append(info)
-        except OSError as e:
-            logger.error(f"Discovery failed on {iface}: {e}")
+        for dst in args.dst_ip_list:
+            try:
+                devices = broadlink.discover(timeout=args.timeout, local_ip_address=iface, discover_ip_address=dst)
+                for d in devices:
+                    info = _process_device(d)
+                    if info and info["mac"] not in seen_macs:
+                        seen_macs.add(info["mac"])
+                        found.append(info)
+            except OSError as e:
+                logger.error(f"Discovery failed on {iface} -> {dst}: {e}")
     logger.info(f"Found {len(found)} device(s)")
     return JSONResponse(found)
 

@@ -39,4 +39,8 @@ export interface CommandResult {
   success: number;
   message: string;
   type?: string;
+  error?: string;
+  bytes?: number;
+  min_bytes?: number;
+  token?: string;
 }

@@ -17,22 +17,35 @@ export function RfLearnTab({ device }: { device: Device }) {
   const [codeName, setCodeName] = useState('');
   const [copied, setCopied] = useState(false);
   const [isLearning, setIsLearning] = useState(false);
+  const [shortCapture, setShortCapture] = useState<{ bytes: number; minBytes: number } | null>(null);
+  const [capturedIr, setCapturedIr] = useState(false);
+  const [countdown, setCountdown] = useState<number | null>(null); // seconds remaining before "press now"
 
   const rfQuery = useQuery({
     queryKey: ['rf-status'],
     queryFn: fetchRfStatus,
     enabled: isLearning && step < 3,
     refetchInterval: 1000,
+    // Never serve a cached status from a previous run — a stale "True" would
+    // skip the wizard straight to step 2 while the backend is still sweeping.
+    gcTime: 0,
+    staleTime: 0,
   });
 
   const learnMut = useMutation({
     mutationFn: () => learnRf(device.ip, device.mac, device.type),
-    onMutate: () => { setIsLearning(true); setStep(1); },
+    onMutate: () => { setIsLearning(true); setStep(1); setShortCapture(null); setCapturedIr(false); },
     onSuccess: data => {
       setIsLearning(false);
       if (data.success === 1) {
         setCode(data.data);
         setStep(3);
+      } else if (data.error === 'captured_ir') {
+        setCapturedIr(true);
+        setStep(0);
+      } else if (data.error === 'too_short') {
+        setShortCapture({ bytes: data.bytes ?? 0, minBytes: data.min_bytes ?? 30 });
+        setStep(0);
       } else {
         addToast('error', data.data || 'RF learn failed');
         setStep(0);
@@ -52,12 +65,23 @@ export function RfLearnTab({ device }: { device: Device }) {
   useEffect(() => {
     if (rfQuery.data?._rf_sweep_status === 'True' && step === 1) {
       setStep(2);
-      // Frequency locked — tell the backend to arm code capture right away,
-      // so the user only has to release the button and press it once.
       continueMut.mutate();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rfQuery.data, step]);
+
+  // Countdown from 3 → 0 when step 2 activates, then stay at 0 ("press now")
+  useEffect(() => {
+    if (step !== 2) { setCountdown(null); return; }
+    setCountdown(3);
+    const id = setInterval(() => {
+      setCountdown(prev => {
+        if (prev === null || prev <= 1) { clearInterval(id); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [step]);
 
   const saveMut = useMutation({
     mutationFn: () => createCode({ CodeType: 'RF', CodeName: codeName, Code: code }),
@@ -77,20 +101,58 @@ export function RfLearnTab({ device }: { device: Device }) {
     setTimeout(() => setCopied(false), 1500);
   };
 
+  const step2Desc = step === 2 && countdown !== null && countdown > 0
+    ? `⏳ Arming… wait ${countdown} second${countdown !== 1 ? 's' : ''} before pressing.`
+    : '✅ Press and hold the button firmly for 1–2 s, then release. Keep remote 10–20 cm from Broadlink.';
+
   const RF_STEPS = [
-    { label: 'Hold button', desc: 'Hold the RF button until device sweeps frequencies.' },
-    { label: 'Press button once', desc: 'Release the button, then press it once to capture the exact code.' },
+    { label: 'Hold button', desc: 'Hold the RF button firmly for 3–5 s until the frequency is found.' },
+    { label: 'Press button once', desc: step2Desc },
     { label: 'Save code', desc: 'Name and save the captured RF code.' },
   ];
 
   const statusMsg =
-    step === 0 ? 'Click "Learn RF" to start.' :
     step === 1 ? 'Hold the RF button until frequency is found…' :
-    step === 2 ? 'Release the button, then press it once to capture.' :
+    step === 2 && countdown !== null && countdown > 0
+               ? `Arming RF receiver… wait ${countdown} s` :
+    step === 2 ? 'Press and hold the button now for 1–2 seconds!' :
                  'RF code captured.';
 
   return (
     <div className="flex flex-col gap-3 p-4">
+      {capturedIr && (
+        <div className="flex flex-col gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-red-400">IR signal captured — expected RF</span>
+          </div>
+          <p className="text-xs text-red-200/80">
+            The Broadlink received an infrared code instead of a 433 MHz RF signal. This happens when the button is pressed before the RF receiver is fully armed.
+          </p>
+          <ul className="flex flex-col gap-1 text-xs text-red-200/80 list-none pl-0">
+            <li>• At step 2, <strong>wait ~1 second</strong> after the prompt appears before pressing</li>
+            <li>• Press firmly and hold for <strong>1–2 seconds</strong></li>
+            <li>• Point the remote directly at the Broadlink (not at the shutter receiver)</li>
+          </ul>
+        </div>
+      )}
+
+      {shortCapture && (
+        <div className="flex flex-col gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-amber-400">Signal too short</span>
+            <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-300">
+              {shortCapture.bytes} / {shortCapture.minBytes} bytes
+            </span>
+          </div>
+          <ul className="flex flex-col gap-1 text-xs text-amber-200/80 list-none pl-0">
+            <li>• Move the remote <strong>10–20 cm</strong> from the Broadlink receiver</li>
+            <li>• At step 2, <strong>press and hold</strong> for <strong>1–2 seconds</strong> — do not tap</li>
+            <li>• Release cleanly — no quick flicks</li>
+            <li>• Avoid other RF sources nearby (Wi-Fi routers, microwaves)</li>
+          </ul>
+        </div>
+      )}
+
       <div className="flex flex-col gap-2">
         {RF_STEPS.map((s, i) => {
           const done   = step > i + 1;
@@ -115,10 +177,12 @@ export function RfLearnTab({ device }: { device: Device }) {
         })}
       </div>
 
-      <StatusBanner
-        status={step === 0 ? 'idle' : step === 3 ? 'success' : 'rf'}
-        message={statusMsg}
-      />
+      {step > 0 && (
+        <StatusBanner
+          status={step === 3 ? 'success' : 'rf'}
+          message={statusMsg}
+        />
+      )}
 
       {step === 3 && (
         <>
@@ -146,13 +210,16 @@ export function RfLearnTab({ device }: { device: Device }) {
 
       <div className="flex gap-2 flex-wrap">
         {step === 0 && (
-          <Button size="lg" variant="rf" className="w-full justify-center font-bold"
+          <Button size="lg" variant="rf" className="w-full flex-col justify-center font-bold gap-0.5"
             onClick={() => learnMut.mutate()} disabled={learnMut.isPending}>
-            Learn RF
+            <span>{(shortCapture || capturedIr) ? 'Try Again' : 'Learn RF'}</span>
+            {!shortCapture && !capturedIr && (
+              <span className="text-xs font-normal opacity-60">Press to start the RF wizard</span>
+            )}
           </Button>
         )}
         {step > 0 && (
-          <Button size="sm" variant="ghost" onClick={() => { setStep(0); setCode(''); setIsLearning(false); }}>
+          <Button size="sm" variant="ghost" onClick={() => { setStep(0); setCode(''); setIsLearning(false); setShortCapture(null); setCapturedIr(false); }}>
             Cancel
           </Button>
         )}

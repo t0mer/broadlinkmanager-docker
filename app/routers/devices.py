@@ -2,6 +2,7 @@ import json
 import platform
 import re
 import subprocess
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from os import path
 
 _HOST_RE = re.compile(r"^[a-zA-Z0-9._-]{1,253}$")
@@ -88,19 +89,25 @@ def autodiscover(freshscan: str = "1"):
             logger.error(f"Failed to load devices file: {e}")
 
     logger.info("Scanning for devices...")
+    pairs = [(iface, dst) for iface in discovery_ip_address_list for dst in args.dst_ip_list]
+
+    def _scan(iface, dst):
+        try:
+            return broadlink.discover(timeout=args.timeout, local_ip_address=iface, discover_ip_address=dst)
+        except OSError as e:
+            logger.error(f"Discovery failed on {iface} -> {dst}: {e}")
+            return []
+
     found: list[dict] = []
     seen_macs: set[str] = set()
-    for iface in discovery_ip_address_list:
-        for dst in args.dst_ip_list:
-            try:
-                devices = broadlink.discover(timeout=args.timeout, local_ip_address=iface, discover_ip_address=dst)
-                for d in devices:
-                    info = _process_device(d)
-                    if info and info["mac"] not in seen_macs:
-                        seen_macs.add(info["mac"])
-                        found.append(info)
-            except OSError as e:
-                logger.error(f"Discovery failed on {iface} -> {dst}: {e}")
+    with ThreadPoolExecutor(max_workers=max(len(pairs), 1)) as pool:
+        futures = [pool.submit(_scan, iface, dst) for iface, dst in pairs]
+        for future in as_completed(futures):
+            for d in future.result():
+                info = _process_device(d)
+                if info and info["mac"] not in seen_macs:
+                    seen_macs.add(info["mac"])
+                    found.append(info)
     logger.info(f"Found {len(found)} device(s)")
     return JSONResponse(found)
 

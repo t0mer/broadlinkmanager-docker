@@ -12,7 +12,9 @@ router = APIRouter(tags=["Commands"])
 
 TICK = 32.84
 IR_TOKEN = 0x26
+RF_TOKENS = {0xB2, 0xD7}   # 433 MHz, 315 MHz broadlink RF formats
 TIMEOUT = 30
+RF_MIN_BYTES = 30  # raw bytes; anything shorter is almost certainly a clipped/noise capture
 
 
 def _init_device(dtype: str, host: str, mac: str):
@@ -96,6 +98,7 @@ def learn_rf(mac: str = "", host: str = "", type: str = "", command: str = ""):
         time.sleep(0.1)
         if time.time() - start > TIMEOUT * 2:
             state.set_rf_message("Timed out waiting to continue")
+            state.set_rf_status(False)
             dev.cancel_sweep_frequency()
             return JSONResponse({"data": "Timed out waiting to continue", "success": 0, "type": "rf"})
 
@@ -117,6 +120,22 @@ def learn_rf(mac: str = "", host: str = "", type: str = "", command: str = ""):
         return JSONResponse({"data": "No Data Found", "success": 0, "type": "rf"})
 
     learned = "".join(format(x, "02x") for x in bytearray(data))
+    token = data[0] if data else 0
+    if token == IR_TOKEN:
+        msg = "Captured IR instead of RF — press the button ~1 s after step 2 activates so the RF receiver is fully armed"
+        logger.warning(f"RF learn captured IR token (0x26) — likely pressed too early. Raw: {learned[:16]}…")
+        state.set_rf_message(msg)
+        return JSONResponse({"data": "", "success": 0, "type": "rf", "error": "captured_ir", "token": hex(token)})
+    if token not in RF_TOKENS:
+        msg = f"Unknown signal format (0x{token:02x}) — try again"
+        logger.warning(msg)
+        state.set_rf_message(msg)
+        return JSONResponse({"data": "", "success": 0, "type": "rf", "error": "unknown_token", "token": hex(token)})
+    if len(data) < RF_MIN_BYTES:
+        msg = f"Signal too short ({len(data)} bytes captured, need ≥{RF_MIN_BYTES}) — hold the button firmly for 1–2 s and try again"
+        logger.warning(msg)
+        state.set_rf_message(msg)
+        return JSONResponse({"data": "", "success": 0, "type": "rf", "error": "too_short", "bytes": len(data), "min_bytes": RF_MIN_BYTES})
     state.set_rf_message("RF Scan Completed Successfully")
     return JSONResponse({"data": learned, "success": 1, "type": "rf"})
 

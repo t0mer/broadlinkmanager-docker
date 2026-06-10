@@ -9,7 +9,7 @@ ip_format_regex = r"\b(((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0
 
 # Populated by init_config() — empty until app startup
 args: argparse.Namespace = argparse.Namespace(
-    ip=[], timeout=5, dst_ip="255.255.255.255", dst_ip_list=["255.255.255.255"]
+    ip=[], timeout=2, dst_ip="255.255.255.255", dst_ip_list=["255.255.255.255"]
 )
 discovery_ip_address_list: list[str | None] = []
 
@@ -63,7 +63,7 @@ def init_config() -> None:
     # imported names pointing at the old empty defaults.
 
     # Env vars provide defaults; CLI args still win
-    env_timeout = os.getenv("DISCOVERY_TIMEOUT", "5")
+    env_timeout = os.getenv("DISCOVERY_TIMEOUT", "2")
     env_dst_ip = os.getenv("DISCOVERY_DST_IP", "")
 
     parser = argparse.ArgumentParser(fromfile_prefix_chars="@")

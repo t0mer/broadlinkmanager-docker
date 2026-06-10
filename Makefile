@@ -1,23 +1,56 @@
-PYTHON = .venv/Scripts/python.exe
+DOCKER_IMAGE = clabnet/broadlinkmanager
+VERSION = $(shell cat VERSION)
+PORT    = 7020
+
+# ── Python / deps ────────────────────────────────────────────────────────────
+
+.PHONY: venv install
 
 venv:
 	uv venv
 
 install:
-	uv sync --all-extras
+	uv pip install .
 
-# Main pipeline orchestrator: run all pipeline steps
 
-runall:
-	$(PYTHON) -m gemini_pipeline.main
+# ── Frontend ──────────────────────────────────────────────────────────────────
 
-format:
-	uvx ruff check --select I,F401,E402,F541 --fix .
-	uvx ruff format .
+.PHONY: web-install web-dev web-build
 
-clean:
-	rimraf "**/__pycache__" .pytest_cache "**/.ipynb_checkpoints" "**/tmp" htmlcov pysse.egg-info .ruff_cache --glob
+web-install:
+	cd web && pnpm install
 
-db-clean:
-	@echo "Starting database cleanup..."
-	$(PYTHON) src/gemini_pipeline/utils/db_clean.py
+web-dev:
+	cd web && pnpm dev
+
+web-build:
+	cd web && pnpm build
+
+# ── Run locally ───────────────────────────────────────────────────────────────
+
+.PHONY: run
+
+run:
+	uv run python server.py
+
+# ── Docker ────────────────────────────────────────────────────────────────────
+
+.PHONY: build up down logs
+
+docker-build:
+	docker build --file Dockerfile -t $(DOCKER_IMAGE) .
+
+docker-build-nocache:
+	docker build --progress=plain --no-cache --file Dockerfile -t $(DOCKER_IMAGE) .
+
+up:
+	docker run -d --name broadlinkmanager --network host \
+	  -e DISCOVERY_IP_LIST="" \
+	  -v $(PWD)/data:/app/data \
+	  $(IMAGE):latest
+
+down:
+	docker stop broadlinkmanager && docker rm broadlinkmanager
+
+logs:
+	docker logs -f broadlinkmanager

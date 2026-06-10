@@ -11,19 +11,17 @@ venv:
 
 install:
 	uv pip install .
+	cd web && pnpm install
 
 
 # ── Frontend ──────────────────────────────────────────────────────────────────
 
-.PHONY: web-install web-dev web-build
+.PHONY: dev build
 
-web-install:
-	cd web && pnpm install
-
-web-dev:
+dev:
 	cd web && pnpm dev
 
-web-build:
+build:
 	cd web && pnpm build
 
 # ── Run locally ───────────────────────────────────────────────────────────────
@@ -35,22 +33,13 @@ run:
 
 # ── Docker ────────────────────────────────────────────────────────────────────
 
-.PHONY: build up down logs
+.PHONY: docker-build docker-build-nocache logs
 
 docker-build:
 	docker build --file Dockerfile -t $(DOCKER_IMAGE) .
 
 docker-build-nocache:
 	docker build --progress=plain --no-cache --file Dockerfile -t $(DOCKER_IMAGE) .
-
-up:
-	docker run -d --name broadlinkmanager --network host \
-	  -e DISCOVERY_IP_LIST="" \
-	  -v $(PWD)/data:/app/data \
-	  $(IMAGE):latest
-
-down:
-	docker stop broadlinkmanager && docker rm broadlinkmanager
 
 logs:
 	docker logs -f broadlinkmanager

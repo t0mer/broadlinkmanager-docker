@@ -1,4 +1,5 @@
 import json
+import platform
 import re
 import subprocess
 from os import path
@@ -112,9 +113,13 @@ def ping_device(host: str = ""):
         logger.warning(f"Rejected invalid host value: {host!r}")
         return JSONResponse({"status": "invalid host", "success": False})
     try:
-        # "--" terminates option parsing so a host that starts with "-" is never
-        # interpreted as a ping flag (defence-in-depth; regex above already rejects it)
-        result = subprocess.run(["ping", "-c", "1", "-W", "3", "--", host], capture_output=True, timeout=5)
+        if platform.system() == "Windows":
+            cmd = ["ping", "-n", "1", "-w", "3000", host]
+        else:
+            # "--" terminates option parsing so a host that starts with "-" is never
+            # interpreted as a ping flag (defence-in-depth; regex above already rejects it)
+            cmd = ["ping", "-c", "1", "-W", "3", "--", host]
+        result = subprocess.run(cmd, capture_output=True, timeout=5)
         status = "online" if result.returncode == 0 else "offline"
         return JSONResponse({"status": status, "success": True})
     except subprocess.TimeoutExpired:

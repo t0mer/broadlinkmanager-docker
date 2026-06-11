@@ -86,13 +86,20 @@ This project includes pre-configured VSCode tasks to streamline development. You
 
 Available tasks:
 
-| Task | Command | Description |
-|---|---|---|
-| **Dev: Start all** *(default)* | `make run` + `make dev` (parallel) | Starts both backend and frontend dev servers |
-| **Backend: FastAPI server** | `make run` | Runs FastAPI development server on port 7020 |
-| **Frontend: Vite dev server** | `make dev` | Runs Vite dev server with hot module reloading |
+| Task | Command | Port | Description |
+|---|---|---|---|
+| **Dev: Start all** *(default)* | `make run` + `make dev` | 7020 + 5174 | Starts both backend and frontend dev servers |
+| **Backend: FastAPI server** | `make run` | 7020 | Runs FastAPI development server |
+| **Frontend: Vite dev server** | `make dev` | 5174 | Runs Vite dev server with hot module reloading |
 
-Each task runs in its own dedicated terminal panel. Press `Ctrl+Shift+B` to start all services at once — the frontend will be available at `http://localhost:5173` and the API at `http://localhost:7020`.
+Each task runs in its own dedicated terminal panel. Press `Ctrl+Shift+B` to start all services at once:
+- **Frontend:** http://localhost:5174
+- **Backend API:** http://localhost:7020
+
+**Port Usage:**
+- `5174` — Vite dev server (frontend)
+- `7020` — FastAPI backend server
+- `5173` — Reserved (do not use)
 
 ## Screenshots
 

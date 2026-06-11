@@ -167,7 +167,7 @@ async function captureScreenshots() {
   }
 }
 
-// Check if dev server is running
+// Check if dev server is running on port 5174
 try {
   await fetch('http://localhost:5174/', { timeout: 1000 });
   captureScreenshots();

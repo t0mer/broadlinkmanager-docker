@@ -20,8 +20,14 @@ data/*.db-journal
 data/devices.json
 
 # Node
+node_modules/
 web/node_modules/
 web/.pnpm-store/
+
+# Testing & verification
+test-mobile.mjs
+verify-mobile.ts
+screenshots/
 
 # Temp scripts
 modernize-templates.sh

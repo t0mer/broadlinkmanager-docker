@@ -35,6 +35,58 @@ function StatsRow({ total, online, codes, lastScan }: {
   );
 }
 
+function DeviceCard({ device }: { device: Device }) {
+  const { openPanel } = usePanel();
+
+  const { data: pingData } = useQuery({
+    queryKey: ['ping', device.ip],
+    queryFn: () => pingDevice(device.ip),
+    refetchInterval: 30_000,
+    staleTime: 25_000,
+  });
+
+  const isOffline = pingData !== undefined && pingData.status !== 'online';
+
+  return (
+    <div
+      className={`rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-3 shadow-sm cursor-pointer transition-colors hover:bg-slate-100 dark:hover:bg-gray-700 ${isOffline ? 'opacity-50' : ''}`}
+      onClick={() => openPanel(device, 'ir')}
+    >
+      <div className="flex justify-between items-start gap-2 mb-2">
+        <div className="flex-1 min-w-0">
+          <div className="font-semibold text-sm text-slate-900 dark:text-slate-100">{device.name}</div>
+        </div>
+        <Badge variant="blue">{device.type}</Badge>
+      </div>
+
+      <div className="mb-3 flex items-center gap-2">
+        {pingData === undefined
+          ? <Badge variant="gray" dot>Checking…</Badge>
+          : pingData.status === 'online'
+            ? <Badge variant="green" dot>Online</Badge>
+            : <Badge variant="gray" dot>Offline</Badge>}
+      </div>
+
+      <div className="text-xs text-slate-500 dark:text-slate-400 mb-3 space-y-1">
+        <div className="font-mono">IP: {device.ip}</div>
+        <div className="font-mono">MAC: {device.mac}</div>
+      </div>
+
+      <div className="flex gap-1.5" onClick={e => e.stopPropagation()}>
+        <Button size="sm" variant="ir" disabled={isOffline} onClick={() => openPanel(device, 'ir')}>
+          <Wifi size={11} /> IR
+        </Button>
+        <Button size="sm" variant="rf" disabled={isOffline} onClick={() => openPanel(device, 'rf')}>RF</Button>
+        <Button size="sm" variant="ghost" disabled={isOffline} onClick={() => openPanel(device, 'send')}>Send</Button>
+        <Button size="sm" variant="ghost" disabled={isOffline} onClick={() => openPanel(device, 'send')}
+          title="Read temperature">
+          <Thermometer size={11} />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 function DeviceRow({ device }: { device: Device }) {
   const { openPanel } = usePanel();
 
@@ -167,31 +219,35 @@ export function DevicesPage() {
           <Badge variant="blue" dot>{(devices as Device[]).length} device{(devices as Device[]).length !== 1 ? 's' : ''}</Badge>
         </div>
 
-        <div className="bg-slate-900 dark:bg-slate-50 border border-slate-800 dark:border-slate-200 rounded-xl overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-slate-800 dark:border-slate-200">
-                {['Device', 'Type', 'IP Address', 'MAC Address', 'Status', 'Actions'].map(h => (
-                  <th key={h}
-                    className={`text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-2.5 ${h === 'MAC Address' ? 'hidden md:table-cell' : ''}`}>
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {(devices as Device[]).length === 0 && !isFetching ? (
-                <tr>
-                  <td colSpan={6} className="text-center text-slate-500 py-12 text-sm">
-                    No devices found. Click <strong>Rescan</strong> to search your network.
-                  </td>
-                </tr>
-              ) : (
-                (devices as Device[]).map((d: Device) => <DeviceRow key={d.mac} device={d} />)
-              )}
-            </tbody>
-          </table>
-        </div>
+        {(devices as Device[]).length === 0 && !isFetching ? (
+          <div className="text-center text-slate-500 py-12 text-sm">
+            No devices found. Click <strong>Rescan</strong> to search your network.
+          </div>
+        ) : (
+          <>
+            <div className="md:hidden space-y-3">
+              {(devices as Device[]).map((d: Device) => <DeviceCard key={d.mac} device={d} />)}
+            </div>
+
+            <div className="hidden md:block bg-slate-900 dark:bg-slate-50 border border-slate-800 dark:border-slate-200 rounded-xl overflow-hidden">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-slate-800 dark:border-slate-200">
+                    {['Device', 'Type', 'IP Address', 'MAC Address', 'Status', 'Actions'].map(h => (
+                      <th key={h}
+                        className={`text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-2.5 ${h === 'MAC Address' ? 'hidden md:table-cell' : ''}`}>
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {(devices as Device[]).map((d: Device) => <DeviceRow key={d.mac} device={d} />)}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
       </div>
 
       {isOpen && <CommandPanel />}

@@ -198,6 +198,48 @@ function CodeForm({ initial, onSave, onCancel, saving }: CodeFormProps) {
   );
 }
 
+interface CodeCardProps {
+  code: Code;
+  onSend: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  isEditing: boolean;
+}
+
+function CodeCard({ code, onSend, onEdit, onDelete, isEditing }: CodeCardProps) {
+  if (isEditing) {
+    return null; // inline edit shown separately
+  }
+
+  return (
+    <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-3 shadow-sm">
+      <div className="flex justify-between items-start gap-2 mb-2">
+        <div className="flex-1 min-w-0">
+          <div className="font-semibold text-sm text-slate-900 dark:text-slate-100">{code.CodeName}</div>
+          <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">ID: {code.CodeId}</div>
+        </div>
+        <Badge variant={code.CodeType === 'RF' ? 'purple' : 'blue'}>{code.CodeType}</Badge>
+      </div>
+
+      <div className="mb-3 font-mono text-xs text-slate-500 dark:text-slate-400 truncate">
+        {code.Code.slice(0, 40)}…
+      </div>
+
+      <div className="flex gap-1.5">
+        <Button size="sm" variant="ir" title="Send this code to a device" onClick={onSend}>
+          <Send size={11} />
+        </Button>
+        <Button size="sm" variant="ghost" onClick={onEdit}>
+          <Edit2 size={11} />
+        </Button>
+        <Button size="sm" variant="danger" onClick={onDelete}>
+          <Trash2 size={11} />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export function SavedCodesPage() {
   const ctx = useOutletContext<{ onMenuClick: () => void }>();
   const qc = useQueryClient();
@@ -337,115 +379,165 @@ export function SavedCodesPage() {
           ))}
         </div>
 
-        <div className="bg-slate-900 dark:bg-slate-50 border border-slate-800 dark:border-slate-200 rounded-xl overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-slate-800 dark:border-slate-200">
-                {([
-                  { label: '#', key: 'CodeId' },
-                  { label: 'Name', key: 'CodeName' },
-                  { label: 'Type', key: 'CodeType' },
-                  { label: 'Code Preview', key: null },
-                  { label: 'Actions', key: null },
-                ] as { label: string; key: typeof sortKey | null }[]).map(h => (
-                  <th key={h.label} className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-2.5">
-                    {h.key ? (
-                      <button
-                        onClick={() => toggleSort(h.key!)}
-                        className="inline-flex items-center gap-1 uppercase tracking-wider hover:text-slate-300 dark:hover:text-slate-700 transition-colors"
-                      >
-                        {h.label}
-                        <span className={sortKey === h.key ? 'text-sky-400' : 'opacity-30'}>
-                          {sortKey === h.key ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
-                        </span>
-                      </button>
-                    ) : h.label}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {paged.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="text-center text-slate-500 py-12 text-sm">
-                    No codes found.
-                  </td>
-                </tr>
-              ) : paged.map((c: Code) =>
-                editId === c.CodeId ? (
-                  <tr key={c.CodeId} className="border-b border-slate-800/50">
-                    <td colSpan={5} className="px-4 py-3">
-                      <CodeForm
-                        initial={c}
-                        onSave={d => updateMut.mutate({ id: c.CodeId, data: d })}
-                        onCancel={() => setEditId(null)}
-                        saving={updateMut.isPending}
-                      />
-                    </td>
-                  </tr>
-                ) : (
-                  <tr key={c.CodeId}
-                    className="border-b border-slate-800/50 dark:border-slate-200/50 hover:bg-slate-800/20 dark:hover:bg-slate-100/50 transition-colors">
-                    <td className="px-4 py-3 text-xs text-slate-500">{c.CodeId}</td>
-                    <td className="px-4 py-3 text-sm font-semibold text-slate-100 dark:text-slate-900">{c.CodeName}</td>
-                    <td className="px-4 py-3">
-                      <Badge variant={c.CodeType === 'RF' ? 'purple' : 'blue'}>{c.CodeType}</Badge>
-                    </td>
-                    <td className="px-4 py-3 font-mono text-xs text-slate-500 max-w-[160px] truncate">
-                      {c.Code.slice(0, 30)}…
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-1.5">
-                        <Button
-                          size="sm"
-                          variant="ir"
-                          title="Send this code to a device"
-                          onClick={() => setPendingSend(c)}
-                        >
-                          <Send size={11} />
-                        </Button>
-                        <Button size="sm" variant="ghost" onClick={() => setEditId(c.CodeId)}>
-                          <Edit2 size={11} />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="danger"
-                          onClick={() => setPendingDelete(c)}
-                        >
-                          <Trash2 size={11} />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                )
+        {paged.length === 0 && !editId ? (
+          <div className="text-center text-slate-500 py-12 text-sm">
+            No codes found.
+          </div>
+        ) : (
+          <>
+            <div className="md:hidden space-y-3">
+              {editId ? (
+                <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-3">
+                  <CodeForm
+                    initial={paged.find(c => c.CodeId === editId)}
+                    onSave={d => updateMut.mutate({ id: editId, data: d })}
+                    onCancel={() => setEditId(null)}
+                    saving={updateMut.isPending}
+                  />
+                </div>
+              ) : (
+                paged.map((c: Code) => (
+                  <CodeCard
+                    key={c.CodeId}
+                    code={c}
+                    onSend={() => setPendingSend(c)}
+                    onEdit={() => setEditId(c.CodeId)}
+                    onDelete={() => setPendingDelete(c)}
+                    isEditing={editId === c.CodeId}
+                  />
+                ))
               )}
-            </tbody>
-          </table>
-
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between px-4 py-2.5 border-t border-slate-800 dark:border-slate-200">
-              <span className="text-xs text-slate-500">{filtered.length} codes</span>
-              <div className="flex gap-1">
-                <Button size="sm" variant="ghost" disabled={safePage === 0} onClick={() => setPage(p => p - 1)}>
-                  ← Prev
-                </Button>
-                {Array.from({ length: totalPages }, (_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setPage(i)}
-                    className={`w-7 h-7 rounded-lg text-xs font-medium transition-all
-                      ${safePage === i ? 'bg-sky-500 text-white' : 'text-slate-500 hover:bg-slate-800 dark:hover:bg-slate-200'}`}
-                  >
-                    {i + 1}
-                  </button>
-                ))}
-                <Button size="sm" variant="ghost" disabled={safePage === totalPages - 1} onClick={() => setPage(p => p + 1)}>
-                  Next →
-                </Button>
-              </div>
             </div>
-          )}
-        </div>
+
+            <div className="hidden md:block bg-slate-900 dark:bg-slate-50 border border-slate-800 dark:border-slate-200 rounded-xl overflow-hidden">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-slate-800 dark:border-slate-200">
+                    {([
+                      { label: '#', key: 'CodeId' },
+                      { label: 'Name', key: 'CodeName' },
+                      { label: 'Type', key: 'CodeType' },
+                      { label: 'Code Preview', key: null },
+                      { label: 'Actions', key: null },
+                    ] as { label: string; key: typeof sortKey | null }[]).map(h => (
+                      <th key={h.label} className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-2.5">
+                        {h.key ? (
+                          <button
+                            onClick={() => toggleSort(h.key!)}
+                            className="inline-flex items-center gap-1 uppercase tracking-wider hover:text-slate-300 dark:hover:text-slate-700 transition-colors"
+                          >
+                            {h.label}
+                            <span className={sortKey === h.key ? 'text-sky-400' : 'opacity-30'}>
+                              {sortKey === h.key ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+                            </span>
+                          </button>
+                        ) : h.label}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {paged.map((c: Code) =>
+                    editId === c.CodeId ? (
+                      <tr key={c.CodeId} className="border-b border-slate-800/50">
+                        <td colSpan={5} className="px-4 py-3">
+                          <CodeForm
+                            initial={c}
+                            onSave={d => updateMut.mutate({ id: c.CodeId, data: d })}
+                            onCancel={() => setEditId(null)}
+                            saving={updateMut.isPending}
+                          />
+                        </td>
+                      </tr>
+                    ) : (
+                      <tr key={c.CodeId}
+                        className="border-b border-slate-800/50 dark:border-slate-200/50 hover:bg-slate-800/20 dark:hover:bg-slate-100/50 transition-colors">
+                        <td className="px-4 py-3 text-xs text-slate-500">{c.CodeId}</td>
+                        <td className="px-4 py-3 text-sm font-semibold text-slate-100 dark:text-slate-900">{c.CodeName}</td>
+                        <td className="px-4 py-3">
+                          <Badge variant={c.CodeType === 'RF' ? 'purple' : 'blue'}>{c.CodeType}</Badge>
+                        </td>
+                        <td className="px-4 py-3 font-mono text-xs text-slate-500 max-w-[160px] truncate">
+                          {c.Code.slice(0, 30)}…
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex gap-1.5">
+                            <Button
+                              size="sm"
+                              variant="ir"
+                              title="Send this code to a device"
+                              onClick={() => setPendingSend(c)}
+                            >
+                              <Send size={11} />
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={() => setEditId(c.CodeId)}>
+                              <Edit2 size={11} />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="danger"
+                              onClick={() => setPendingDelete(c)}
+                            >
+                              <Trash2 size={11} />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  )}
+                </tbody>
+              </table>
+
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between px-4 py-2.5 border-t border-slate-800 dark:border-slate-200">
+                  <span className="text-xs text-slate-500">{filtered.length} codes</span>
+                  <div className="flex gap-1">
+                    <Button size="sm" variant="ghost" disabled={safePage === 0} onClick={() => setPage(p => p - 1)}>
+                      ← Prev
+                    </Button>
+                    {Array.from({ length: totalPages }, (_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setPage(i)}
+                        className={`w-7 h-7 rounded-lg text-xs font-medium transition-all
+                          ${safePage === i ? 'bg-sky-500 text-white' : 'text-slate-500 hover:bg-slate-800 dark:hover:bg-slate-200'}`}
+                      >
+                        {i + 1}
+                      </button>
+                    ))}
+                    <Button size="sm" variant="ghost" disabled={safePage === totalPages - 1} onClick={() => setPage(p => p + 1)}>
+                      Next →
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="md:hidden flex items-center justify-between px-1 py-2.5 mt-3">
+                <span className="text-xs text-slate-500">{filtered.length} codes</span>
+                <div className="flex gap-1">
+                  <Button size="sm" variant="ghost" disabled={safePage === 0} onClick={() => setPage(p => p - 1)}>
+                    ← Prev
+                  </Button>
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setPage(i)}
+                      className={`w-7 h-7 rounded-lg text-xs font-medium transition-all
+                        ${safePage === i ? 'bg-sky-500 text-white' : 'text-slate-500 hover:bg-slate-800 dark:hover:bg-slate-200'}`}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                  <Button size="sm" variant="ghost" disabled={safePage === totalPages - 1} onClick={() => setPage(p => p + 1)}>
+                    Next →
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {pendingSend && (

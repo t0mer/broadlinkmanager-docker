@@ -19,7 +19,7 @@ install:
 .PHONY: dev build
 
 dev:
-	cd web && pnpm dev
+	cd web && pnpm dev --host
 
 build:
 	cd web && pnpm build

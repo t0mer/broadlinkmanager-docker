@@ -1,0 +1,44 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Backend: FastAPI server",
+      "type": "shell",
+      "command": "make run",
+      "presentation": {
+        "group": "dev",
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Frontend: Vite dev server",
+      "type": "shell",
+      "command": "make dev",
+      "presentation": {
+        "group": "dev",
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev: Start all",
+      "dependsOn": ["Backend: FastAPI server", "Frontend: Vite dev server"],
+      "dependsOrder": "parallel",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "group": "dev",
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

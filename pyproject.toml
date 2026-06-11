@@ -1,0 +1,16 @@
+[project]
+name = "broadlinkmanager"
+version = "6.0.0"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.104.1,<0.115.0",
+    "uvicorn[standard]>=0.24.0,<0.32.0",
+    "loguru>=0.7.2,<0.8.0",
+    "pydantic>=2.8.2,<3.0.0",
+    "starlette-exporter>=0.17.1,<0.24.0",
+    "python-multipart>=0.0.6,<0.0.10",
+    "Jinja2>=3.1.2,<4.0.0",
+    "aiofiles>=23.2.1,<24.2.0",
+    "requests>=2.31.0,<3.0.0",
+    "cryptography>=41.0.7,<44.0.0",
+]

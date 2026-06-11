@@ -122,8 +122,8 @@ def learn_rf(mac: str = "", host: str = "", type: str = "", command: str = ""):
     learned = "".join(format(x, "02x") for x in bytearray(data))
     token = data[0] if data else 0
     if token == IR_TOKEN:
-        msg = "Captured IR instead of RF — press the button ~1 s after step 2 activates so the RF receiver is fully armed"
-        logger.warning(f"RF learn captured IR token (0x26) — likely pressed too early. Raw: {learned[:16]}…")
+        msg = "Captured IR instead of RF — release the button after the frequency is found, then press it once"
+        logger.warning(f"RF learn captured IR token (0x26) — button likely held through capture phase. Raw: {learned[:16]}…")
         state.set_rf_message(msg)
         return JSONResponse({"data": "", "success": 0, "type": "rf", "error": "captured_ir", "token": hex(token)})
     if token not in RF_TOKENS:
@@ -132,7 +132,7 @@ def learn_rf(mac: str = "", host: str = "", type: str = "", command: str = ""):
         state.set_rf_message(msg)
         return JSONResponse({"data": "", "success": 0, "type": "rf", "error": "unknown_token", "token": hex(token)})
     if len(data) < RF_MIN_BYTES:
-        msg = f"Signal too short ({len(data)} bytes captured, need ≥{RF_MIN_BYTES}) — hold the button firmly for 1–2 s and try again"
+        msg = f"Signal too short ({len(data)} bytes captured, need ≥{RF_MIN_BYTES}) — press the button once, firmly, and try again"
         logger.warning(msg)
         state.set_rf_message(msg)
         return JSONResponse({"data": "", "success": 0, "type": "rf", "error": "too_short", "bytes": len(data), "min_bytes": RF_MIN_BYTES})

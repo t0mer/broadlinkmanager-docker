@@ -104,6 +104,39 @@ function DevicePickerModal({ code, onClose }: DevicePickerModalProps) {
   );
 }
 
+interface ConfirmDeleteModalProps {
+  code: Code;
+  deleting: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}
+
+function ConfirmDeleteModal({ code, deleting, onConfirm, onCancel }: ConfirmDeleteModalProps) {
+  return (
+    <>
+      <div className="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm" onClick={onCancel} />
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50
+        w-full max-w-sm bg-slate-900 dark:bg-white border border-slate-800 dark:border-slate-200
+        rounded-2xl shadow-2xl p-5">
+        <div className="text-sm font-semibold text-slate-100 dark:text-slate-900 mb-1">
+          Delete "{code.CodeName}"?
+        </div>
+        <p className="text-xs text-slate-500 mb-4">
+          This {code.CodeType} code will be permanently removed. You would need to learn it again from the remote.
+        </p>
+        <div className="flex gap-2 justify-end">
+          <Button size="sm" variant="ghost" onClick={onCancel} disabled={deleting}>
+            Cancel
+          </Button>
+          <Button size="sm" variant="danger" onClick={onConfirm} disabled={deleting}>
+            <Trash2 size={11} /> {deleting ? 'Deleting…' : 'Delete'}
+          </Button>
+        </div>
+      </div>
+    </>
+  );
+}
+
 interface CodeFormProps {
   initial?: Code;
   onSave: (data: CodeInput) => void;
@@ -171,10 +204,13 @@ export function SavedCodesPage() {
 
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'IR' | 'RF'>('all');
+  const [sortKey, setSortKey] = useState<'CodeId' | 'CodeName' | 'CodeType'>('CodeId');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [page, setPage] = useState(0);
   const [showAdd, setShowAdd] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [pendingSend, setPendingSend] = useState<Code | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<Code | null>(null);
 
   const { data: codes = [] } = useQuery({
     queryKey: ['codes'],
@@ -206,6 +242,7 @@ export function SavedCodesPage() {
     onSuccess: () => {
       addToast('success', 'Code deleted');
       qc.invalidateQueries({ queryKey: ['codes'] });
+      setPendingDelete(null);
     },
     onError: () => addToast('error', 'Failed to delete code'),
   });
@@ -223,11 +260,28 @@ export function SavedCodesPage() {
     URL.revokeObjectURL(a.href);
   };
 
-  const filtered = (codes as Code[]).filter(c => {
-    const matchType = typeFilter === 'all' || c.CodeType === typeFilter;
-    const matchSearch = !search || c.CodeName.toLowerCase().includes(search.toLowerCase());
-    return matchType && matchSearch;
-  });
+  const toggleSort = (key: typeof sortKey) => {
+    if (sortKey === key) {
+      setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+    setPage(0);
+  };
+
+  const filtered = (codes as Code[])
+    .filter(c => {
+      const matchType = typeFilter === 'all' || c.CodeType === typeFilter;
+      const matchSearch = !search || c.CodeName.toLowerCase().includes(search.toLowerCase());
+      return matchType && matchSearch;
+    })
+    .sort((a, b) => {
+      const cmp = sortKey === 'CodeId'
+        ? a.CodeId - b.CodeId
+        : String(a[sortKey]).localeCompare(String(b[sortKey]), undefined, { sensitivity: 'base' });
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages - 1);
@@ -287,9 +341,25 @@ export function SavedCodesPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-slate-800 dark:border-slate-200">
-                {['#', 'Name', 'Type', 'Code Preview', 'Actions'].map(h => (
-                  <th key={h} className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-2.5">
-                    {h}
+                {([
+                  { label: '#', key: 'CodeId' },
+                  { label: 'Name', key: 'CodeName' },
+                  { label: 'Type', key: 'CodeType' },
+                  { label: 'Code Preview', key: null },
+                  { label: 'Actions', key: null },
+                ] as { label: string; key: typeof sortKey | null }[]).map(h => (
+                  <th key={h.label} className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-2.5">
+                    {h.key ? (
+                      <button
+                        onClick={() => toggleSort(h.key!)}
+                        className="inline-flex items-center gap-1 uppercase tracking-wider hover:text-slate-300 dark:hover:text-slate-700 transition-colors"
+                      >
+                        {h.label}
+                        <span className={sortKey === h.key ? 'text-sky-400' : 'opacity-30'}>
+                          {sortKey === h.key ? (sortDir === 'asc' ? '▲' : '▼') : '↕'}
+                        </span>
+                      </button>
+                    ) : h.label}
                   </th>
                 ))}
               </tr>
@@ -340,8 +410,7 @@ export function SavedCodesPage() {
                         <Button
                           size="sm"
                           variant="danger"
-                          onClick={() => deleteMut.mutate(c.CodeId)}
-                          disabled={deleteMut.isPending}
+                          onClick={() => setPendingDelete(c)}
                         >
                           <Trash2 size={11} />
                         </Button>
@@ -383,6 +452,15 @@ export function SavedCodesPage() {
         <DevicePickerModal
           code={pendingSend}
           onClose={() => setPendingSend(null)}
+        />
+      )}
+
+      {pendingDelete && (
+        <ConfirmDeleteModal
+          code={pendingDelete}
+          deleting={deleteMut.isPending}
+          onConfirm={() => deleteMut.mutate(pendingDelete.CodeId)}
+          onCancel={() => setPendingDelete(null)}
         />
       )}
     </div>

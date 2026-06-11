@@ -20,6 +20,7 @@ export function RfLearnTab({ device }: { device: Device }) {
   const [shortCapture, setShortCapture] = useState<{ bytes: number; minBytes: number } | null>(null);
   const [capturedIr, setCapturedIr] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null); // seconds remaining before "press now"
+  const [holdSeconds, setHoldSeconds] = useState(0); // elapsed seconds while holding in step 1
 
   const rfQuery = useQuery({
     queryKey: ['rf-status'],
@@ -70,6 +71,14 @@ export function RfLearnTab({ device }: { device: Device }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rfQuery.data, step]);
 
+  // Count up 1..2..3… while the user holds the button in step 1
+  useEffect(() => {
+    if (step !== 1) { setHoldSeconds(0); return; }
+    setHoldSeconds(1);
+    const id = setInterval(() => setHoldSeconds(prev => prev + 1), 1000);
+    return () => clearInterval(id);
+  }, [step]);
+
   // Countdown from 3 → 0 when step 2 activates, then stay at 0 ("press now")
   useEffect(() => {
     if (step !== 2) { setCountdown(null); return; }
@@ -102,20 +111,24 @@ export function RfLearnTab({ device }: { device: Device }) {
   };
 
   const step2Desc = step === 2 && countdown !== null && countdown > 0
-    ? `⏳ Arming… wait ${countdown} second${countdown !== 1 ? 's' : ''} before pressing.`
-    : '✅ Press and hold the button firmly for 1–2 s, then release. Keep remote 10–20 cm from Broadlink.';
+    ? `🖐 RELEASE the button now! Arming receiver… ${countdown} s`
+    : '✅ Now press the button once (a normal short press). Keep remote 10–20 cm from Broadlink.';
+
+  const step1Desc = step === 1
+    ? `✊ Keep holding… ${Array.from({ length: Math.min(holdSeconds, 5) }, (_, i) => i + 1).join('..')}${holdSeconds > 5 ? '..' + holdSeconds : ''}`
+    : 'Hold the RF button until the frequency is found (3–5 s).';
 
   const RF_STEPS = [
-    { label: 'Hold button', desc: 'Hold the RF button firmly for 3–5 s until the frequency is found.' },
-    { label: 'Press button once', desc: step2Desc },
+    { label: 'Hold button', desc: step1Desc },
+    { label: 'Release, then press once', desc: step2Desc },
     { label: 'Save code', desc: 'Name and save the captured RF code.' },
   ];
 
   const statusMsg =
-    step === 1 ? 'Hold the RF button until frequency is found…' :
+    step === 1 ? `Hold the RF button until frequency is found… ${holdSeconds} s` :
     step === 2 && countdown !== null && countdown > 0
-               ? `Arming RF receiver… wait ${countdown} s` :
-    step === 2 ? 'Press and hold the button now for 1–2 seconds!' :
+               ? `Frequency found — RELEASE the button! (${countdown} s)` :
+    step === 2 ? 'Now press the button once.' :
                  'RF code captured.';
 
   return (
@@ -126,12 +139,12 @@ export function RfLearnTab({ device }: { device: Device }) {
             <span className="text-sm font-semibold text-red-400">IR signal captured — expected RF</span>
           </div>
           <p className="text-xs text-red-200/80">
-            The Broadlink received an infrared code instead of a 433 MHz RF signal. This happens when the button is pressed before the RF receiver is fully armed.
+            The Broadlink captured an infrared code instead of a 433 MHz RF signal. The most common cause: the button was <strong>held continuously</strong> from step 1 — the receiver needs to see a <strong>new</strong> press to detect the RF packet.
           </p>
           <ul className="flex flex-col gap-1 text-xs text-red-200/80 list-none pl-0">
-            <li>• At step 2, <strong>wait ~1 second</strong> after the prompt appears before pressing</li>
-            <li>• Press firmly and hold for <strong>1–2 seconds</strong></li>
-            <li>• Point the remote directly at the Broadlink (not at the shutter receiver)</li>
+            <li>• When the frequency is found, <strong>release the button completely</strong></li>
+            <li>• Wait for the countdown, then <strong>press it once</strong> (normal short press)</li>
+            <li>• Keep the remote 10–20 cm from the Broadlink</li>
           </ul>
         </div>
       )}
@@ -146,8 +159,7 @@ export function RfLearnTab({ device }: { device: Device }) {
           </div>
           <ul className="flex flex-col gap-1 text-xs text-amber-200/80 list-none pl-0">
             <li>• Move the remote <strong>10–20 cm</strong> from the Broadlink receiver</li>
-            <li>• At step 2, <strong>press and hold</strong> for <strong>1–2 seconds</strong> — do not tap</li>
-            <li>• Release cleanly — no quick flicks</li>
+            <li>• At step 2, press the button <strong>once, firmly</strong> — a full normal press, not a light tap</li>
             <li>• Avoid other RF sources nearby (Wi-Fi routers, microwaves)</li>
           </ul>
         </div>

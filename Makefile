@@ -31,6 +31,15 @@ build:
 run:
 	uv run python server.py
 
+# ── Screenshots ──────────────────────────────────────────────────────────────
+
+.PHONY: screenshots
+
+screenshots:
+	@echo "📸 Capturing screenshots of all pages..."
+	@echo "   Make sure dev server is running: make dev"
+	node scripts/screenshots.mjs
+
 # ── Docker ────────────────────────────────────────────────────────────────────
 
 .PHONY: docker-build docker-build-nocache logs

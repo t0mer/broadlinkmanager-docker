@@ -49,12 +49,12 @@ function DeviceCard({ device }: { device: Device }) {
 
   return (
     <div
-      className={`rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-3 shadow-sm cursor-pointer transition-colors hover:bg-slate-100 dark:hover:bg-gray-700 ${isOffline ? 'opacity-50' : ''}`}
+      className={`rounded-lg border border-slate-800 dark:border-slate-200 bg-slate-900 dark:bg-slate-50 p-3 shadow-sm cursor-pointer transition-colors hover:bg-slate-800 dark:hover:bg-slate-100 ${isOffline ? 'opacity-50' : ''}`}
       onClick={() => openPanel(device, 'ir')}
     >
       <div className="flex justify-between items-start gap-2 mb-2">
         <div className="flex-1 min-w-0">
-          <div className="font-semibold text-sm text-slate-900 dark:text-slate-100">{device.name}</div>
+          <div className="font-semibold text-sm text-slate-100 dark:text-slate-900">{device.name}</div>
         </div>
         <Badge variant="blue">{device.type}</Badge>
       </div>
@@ -67,7 +67,7 @@ function DeviceCard({ device }: { device: Device }) {
             : <Badge variant="gray" dot>Offline</Badge>}
       </div>
 
-      <div className="text-xs text-slate-500 dark:text-slate-400 mb-3 space-y-1">
+      <div className="text-xs text-slate-400 dark:text-slate-600 mb-3 space-y-1">
         <div className="font-mono">IP: {device.ip}</div>
         <div className="font-mono">MAC: {device.mac}</div>
       </div>

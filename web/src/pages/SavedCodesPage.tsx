@@ -150,7 +150,7 @@ function CodeForm({ initial, onSave, onCancel, saving }: CodeFormProps) {
   const [code, setCode] = useState(initial?.Code ?? '');
 
   return (
-    <div className="flex flex-col gap-3 p-4 bg-slate-800/50 dark:bg-slate-100 rounded-xl border border-slate-700 dark:border-slate-200">
+    <div className="flex flex-col gap-3 p-4 bg-slate-800 dark:bg-slate-100 rounded-xl border border-slate-700 dark:border-slate-200">
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="text-xs text-slate-500 mb-1 block">Type</label>
@@ -212,16 +212,16 @@ function CodeCard({ code, onSend, onEdit, onDelete, isEditing }: CodeCardProps) 
   }
 
   return (
-    <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-3 shadow-sm">
+    <div className="rounded-lg border border-slate-800 dark:border-slate-200 bg-slate-900 dark:bg-slate-50 p-3 shadow-sm">
       <div className="flex justify-between items-start gap-2 mb-2">
         <div className="flex-1 min-w-0">
-          <div className="font-semibold text-sm text-slate-900 dark:text-slate-100">{code.CodeName}</div>
-          <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">ID: {code.CodeId}</div>
+          <div className="font-semibold text-sm text-slate-100 dark:text-slate-900">{code.CodeName}</div>
+          <div className="text-xs text-slate-400 dark:text-slate-600 mt-0.5">ID: {code.CodeId}</div>
         </div>
         <Badge variant={code.CodeType === 'RF' ? 'purple' : 'blue'}>{code.CodeType}</Badge>
       </div>
 
-      <div className="mb-3 font-mono text-xs text-slate-500 dark:text-slate-400 truncate">
+      <div className="mb-3 font-mono text-xs text-slate-400 dark:text-slate-600 truncate">
         {code.Code.slice(0, 40)}…
       </div>
 
@@ -387,7 +387,7 @@ export function SavedCodesPage() {
           <>
             <div className="md:hidden space-y-3">
               {editId ? (
-                <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-3">
+                <div className="rounded-lg border border-slate-800 dark:border-slate-200 bg-slate-900 dark:bg-slate-50 p-3">
                   <CodeForm
                     initial={paged.find(c => c.CodeId === editId)}
                     onSave={d => updateMut.mutate({ id: editId, data: d })}

@@ -110,7 +110,7 @@ async function captureScreenshots() {
     }
     await lightPage.close();
 
-    // Mobile screenshots
+    // Mobile screenshots (light UI)
     console.log('\n📸 Capturing mobile screenshots (375px)...\n');
     const mobileContext = await browser.newContext({
       viewport: { width: 375, height: 667 },
@@ -129,7 +129,7 @@ async function captureScreenshots() {
 
     const mobilePage = await mobileContext.newPage();
 
-    // Navigate to root and set dark theme, then reload
+    // Navigate to root and set dark theme (light UI), then reload
     await mobilePage.goto('http://localhost:5174/', { waitUntil: 'networkidle', timeout: 15000 });
     await mobilePage.evaluate(() => {
       localStorage.setItem('theme', 'dark');
@@ -153,9 +153,54 @@ async function captureScreenshots() {
     }
 
     await mobilePage.close();
+    await mobileContext.close();
+
+    // Mobile dark mode screenshots
+    console.log('\n📸 Capturing mobile dark mode screenshots (375px)...\n');
+    const mobileDarkContext = await browser.newContext({
+      viewport: { width: 375, height: 667 },
+      deviceScaleFactor: 2,
+      isMobile: true,
+      storageState: {
+        cookies: [],
+        origins: [
+          {
+            origin: 'http://localhost:5174',
+            localStorage: [{ name: 'theme', value: 'light' }],
+          },
+        ],
+      },
+    });
+
+    const mobileDarkPage = await mobileDarkContext.newPage();
+
+    // Navigate to root and set light theme (dark UI), then reload
+    await mobileDarkPage.goto('http://localhost:5174/', { waitUntil: 'networkidle', timeout: 15000 });
+    await mobileDarkPage.evaluate(() => {
+      localStorage.setItem('theme', 'light');
+    });
+    await mobileDarkPage.reload({ waitUntil: 'networkidle' });
+    await mobileDarkPage.waitForTimeout(500);
+
+    for (const pageConfig of pages) {
+      try {
+        const url = `http://localhost:5174${pageConfig.path}`;
+        console.log(`  📱 ${pageConfig.name}...`);
+        await mobileDarkPage.goto(url, { waitUntil: 'networkidle', timeout: 15000 });
+        await mobileDarkPage.waitForTimeout(300);
+
+        const filePath = path.join(screenshotsDir, `${pageConfig.name}-mobile-dark.png`);
+        await mobileDarkPage.screenshot({ path: filePath, fullPage: true });
+        console.log(`     ✅ Saved: screenshots/new/${pageConfig.name}-mobile-dark.png`);
+      } catch (error) {
+        console.error(`     ❌ Failed: ${error.message}`);
+      }
+    }
+
+    await mobileDarkPage.close();
+    await mobileDarkContext.close();
     await darkContext.close();
     await lightContext.close();
-    await mobileContext.close();
 
     console.log('\n✅ All screenshots captured successfully!');
     process.exit(0);

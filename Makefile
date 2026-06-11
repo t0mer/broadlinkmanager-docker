@@ -38,6 +38,7 @@ run:
 screenshots:
 	@echo "📸 Capturing screenshots of all pages..."
 	@echo "   Make sure dev server is running: make dev"
+	pnpm add -D playwright
 	node scripts/screenshots.mjs
 
 # ── Docker ────────────────────────────────────────────────────────────────────

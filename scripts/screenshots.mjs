@@ -29,42 +29,77 @@ async function captureScreenshots() {
   try {
     console.log('📸 Capturing desktop screenshots (1280px)...\n');
 
-    // Desktop viewports
-    const desktopContext = await browser.newContext({
+    // Desktop viewports - Dark mode
+    const darkContext = await browser.newContext({
       viewport: { width: 1280, height: 720 },
-      colorScheme: 'dark',
+      storageState: {
+        cookies: [],
+        origins: [
+          {
+            origin: 'http://localhost:5174',
+            localStorage: [{ name: 'theme', value: 'dark' }],
+          },
+        ],
+      },
     });
-    const desktopPage = await desktopContext.newPage();
+
+    const darkPage = await darkContext.newPage();
+
+    // Navigate to root and set light theme (inverted naming), then reload
+    await darkPage.goto('http://localhost:5174/', { waitUntil: 'networkidle', timeout: 15000 });
+    await darkPage.evaluate(() => {
+      localStorage.setItem('theme', 'light');
+    });
+    await darkPage.reload({ waitUntil: 'networkidle' });
+    await darkPage.waitForTimeout(500);
 
     for (const pageConfig of pages) {
       try {
         const url = `http://localhost:5174${pageConfig.path}`;
         console.log(`  📄 ${pageConfig.name}...`);
-        await desktopPage.goto(url, { waitUntil: 'networkidle', timeout: 15000 });
-        await desktopPage.waitForTimeout(500);
+        await darkPage.goto(url, { waitUntil: 'networkidle', timeout: 15000 });
+        await darkPage.waitForTimeout(300);
 
         const filePath = path.join(screenshotsDir, `${pageConfig.name}-dark.png`);
-        await desktopPage.screenshot({ path: filePath, fullPage: true });
+        await darkPage.screenshot({ path: filePath, fullPage: true });
         console.log(`     ✅ Saved: screenshots/new/${pageConfig.name}-dark.png`);
       } catch (error) {
         console.error(`     ❌ Failed: ${error.message}`);
       }
     }
+    await darkPage.close();
 
     // Light mode screenshots
     console.log('\n📸 Capturing light mode screenshots...\n');
     const lightContext = await browser.newContext({
       viewport: { width: 1280, height: 720 },
-      colorScheme: 'light',
+      storageState: {
+        cookies: [],
+        origins: [
+          {
+            origin: 'http://localhost:5174',
+            localStorage: [{ name: 'theme', value: 'light' }],
+          },
+        ],
+      },
     });
+
     const lightPage = await lightContext.newPage();
+
+    // Navigate to root and set dark theme (inverted naming), then reload
+    await lightPage.goto('http://localhost:5174/', { waitUntil: 'networkidle', timeout: 15000 });
+    await lightPage.evaluate(() => {
+      localStorage.setItem('theme', 'dark');
+    });
+    await lightPage.reload({ waitUntil: 'networkidle' });
+    await lightPage.waitForTimeout(500);
 
     for (const pageConfig of pages) {
       try {
         const url = `http://localhost:5174${pageConfig.path}`;
         console.log(`  📄 ${pageConfig.name}...`);
         await lightPage.goto(url, { waitUntil: 'networkidle', timeout: 15000 });
-        await lightPage.waitForTimeout(500);
+        await lightPage.waitForTimeout(300);
 
         const filePath = path.join(screenshotsDir, `${pageConfig.name}-light.png`);
         await lightPage.screenshot({ path: filePath, fullPage: true });
@@ -73,6 +108,7 @@ async function captureScreenshots() {
         console.error(`     ❌ Failed: ${error.message}`);
       }
     }
+    await lightPage.close();
 
     // Mobile screenshots
     console.log('\n📸 Capturing mobile screenshots (375px)...\n');
@@ -80,16 +116,33 @@ async function captureScreenshots() {
       viewport: { width: 375, height: 667 },
       deviceScaleFactor: 2,
       isMobile: true,
-      colorScheme: 'dark',
+      storageState: {
+        cookies: [],
+        origins: [
+          {
+            origin: 'http://localhost:5174',
+            localStorage: [{ name: 'theme', value: 'dark' }],
+          },
+        ],
+      },
     });
+
     const mobilePage = await mobileContext.newPage();
+
+    // Navigate to root and set dark theme, then reload
+    await mobilePage.goto('http://localhost:5174/', { waitUntil: 'networkidle', timeout: 15000 });
+    await mobilePage.evaluate(() => {
+      localStorage.setItem('theme', 'dark');
+    });
+    await mobilePage.reload({ waitUntil: 'networkidle' });
+    await mobilePage.waitForTimeout(500);
 
     for (const pageConfig of pages) {
       try {
         const url = `http://localhost:5174${pageConfig.path}`;
         console.log(`  📱 ${pageConfig.name}...`);
         await mobilePage.goto(url, { waitUntil: 'networkidle', timeout: 15000 });
-        await mobilePage.waitForTimeout(500);
+        await mobilePage.waitForTimeout(300);
 
         const filePath = path.join(screenshotsDir, `${pageConfig.name}-mobile.png`);
         await mobilePage.screenshot({ path: filePath, fullPage: true });
@@ -99,7 +152,8 @@ async function captureScreenshots() {
       }
     }
 
-    await desktopContext.close();
+    await mobilePage.close();
+    await darkContext.close();
     await lightContext.close();
     await mobileContext.close();
 

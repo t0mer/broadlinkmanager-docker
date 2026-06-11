@@ -75,6 +75,25 @@ Example:
 command: ["python", "server.py", "--ip", "192.168.1.50"]
 ```
 
+## Development
+
+### VSCode Tasks
+
+This project includes pre-configured VSCode tasks to streamline development. You can run tasks via:
+- **Command Palette:** `Ctrl+Shift+P` → search "Run Task"
+- **Default Task:** `Ctrl+Shift+B` runs "Dev: Start all"
+- **Terminal:** `Ctrl+Shift+`` to open integrated terminal
+
+Available tasks:
+
+| Task | Command | Description |
+|---|---|---|
+| **Dev: Start all** *(default)* | `make run` + `make dev` (parallel) | Starts both backend and frontend dev servers |
+| **Backend: FastAPI server** | `make run` | Runs FastAPI development server on port 7020 |
+| **Frontend: Vite dev server** | `make dev` | Runs Vite dev server with hot module reloading |
+
+Each task runs in its own dedicated terminal panel. Press `Ctrl+Shift+B` to start all services at once — the frontend will be available at `http://localhost:5173` and the API at `http://localhost:7020`.
+
 ## Screenshots
 
 ### Devices — Dark Mode

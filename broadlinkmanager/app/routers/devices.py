@@ -10,7 +10,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from loguru import logger
 
-from app.config import args, discovery_ip_address_list, get_devices_file_path
+from app.config import args, discovery_host_list, discovery_ip_address_list, get_devices_file_path
 
 router = APIRouter(tags=["Devices"])
 
@@ -88,13 +88,25 @@ def autodiscover(freshscan: str = "1"):
 
     logger.info("Scanning for devices...")
     found: list[dict] = []
+    seen_macs: set[str] = set()
+
+    def add_device(info: dict | None) -> None:
+        if info and info["mac"] not in seen_macs:
+            seen_macs.add(info["mac"])
+            found.append(info)
+
+    for host in discovery_host_list:
+        try:
+            device = broadlink.hello(host, timeout=args.timeout)
+            add_device(_process_device(device))
+        except Exception as e:
+            logger.error(f"Direct discovery failed for {host}: {e}")
+
     for iface in discovery_ip_address_list:
         try:
             devices = broadlink.discover(timeout=5, local_ip_address=iface, discover_ip_address=args.dst_ip)
             for d in devices:
-                info = _process_device(d)
-                if info:
-                    found.append(info)
+                add_device(_process_device(d))
         except OSError as e:
             logger.error(f"Discovery failed on {iface}: {e}")
     logger.info(f"Found {len(found)} device(s)")

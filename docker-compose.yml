@@ -1,0 +1,13 @@
+services:
+  broadlinkmanager:
+    build: .
+    container_name: broadlinkmanager
+    restart: unless-stopped
+    ports:
+      - "7020:7020"
+    volumes:
+      - ./data:/app/data
+    environment:
+      # Docker bridge cannot UDP-broadcast to LAN; probe known device IPs directly.
+      # On Linux, use network_mode: host instead (remove ports + DISCOVERY_HOSTS).
+      DISCOVERY_HOSTS: "192.168.1.101"

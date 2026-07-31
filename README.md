@@ -71,31 +71,31 @@ command: ["python", "broadlinkmanager.py", "--ip", "192.168.1.50"]
 ## Screenshots
 
 ### Devices — Dark Mode
-[![Devices Dark](screenshots/new/devices-dark.png)](screenshots/new/devices-dark.png)
+[![Devices Dark](https://raw.githubusercontent.com/t0mer/broadlinkmanager-docker/master/screenshots/new/devices-dark.png)](screenshots/new/devices-dark.png)
 
 ### Devices — Light Mode
-[![Devices Light](screenshots/new/devices-light.png)](screenshots/new/devices-light.png)
+[![Devices Light](https://raw.githubusercontent.com/t0mer/broadlinkmanager-docker/master/screenshots/new/devices-light.png)](screenshots/new/devices-light.png)
 
 ### Saved Codes
-[![Saved Codes](screenshots/new/saved-codes.png)](screenshots/new/saved-codes.png)
+[![Saved Codes](https://raw.githubusercontent.com/t0mer/broadlinkmanager-docker/master/screenshots/new/saved-codes.png)](screenshots/new/saved-codes.png)
 
 ### RF Code Generator
-[![RF Code Generator](screenshots/new/rf-generator.png)](screenshots/new/rf-generator.png)
+[![RF Code Generator](https://raw.githubusercontent.com/t0mer/broadlinkmanager-docker/master/screenshots/new/rf-generator.png)](screenshots/new/rf-generator.png)
 
 ### Livolo Code Generator
-[![Livolo](screenshots/new/livolo.png)](screenshots/new/livolo.png)
+[![Livolo](https://raw.githubusercontent.com/t0mer/broadlinkmanager-docker/master/screenshots/new/livolo.png)](screenshots/new/livolo.png)
 
 ### Energenie Code Generator
-[![Energenie](screenshots/new/energenie.png)](screenshots/new/energenie.png)
+[![Energenie](https://raw.githubusercontent.com/t0mer/broadlinkmanager-docker/master/screenshots/new/energenie.png)](screenshots/new/energenie.png)
 
 ### Change Repeats
-[![Change Repeats](screenshots/new/repeats.png)](screenshots/new/repeats.png)
+[![Change Repeats](https://raw.githubusercontent.com/t0mer/broadlinkmanager-docker/master/screenshots/new/repeats.png)](screenshots/new/repeats.png)
 
 ### Hex ↔ Base64 Converter
-[![Convert](screenshots/new/convert.png)](screenshots/new/convert.png)
+[![Convert](https://raw.githubusercontent.com/t0mer/broadlinkmanager-docker/master/screenshots/new/convert.png)](screenshots/new/convert.png)
 
 ### About
-[![About](screenshots/new/about.png)](screenshots/new/about.png)
+[![About](https://raw.githubusercontent.com/t0mer/broadlinkmanager-docker/master/screenshots/new/about.png)](screenshots/new/about.png)
 
 ## Supported Devices
 

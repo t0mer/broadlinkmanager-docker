@@ -44,7 +44,10 @@ def get_version() -> str:
 
 
 def get_devices_file_path() -> str:
-    return os.path.join(os.path.dirname(__file__), "..", "data", "devices.json")
+    return os.getenv(
+        "DEVICES_PATH",
+        os.path.join(os.path.dirname(__file__), "..", "data", "devices.json"),
+    )
 
 
 def init_config() -> None:
@@ -55,7 +58,7 @@ def init_config() -> None:
     parser = argparse.ArgumentParser(fromfile_prefix_chars="@")
     parser.add_argument("--timeout", type=int, default=5)
     parser.add_argument("--ip", action="append", default=[])
-    parser.add_argument("--dst-ip", default="255.255.255.255")
+    parser.add_argument("--dst-ip", default=os.getenv("DISCOVERY_DST_IP", "255.255.255.255"))
     parsed = parser.parse_args()
 
     # Mutate args in-place rather than rebinding

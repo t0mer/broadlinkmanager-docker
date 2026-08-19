@@ -1,7 +1,7 @@
 name: "Broadlink Manager"
 description: "Easely learn and send IR/RF Command"
 codenotary: tomer.klein@gmail.com
-version: "5.8.4"
+version: "5.8.5"
 slug: "broadlink_manager"
 panel_icon: mdi:remote
 # panel_admin: false
@@ -16,12 +16,11 @@ arch:
   - armhf
   - armv7
 startup: before
-host_network: true
-ports:
-  7020/tcp: 7020
-ports_description:
-  7020/tcp: Web interface
-webui: http://[HOST]:[PORT:7020]
+# Deliberately NOT host_network: with it the app binds 0.0.0.0:7020 on the host
+# regardless of the ports mapping, exposing the unauthenticated API to the LAN.
+# Bridge networking keeps it reachable only through Ingress. The cost is that
+# broadcast auto-discovery no longer reaches the LAN; add devices by IP, or set
+# DISCOVERY_DST_IP to a unicast address or subnet broadcast.
 url: https://github.com/t0mer/broadlinkmanager-docker
 options:
   certfile: fullchain.pem

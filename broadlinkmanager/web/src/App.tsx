@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { API_BASE } from '@/api/base';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { PanelProvider } from '@/contexts/PanelContext';
 import { AppShell } from '@/components/layout/AppShell';
@@ -24,7 +25,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <PanelProvider>
-          <BrowserRouter>
+          <BrowserRouter basename={API_BASE}>
             <Routes>
               <Route element={<AppShell />}>
                 <Route path="/"          element={<DevicesPage />} />

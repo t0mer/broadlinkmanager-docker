@@ -2,6 +2,7 @@ import { useOutletContext } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { RefreshCw, Save, Upload, Wifi, Thermometer } from 'lucide-react';
 import { fetchDevices, saveDevices, loadDevices, pingDevice } from '@/api/devices';
+import { apiUrl } from '@/api/base';
 import { Topbar } from '@/components/layout/Topbar';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -100,7 +101,7 @@ export function DevicesPage() {
   const { data: codes = [] } = useQuery({
     queryKey: ['codes'],
     queryFn: async () => {
-      const r = await fetch('/api/codes');
+      const r = await fetch(apiUrl('/api/codes'));
       if (!r.ok) return [];
       return r.json();
     },

@@ -2,13 +2,14 @@ import { useOutletContext } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { GitBranch, Coffee } from 'lucide-react';
 import { Topbar } from '@/components/layout/Topbar';
+import { apiUrl } from '@/api/base';
 
 export function AboutPage() {
   const ctx = useOutletContext<{ onMenuClick: () => void }>();
   const { data } = useQuery({
     queryKey: ['version'],
     queryFn: async () => {
-      const r = await fetch('/api/version');
+      const r = await fetch(apiUrl('/api/version'));
       return r.json() as Promise<{ version: string }>;
     },
     staleTime: Infinity,

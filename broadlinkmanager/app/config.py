@@ -10,6 +10,7 @@ ip_format_regex = r"\b(((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0
 # Populated by init_config() — empty until app startup
 args: argparse.Namespace = argparse.Namespace(ip=[], timeout=5, dst_ip="255.255.255.255")
 discovery_ip_address_list: list[str] = []
+discovery_host_list: list[str] = []
 
 
 def validate_ip(ip: str) -> bool:
@@ -32,6 +33,14 @@ def get_env_ip_list() -> list[str]:
     env = os.getenv("DISCOVERY_IP_LIST", "")
     result = parse_ip_list(str(env))
     logger.debug(f"Env IP list: {result}")
+    return result
+
+
+def get_env_host_list() -> list[str]:
+    """IPs to probe directly (broadlink.hello). Works from Docker bridge network."""
+    env = os.getenv("DISCOVERY_HOSTS", "")
+    result = parse_ip_list(str(env))
+    logger.debug(f"Env host list: {result}")
     return result
 
 
@@ -75,4 +84,9 @@ def init_config() -> None:
     discovery_ip_address_list.clear()
     discovery_ip_address_list.extend(resolved)
 
+    discovery_host_list.clear()
+    discovery_host_list.extend(get_env_host_list())
+
     logger.info(f"Discovery interfaces: {discovery_ip_address_list}")
+    if discovery_host_list:
+        logger.info(f"Direct discovery hosts: {discovery_host_list}")

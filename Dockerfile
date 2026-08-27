@@ -28,3 +28,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application source
 COPY broadlinkmanager/ /app/
 
+# Copy built React frontend from stage 1
+COPY --from=frontend /app/dist /app/dist
+
+EXPOSE 7020
+
+CMD ["python", "broadlinkmanager.py"]
+

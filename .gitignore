@@ -6,21 +6,28 @@ docs/*
 .superpowers/
 
 # Python
-broadlinkmanager/__pycache__/
-broadlinkmanager/**/__pycache__/
-broadlinkmanager/**/*.pyc
+__pycache__/
+**/__pycache__/
+**/*.pyc
 
 # Frontend build output (placeholder only, not the build)
-broadlinkmanager/dist/*
-!broadlinkmanager/dist/.gitkeep
+dist/*
+!dist/.gitkeep
 
 # Runtime data — generated at startup, never commit
-broadlinkmanager/data/*.db
-broadlinkmanager/data/*.db-journal
-broadlinkmanager/data/devices.json
+data/*.db
+data/*.db-journal
+data/devices.json
 
 # Node
-broadlinkmanager/web/node_modules/
+node_modules/
+web/node_modules/
+web/.pnpm-store/
+
+# Testing & verification
+test-mobile.mjs
+verify-mobile.ts
+screenshots/
 
 # Temp scripts
 modernize-templates.sh

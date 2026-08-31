@@ -33,13 +33,18 @@ services:
   broadlinkmanager:
     image: techblog/broadlinkmanager
     container_name: broadlinkmanager
-    network_mode: host
     restart: unless-stopped
+    ports:
+      - "7020:7020"
     volumes:
       - ./data:/app/data
+    environment:
+      - DISCOVERY_DST_IP=192.168.1.255   # set to your subnet broadcast
 ```
 
-> **Why `network_mode: host`?**  Broadlink device discovery uses UDP broadcast packets on the local network. Host networking allows the container to send and receive those broadcasts. Without it, auto-discovery will not find any devices.
+> **Docker Desktop (Windows/Mac):** the default bridge/NAT network blocks UDP broadcast, so the scan will find nothing without extra configuration. Set `DISCOVERY_DST_IP` to your subnet broadcast address and/or specific device IPs (e.g. `192.168.1.255,192.168.1.199`) — unicast replies route back through NAT conntrack.
+
+> **Linux hosts:** for the simplest setup replace `ports:` with `network_mode: host` so the container joins the host network directly and broadcast discovery works with no extra config.
 
 Once the container is running, open your browser at:
 ```
@@ -51,6 +56,8 @@ http://<docker-host-ip>:7020
 | Variable | Default | Description |
 |---|---|---|
 | `DISCOVERY_IP_LIST` | *(auto-detected)* | Comma-separated list of local IP addresses to use for device discovery. Useful when the container has multiple network interfaces. Example: `192.168.1.10,192.168.2.10` |
+| `DISCOVERY_DST_IP` | `255.255.255.255` | Comma-separated list of destination addresses for the discovery packet: broadcast addresses and/or specific device IPs. Example: `192.168.1.255,192.168.1.199` |
+| `DISCOVERY_TIMEOUT` | `5` | Discovery timeout in seconds per scan |
 | `DB_PATH` | `/app/data/codes.db` | Path to the SQLite database file for saved codes |
 
 ### CLI Flags
@@ -60,13 +67,39 @@ You can pass arguments directly to the container to override discovery behaviour
 | Flag | Default | Description |
 |---|---|---|
 | `--ip <IP>` | *(auto)* | Specify a local interface IP for discovery (repeatable) |
-| `--dst-ip <IP>` | `255.255.255.255` | Broadcast destination IP for discovery |
+| `--dst-ip <IP[,IP…]>` | `255.255.255.255` | Comma-separated destination addresses for discovery (broadcast and/or device IPs) |
 | `--timeout <s>` | `5` | Discovery timeout in seconds |
 
 Example:
 ```yaml
-command: ["python", "broadlinkmanager.py", "--ip", "192.168.1.50"]
+command: ["python", "server.py", "--ip", "192.168.1.50"]
 ```
+
+## Development
+
+### VSCode Tasks
+
+This project includes pre-configured VSCode tasks to streamline development. You can run tasks via:
+- **Command Palette:** `Ctrl+Shift+P` → search "Run Task"
+- **Default Task:** `Ctrl+Shift+B` runs "Dev: Start all"
+- **Terminal:** `Ctrl+Shift+`` to open integrated terminal
+
+Available tasks:
+
+| Task | Command | Port | Description |
+|---|---|---|---|
+| **Dev: Start all** *(default)* | `make run` + `make dev` | 7020 + 5174 | Starts both backend and frontend dev servers |
+| **Backend: FastAPI server** | `make run` | 7020 | Runs FastAPI development server |
+| **Frontend: Vite dev server** | `make dev` | 5174 | Runs Vite dev server with hot module reloading |
+
+Each task runs in its own dedicated terminal panel. Press `Ctrl+Shift+B` to start all services at once:
+- **Frontend:** http://localhost:5174
+- **Backend API:** http://localhost:7020
+
+**Port Usage:**
+- `5174` — Vite dev server (frontend)
+- `7020` — FastAPI backend server
+- `5173` — Reserved (do not use)
 
 ## Screenshots
 
